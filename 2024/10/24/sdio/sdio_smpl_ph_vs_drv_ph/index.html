@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://kindresy.github.io/stuff/UHS_REG_TXT.png">
 <meta property="og:image" content="https://kindresy.github.io/stuff/sdio_gpio_reg.png">
 <meta property="article:published_time" content="2024-10-23T16:00:00.000Z">
-<meta property="article:modified_time" content="2024-10-24T11:31:07.773Z">
+<meta property="article:modified_time" content="2024-10-24T11:53:15.526Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://kindresy.github.io/stuff/sdio_clocks_and_delays.png">
@@ -195,7 +195,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2024-10-24 00:00:00 / Modified: 19:31:07" itemprop="dateCreated datePublished" datetime="2024-10-24T00:00:00+08:00">2024-10-24</time>
+      <time title="Created: 2024-10-24 00:00:00 / Modified: 19:53:15" itemprop="dateCreated datePublished" datetime="2024-10-24T00:00:00+08:00">2024-10-24</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -242,7 +242,9 @@
 <p>hs_timing_cfg是海思静态定义的一个timing table，可能存储的是一些经验值，如果tuning流程对bitmap上每一位都置位了，这意味着每一个相位都通过了eMMc的检验，就会使用timing table里的值</p>
 <p>随后它还配置了**mci_writel(host, GPIO, 0x0);**，该寄存器确实为dw ip里的，bit field如下：</p>
 <p><img src="/../../stuff/sdio_gpio_reg.png" alt="image-sdio-gpio-reg"><br>这个寄存器，手册里的信息实在太少了。海思在会首先将该寄存器清零，在配置UHS_REG_EXT寄存器后还会配置这个寄存器，不清楚是何目的。</p>
-<p>总之，我的猜想并不对，没有找到先clkgen调谐再UHS_REG_EXT调谐的例子。<br>和设计那边的讨论也就到此结束了，我们所有芯片系列中，其中有一些只支持clkgen调谐，不支持UHS_REG_EXT调谐。所以代码的兼容性要做好，后期有时间会尝试一下UHS_REG_EXT调谐后的性能。</p>
+<p>总之，我的猜想并不对，没有找到先clkgen调谐再UHS_REG_EXT调谐的例子。</p>
+<hr>
+<p>后来设计查询了他们的代码，我们clkgen中对sample phase的调节就是在控制sdhc的clk_sample_phase_ctrl信号。<br>rk的代码使用的是clkgen，海思使用的是UHS_REG_EXT，可能各家的实现不一样，我们的驱动代码沿用原来那一套即可。</p>
 
     </div>
 
