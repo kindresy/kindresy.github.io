@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
@@ -60,6 +60,9 @@
       <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
   <div class="site-nav-toggle">
     <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
     </div>
   </div>
 
@@ -81,6 +84,10 @@
 
 
 
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
 
 
 
@@ -115,9 +122,14 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">posts</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
       </div>
   </nav>
 </div>
@@ -142,7 +154,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/22/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/24/sdio/sdio_basic_knowlegde/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -160,7 +172,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/10/22/hello-world/" class="post-title-link" itemprop="url">Untitled</a>
+          <a href="/2024/10/24/sdio/sdio_basic_knowlegde/" class="post-title-link" itemprop="url">SDIO eMMc相关知识总结</a>
         </h2>
 
         <div class="post-meta-container">
@@ -170,8 +182,18 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
+      
 
-      <time title="Created: 2024-10-22 19:01:58" itemprop="dateCreated datePublished" datetime="2024-10-22T19:01:58+08:00">2024-10-22</time>
+      <time title="Created: 2024-10-24 10:15:16 / Modified: 09:41:03" itemprop="dateCreated datePublished" datetime="2024-10-24T10:15:16+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sdio/" itemprop="url" rel="index"><span itemprop="name">sdio</span></a>
+        </span>
     </span>
 
   
@@ -184,64 +206,192 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="关于部分时钟在dts中配置频率，到内核下发现配置错误的问题"><a href="#关于部分时钟在dts中配置频率，到内核下发现配置错误的问题" class="headerlink" title="关于部分时钟在dts中配置频率，到内核下发现配置错误的问题"></a>关于部分时钟在dts中配置频率，到内核下发现配置错误的问题</h1><h2 id="CCF框架逻辑"><a href="#CCF框架逻辑" class="headerlink" title="CCF框架逻辑"></a>CCF框架逻辑</h2><p>ccf(common clock framework)是uboot&#x2F;kernel提供的系统clock管理框架，它将时钟的使用抽象为3个对象：</p>
-<ul>
-<li><strong>provider</strong> - 提供时钟的模块</li>
-<li><strong>consumer</strong> - 使用时钟的模块</li>
-<li><strong>ccf</strong> - 管理时钟的框架</li>
-</ul>
-<p>ccf实现以下功能：</p>
-<p>(1) 向consumer提供操作clocks的通用API；</p>
-<p>(2) 实现clock控制的通用逻辑(硬件无关)；</p>
-<p>(3) 向provider提供注册时钟的API，将特定的provider纳入ccf框架管理。</p>
-<p>consumer和provider，都只跟ccf交互，互相看不到对方，唯一的交集是Device Tree的配置，consumer需要在dts中指定其依赖的具体时钟，而时钟ID由provider提供。</p>
-<p>驱动要做的事情，是将特定Soc的硬件时钟树，转换成provider驱动，即实现硬件相关的时钟操作接口，将时钟树上的各个时钟注册到ccf，以方便consumer驱动使用。</p>
-<p><img src="/../stuff/ccf_architect.png" alt="image-20241018154127124"></p>
-<p>clk_register_composite</p>
-<h2 id="问题现象"><a href="#问题现象" class="headerlink" title="问题现象"></a>问题现象</h2><p>部分时钟，在dts中配置assgined-clock-rates &#x3D; &lt; &gt;，进内核后发现实际频率和配置值不一致。比如配置配31250000 内核下得到的是 17066666。</p>
-<p>DTS配置样例：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">clocks = &lt;&amp;ts_clk TS_CLK_TX5112_CHIP_OCLK_I0&gt;;</span><br><span class="line">clock-names = <span class="string">&quot;mclk&quot;</span>;</span><br><span class="line">assigned-clocks = &lt;&amp;ts_clk TS_CLK_TX5112_CHIP_OCLK_I0&gt;;</span><br><span class="line">assigned-clock-parents = &lt;&amp;ts_clk TS_CLK_TX5112_PLL1_D8&gt;;</span><br><span class="line">assigned-clock-rates = &lt;<span class="number">30700000</span>&gt;;</span><br></pre></td></tr></table></figure>
+          <p>sdio eMMc相关知识，包括接口，控制器，总线模型，速率模式，内核初始化过程，hs200模式，tuning方式。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/10/24/sdio/sdio_basic_knowlegde/">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
 
-<p>Provider 注册样例：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">DIV_FLAGS(TS_CLK_TX5112_CHIP_OCLK_I0, CHIP_OCLK_CFG, <span class="number">18</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, \</span><br><span class="line">		CLK_DIVIDER_POWER_OF_TWO_PLUS_ONE) \</span><br><span class="line">DIV_FLAGS(TS_CLK_TX5112_CHIP_OCLK_I1, CHIP_OCLK_CFG, <span class="number">22</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, \</span><br><span class="line">		CLK_DIVIDER_POWER_OF_TWO_PLUS_ONE) \</span><br><span class="line">DIV_FLAGS(TS_CLK_TX5112_CHIP_OCLK_I2, CHIP_OCLK_CFG, <span class="number">26</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, \</span><br><span class="line">		CLK_DIVIDER_POWER_OF_TWO_PLUS_ONE) \</span><br><span class="line">DIV_FLAGS(TS_CLK_TX5112_CHIP_OCLK_I3, CHIP_OCLK_CFG, <span class="number">30</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, \</span><br><span class="line">		CLK_DIVIDER_POWER_OF_TWO_PLUS_ONE) \</span><br></pre></td></tr></table></figure>
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
 
 
 
-<h2 id="问题定位"><a href="#问题定位" class="headerlink" title="问题定位"></a>问题定位</h2><h3 id="检查we位配置"><a href="#检查we位配置" class="headerlink" title="检查we位配置"></a>检查we位配置</h3><p>根据经验，一般时钟问题很多都是由于CCF的<strong>provider</strong>层驱动里，对我们SoC中特殊的sync bit和write enable bit的支持缺失导致的，我首先检查了这部分，发现write enable是成功配置的：</p>
-<p>chip_oclk属于comp clk，看到kernel&#x2F;drivers&#x2F;clk&#x2F;clk-divider.c</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">clk_divider_set_rate</span><span class="params">(<span class="keyword">struct</span> clk_hw *hw, <span class="type">unsigned</span> <span class="type">long</span> rate,</span></span><br><span class="line"><span class="params">				<span class="type">unsigned</span> <span class="type">long</span> parent_rate)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">clk_divider</span> *<span class="title">divider</span> =</span> to_clk_divider(hw);</span><br><span class="line">	<span class="type">int</span> value;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> flags = <span class="number">0</span>;</span><br><span class="line">	u32 val;</span><br><span class="line"></span><br><span class="line">	value = divider_get_val(rate, parent_rate, divider-&gt;table,</span><br><span class="line">				divider-&gt;width, divider-&gt;flags);</span><br><span class="line">	<span class="keyword">if</span> (value &lt; <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> value;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (divider-&gt;lock)</span><br><span class="line">		spin_lock_irqsave(divider-&gt;lock, flags);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		__acquire(divider-&gt;lock);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (divider-&gt;flags &amp; CLK_DIVIDER_HIWORD_MASK) &#123;</span><br><span class="line">		val = div_mask(divider-&gt;width) &lt;&lt; (divider-&gt;shift + <span class="number">16</span>);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		val = clk_readl(divider-&gt;reg);</span><br><span class="line">		val &amp;= ~(div_mask(divider-&gt;width) &lt;&lt; divider-&gt;shift);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_ARCH_TS		<span class="comment">//write enable 支持</span></span></span><br><span class="line">	<span class="keyword">if</span> (divider-&gt;we &lt; WE_INVALID)</span><br><span class="line">		val |= BIT(divider-&gt;we);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (divider-&gt;sync &lt; SYNC_INVALID)</span><br><span class="line">		val |= BIT(divider-&gt;sync);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	val |= (u32)value &lt;&lt; divider-&gt;shift;</span><br><span class="line">	<span class="comment">//printk(KERN_INFO &quot;[%s] wr 0x%p val 0x%x\n&quot;,</span></span><br><span class="line">		<span class="comment">//__func__, divider-&gt;reg, val);</span></span><br><span class="line">	clk_writel(val, divider-&gt;reg);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (divider-&gt;lock)</span><br><span class="line">		spin_unlock_irqrestore(divider-&gt;lock, flags);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		__release(divider-&gt;lock);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>驱动已经支持对we位的判断，provider注册这几个时钟时，也提供了we位的信息。</p>
-<h3 id="追溯assign-clock-配置过程"><a href="#追溯assign-clock-配置过程" class="headerlink" title="追溯assign-clock-配置过程"></a>追溯assign-clock-配置过程</h3><p>通过不断加log，加dump_stack，看assign-clock-配置过程</p>
-<p>[ kernel&#x2F;drivers&#x2F;clk&#x2F;clk-conf.c ]</p>
-<blockquote>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">of_clk_set_defaults</span><span class="params">(<span class="keyword">struct</span> device_node *node, <span class="type">bool</span> clk_supplier)</span></span><br><span class="line">	rc = __set_clk_parents(node, clk_supplier);</span><br><span class="line">		of_parse_phandle_with_args(node, <span class="string">&quot;assigned-clock-parents&quot;</span>, <span class="string">&quot;#clock-cells&quot;</span>, index, &amp;clkspec);</span><br><span class="line">		pclk = of_clk_get_from_provider(&amp;clkspec);</span><br><span class="line">		clk = of_clk_get_from_provider(&amp;clkspec);</span><br><span class="line">		rc = clk_set_parent(clk, pclk);</span><br><span class="line">			clk_core_set_parent(clk-&gt;core, parent ? parent-&gt;core : <span class="literal">NULL</span>);</span><br><span class="line">				 <span class="keyword">if</span> (parent) &#123;</span><br><span class="line">                  p_index = clk_fetch_parent_index(core, parent);</span><br><span class="line">                  <span class="keyword">if</span> (p_index &lt; <span class="number">0</span>) &#123;</span><br><span class="line">				            pr_debug(<span class="string">&quot;%s: clk %s can not be parent of clk %s\n&quot;</span>,</span><br><span class="line">				                    __func__, parent-&gt;name, core-&gt;name);</span><br><span class="line">				            ret = p_index;</span><br><span class="line">				            <span class="keyword">goto</span> out;</span><br><span class="line">				        &#125;</span><br><span class="line">				        p_rate = parent-&gt;rate;</span><br><span class="line">				    &#125;</span><br><span class="line">				 ret = __clk_set_parent(core, parent, p_index);</span><br><span class="line">					  <span class="keyword">if</span> (parent &amp;&amp; core-&gt;ops-&gt;set_parent)</span><br><span class="line">     					ret = core-&gt;ops-&gt;set_parent(core-&gt;hw, p_index);</span><br><span class="line">	rc = __set_clk_rates(node, clk_supplier);</span><br><span class="line">		of_property_for_each_u32(node, <span class="string">&quot;assigned-clock-rates&quot;</span>, prop, cur, rate) &#123;</span><br><span class="line">			rc = of_parse_phandle_with_args(node, <span class="string">&quot;assigned-clocks&quot;</span>, <span class="string">&quot;#clock-cells&quot;</span>, index, &amp;clkspec);</span><br><span class="line">         clk = of_clk_get_from_provider(&amp;clkspec);</span><br><span class="line">         rc = clk_set_rate(clk, rate);</span><br><span class="line">         	clk_core_set_rate_nolock(<span class="keyword">struct</span> clk_core *core, <span class="type">unsigned</span> <span class="type">long</span> req_rate)  &lt;----</span><br><span class="line">                 ore-&gt;ops-&gt;round_rate(core-&gt;hw, req-&gt;rate, &amp;req-&gt;best_parent_rate);</span><br><span class="line">                 top = clk_calc_new_rates(core, rate);</span><br><span class="line">         			clk_divider_round_rate	<span class="comment">//note here</span></span><br><span class="line">                         <span class="keyword">if</span> (core-&gt;flags &amp; CLK_SET_RATE_PARENT)</span><br><span class="line">                         	-&gt; clk_core_round_rate_nolock   递归调用，尝试所有parent ---&gt;</span><br><span class="line">                 clk_change_rate(top);</span><br><span class="line">                     clk_divider_set_rate</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>clk_divider_round_rate函数：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">long</span> <span class="title function_">clk_divider_round_rate</span><span class="params">(<span class="keyword">struct</span> clk_hw *hw, <span class="type">unsigned</span> <span class="type">long</span> rate,</span></span><br><span class="line"><span class="params">				<span class="type">unsigned</span> <span class="type">long</span> *prate)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">clk_divider</span> *<span class="title">divider</span> =</span> to_clk_divider(hw);</span><br><span class="line">	<span class="type">int</span> bestdiv;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* if read only, just return current value */</span></span><br><span class="line">	<span class="keyword">if</span> (divider-&gt;flags &amp; CLK_DIVIDER_READ_ONLY) &#123;		<span class="comment">// escape</span></span><br><span class="line">		bestdiv = clk_readl(divider-&gt;reg) &gt;&gt; divider-&gt;shift;</span><br><span class="line">		bestdiv &amp;= div_mask(divider-&gt;width);</span><br><span class="line">		bestdiv = _get_div(divider-&gt;table, bestdiv, divider-&gt;flags,</span><br><span class="line">			divider-&gt;width);</span><br><span class="line">		<span class="keyword">return</span> DIV_ROUND_UP_ULL((u64)*prate, bestdiv);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> divider_round_rate(hw, rate, prate, divider-&gt;table,	<span class="comment">//go into here</span></span><br><span class="line">				  divider-&gt;width, divider-&gt;flags);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">divider_round_rate</span><br><span class="line">    divider_round_rate_parent</span><br><span class="line">    	clk_divider_bestdiv		<span class="comment">//note here	  [kernel/drivers/clk/clk-divider.c]</span></span><br><span class="line">    		maxdiv = _get_maxdiv(table, width, flags);</span><br><span class="line">			<span class="keyword">if</span> (!(clk_hw_get_flags(hw) &amp; CLK_SET_RATE_PARENT)) &#123;</span><br><span class="line">                parent_rate = *best_parent_rate;</span><br><span class="line">                bestdiv = _div_round(table, parent_rate, rate, flags);</span><br><span class="line">                bestdiv = bestdiv == <span class="number">0</span> ? <span class="number">1</span> : bestdiv;</span><br><span class="line">                bestdiv = bestdiv &gt; maxdiv ? maxdiv : bestdiv;</span><br><span class="line">                <span class="keyword">return</span> bestdiv;</span><br><span class="line">			&#125;</span><br><span class="line">    </span><br><span class="line">    	<span class="keyword">return</span> DIV_ROUND_UP_ULL((u64)*prate, div);</span><br></pre></td></tr></table></figure>
+    
 
-<p>相关函数的实现：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">static int _div_round_up(const struct clk_div_table *table,</span><br><span class="line">			 unsigned long parent_rate, unsigned long rate,</span><br><span class="line">			 unsigned long flags)</span><br><span class="line">&#123;</span><br><span class="line">	int div = DIV_ROUND_UP_ULL((u64)parent_rate, rate);</span><br><span class="line"></span><br><span class="line">	if (flags &amp; CLK_DIVIDER_POWER_OF_TWO)</span><br><span class="line">		div = __roundup_pow_of_two(div);</span><br><span class="line">	if (table)</span><br><span class="line">		div = _round_up_table(table, div);</span><br><span class="line"></span><br><span class="line">	return div;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static int _round_up_table(const struct clk_div_table *table, int div)</span><br><span class="line">&#123;</span><br><span class="line">	const struct clk_div_table *clkt;</span><br><span class="line">	int up = INT_MAX;</span><br><span class="line"></span><br><span class="line">	for (clkt = table; clkt-&gt;div; clkt++) &#123;</span><br><span class="line">		if (clkt-&gt;div == div)</span><br><span class="line">			return clkt-&gt;div;</span><br><span class="line">		else if (clkt-&gt;div &lt; div)</span><br><span class="line">			continue;</span><br><span class="line"></span><br><span class="line">		if ((clkt-&gt;div - div) &lt; (up - div))</span><br><span class="line">			up = clkt-&gt;div;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return up;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static unsigned int _get_maxdiv(const struct clk_div_table *table, u8 width,</span><br><span class="line">				unsigned long flags)</span><br><span class="line">&#123;</span><br><span class="line">	if (flags &amp; CLK_DIVIDER_ONE_BASED)</span><br><span class="line">		return div_mask(width);</span><br><span class="line">	if (flags &amp; CLK_DIVIDER_POWER_OF_TWO)</span><br><span class="line">		return 1 &lt;&lt; div_mask(width);</span><br><span class="line">	if (table)</span><br><span class="line">		return _get_table_maxdiv(table, width);</span><br><span class="line">	return div_mask(width) + 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>可以看到provider在注册时，使用了自定义的<strong>CLK_DIVIDER_POWER_OF_TWO_PLUS_ONE</strong>宏，但是这个宏在上面这个函数中没有做判断，导致他总是走最后return val+1，这里在当时log调试时发现是一个固定的值。</p>
-<p><strong>CLK_DIVIDER_POWER_OF_TWO_PLUS_ONE</strong>本意为寄存器值n与分频系数值div的关系为: div &#x3D; 2^n+1<br>查看我们CRGU的regfile，其中确实有这样的关系：</p>
-<p><img src="/../stuff/crgu_reg_chipout.png" alt="image-20241018153854120"></p>
-<p>问题就在这，虽然自定义了一个新的FLAG宏，但是在clk-divider.c的这些基础组件中，支持并不完善，没有完整的添加判断。</p>
-<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>_get_div函数中有对table的判断，可以再CLK Provider层注册时，提供这个table，构造寄存器值与分频系数div的POWER_OF_TWO_PLUS_ONE关系</p>
-<p>_get_table_div遍历表中提供的div与val键值对，返回目标val下对应的div值</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> _get_table_div(<span class="type">const</span> <span class="keyword">struct</span> clk_div_table *table,</span><br><span class="line">							<span class="type">unsigned</span> <span class="type">int</span> val)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">clk_div_table</span> *<span class="title">clkt</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (clkt = table; clkt-&gt;div; clkt++)</span><br><span class="line">		<span class="keyword">if</span> (clkt-&gt;val == val)</span><br><span class="line">			<span class="keyword">return</span> clkt-&gt;div;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="post-block">
+  
+  
 
-<p>注册：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">clk_div_table</span> <span class="title">oclk_div_table</span>[] =</span> &#123;</span><br><span class="line"></span><br><span class="line">  &#123; <span class="number">0</span>, <span class="number">1</span> &#125;, </span><br><span class="line"></span><br><span class="line">  &#123; <span class="number">1</span>, <span class="number">3</span> &#125;, </span><br><span class="line"></span><br><span class="line">  &#123; <span class="number">2</span>, <span class="number">5</span> &#125;, </span><br><span class="line"></span><br><span class="line">  &#123; <span class="number">3</span>, <span class="number">9</span> &#125;,</span><br><span class="line"></span><br><span class="line">  &#123;.div = <span class="number">0</span>&#125;,		<span class="comment">//note here</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DIV_TABLE(id, off, shift, width, we, sync, table) DIV_FLAGS(id, off, shift, width, we, sync, 0, table)</span></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">ts_div_params</span> <span class="title">ts_tx5112_divs</span>[] =</span> &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DIV_FLAGS(id, _off, _shift, _width, _we, _sync, _flags, _table) \</span></span><br><span class="line"><span class="meta">	[DIVIFY(id)] = &#123; \</span></span><br><span class="line"><span class="meta">		.off = (_off), \</span></span><br><span class="line"><span class="meta">		.shift = (_shift), \</span></span><br><span class="line"><span class="meta">		.width = (_width), \</span></span><br><span class="line"><span class="meta">		.we = (_we), \</span></span><br><span class="line"><span class="meta">		.sync = (_sync), \</span></span><br><span class="line"><span class="meta">		.flags = (_flags), \</span></span><br><span class="line"><span class="meta">        .table = (_table), \</span></span><br><span class="line"><span class="meta">	&#125;,</span></span><br><span class="line">	DIV_LIST</span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> DIV_FLAGS</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">  DIV_TABLE(TS_CLK_TX5112_CHIP_OCLK_I0, CHIP_OCLK_CFG, <span class="number">18</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, oclk_div_table) \</span><br><span class="line"></span><br><span class="line">  DIV_TABLE(TS_CLK_TX5112_CHIP_OCLK_I1, CHIP_OCLK_CFG, <span class="number">22</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, oclk_div_table) \</span><br><span class="line"></span><br><span class="line">  DIV_TABLE(TS_CLK_TX5112_CHIP_OCLK_I2, CHIP_OCLK_CFG, <span class="number">26</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, oclk_div_table) \</span><br><span class="line"></span><br><span class="line">  DIV_TABLE(TS_CLK_TX5112_CHIP_OCLK_I3, CHIP_OCLK_CFG, <span class="number">30</span>, <span class="number">2</span>, <span class="number">0</span>, SYNC_INVALID, oclk_div_table) \</span><br></pre></td></tr></table></figure>
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/24/sdio/sdio_dwc_mshc_vol_switch/">
 
-<p>将table提供给这类divider clk后，_get_div通过查表获取到正确的dividier值，dts中的频率可以正常配置进去。</p>
-<p>修改之前的log：</p>
-<p>bestdiv都是固定的4</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[    <span class="number">1.958283</span>] best_parent_rate:<span class="number">250000000</span>, rate:<span class="number">30800000</span></span><br><span class="line">[    <span class="number">1.964241</span>] clk_divider_bestdiv bestdiv:<span class="number">4</span> parent_rate:<span class="number">250000000</span></span><br><span class="line">[    <span class="number">1.971363</span>] divider_round_rate_parent:<span class="number">4</span> prate:<span class="number">250000000</span></span><br><span class="line">[    <span class="number">1.971390</span>] _func:clk_composite_determine_rate parent_name:pll0_d8 parent_rate:<span class="number">250000000</span>, req-&gt;rate:<span class="number">30800000</span>,tmp_rate:<span class="number">62500000</span></span><br><span class="line">[    <span class="number">1.988833</span>] best_parent_rate:<span class="number">153600000</span>, rate:<span class="number">30800000</span></span><br><span class="line">[    <span class="number">1.994780</span>] clk_divider_bestdiv bestdiv:<span class="number">4</span> parent_rate:<span class="number">153600000</span></span><br><span class="line">[    <span class="number">2.001955</span>] divider_round_rate_parent:<span class="number">4</span> prate:<span class="number">153600000</span></span><br><span class="line">[    <span class="number">2.001981</span>] _func:clk_composite_determine_rate parent_name:pll1_d8 parent_rate:<span class="number">153600000</span>, req-&gt;rate:<span class="number">30800000</span>,tmp_rate:<span class="number">38400000</span></span><br><span class="line">[    <span class="number">2.018835</span>] best_parent_rate:<span class="number">24000000</span>, rate:<span class="number">30800000</span></span><br><span class="line">[    <span class="number">2.024686</span>] clk_divider_bestdiv bestdiv:<span class="number">1</span> parent_rate:<span class="number">24000000</span></span><br><span class="line">[    <span class="number">2.031791</span>] divider_round_rate_parent:<span class="number">1</span> prate:<span class="number">24000000</span></span><br><span class="line">[    <span class="number">2.031819</span>] _func:clk_composite_determine_rate parent_name:osc24m_clk parent_rate:<span class="number">24000000</span>, req-&gt;rate:<span class="number">30800000</span>,tmp_rate:<span class="number">24000000</span></span><br><span class="line">[    <span class="number">2.049194</span>] req-&gt;rate = best_rate:<span class="number">24000000</span></span><br></pre></td></tr></table></figure>
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
 
-<p>修改后的log：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[    <span class="number">1.953459</span>] best_parent_rate:<span class="number">250000000</span>, rate:<span class="number">30800000</span></span><br><span class="line">[    <span class="number">1.960406</span>] clk_divider_bestdiv bestdiv:<span class="number">9</span> parent_rate:<span class="number">250000000</span></span><br><span class="line">[    <span class="number">1.967505</span>] divider_round_rate_parent:<span class="number">9</span> prate:<span class="number">250000000</span></span><br><span class="line">[    <span class="number">1.967532</span>] _func:clk_composite_determine_rate parent_name:pll0_d8 parent_rate:<span class="number">250000000</span>, req-&gt;rate:<span class="number">30800000</span>,tmp_rate:<span class="number">27777778</span></span><br><span class="line">[    <span class="number">1.984943</span>] best_parent_rate:<span class="number">153600000</span>, rate:<span class="number">30800000</span></span><br><span class="line">[    <span class="number">1.991672</span>] clk_divider_bestdiv bestdiv:<span class="number">5</span> parent_rate:<span class="number">153600000</span></span><br><span class="line">[    <span class="number">1.998901</span>] divider_round_rate_parent:<span class="number">5</span> prate:<span class="number">153600000</span></span><br><span class="line">[    <span class="number">1.998928</span>] _func:clk_composite_determine_rate parent_name:pll1_d8 parent_rate:<span class="number">153600000</span>, req-&gt;rate:<span class="number">30800000</span>,tmp_rate:<span class="number">30720000</span></span><br><span class="line">[    <span class="number">2.015785</span>] best_parent_rate:<span class="number">24000000</span>, rate:<span class="number">30800000</span></span><br><span class="line">[    <span class="number">2.022420</span>] clk_divider_bestdiv bestdiv:<span class="number">1</span> parent_rate:<span class="number">24000000</span></span><br><span class="line">[    <span class="number">2.029599</span>] divider_round_rate_parent:<span class="number">1</span> prate:<span class="number">24000000</span></span><br><span class="line">[    <span class="number">2.029626</span>] _func:clk_composite_determine_rate parent_name:osc24m_clk parent_rate:<span class="number">24000000</span>, req-&gt;rate:<span class="number">30800000</span>,tmp_rate:<span class="number">24000000</span></span><br><span class="line">[    <span class="number">2.047011</span>] req-&gt;rate = best_rate:<span class="number">30720000</span></span><br></pre></td></tr></table></figure>
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="雁栖湖">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
 
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 雁栖湖">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/10/24/sdio/sdio_dwc_mshc_vol_switch/" class="post-title-link" itemprop="url">SDIO MSHC 电压切换</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-10-24 09:33:57" itemprop="dateCreated datePublished" datetime="2024-10-24T09:33:57+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sdio/" itemprop="url" rel="index"><span itemprop="name">sdio</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>sdio mshc控制器，电压切换方式，linux内核的支持。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/10/24/sdio/sdio_dwc_mshc_vol_switch/">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/15/ccf/ccf_clk_cannot_assigned/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="雁栖湖">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 雁栖湖">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/10/15/ccf/ccf_clk_cannot_assigned/" class="post-title-link" itemprop="url">CCF - CLK配置失败问题 - Flag误用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-10-15 08:15:16" itemprop="dateCreated datePublished" datetime="2024-10-15T08:15:16+08:00">2024-10-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-10-24 09:37:19" itemprop="dateModified" datetime="2024-10-24T09:37:19+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ccf/" itemprop="url" rel="index"><span itemprop="name">ccf</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>ccf框架下误用clk结构对象的flag设置分频系数与寄存器的关系，导致assigned-clock-rates失败的问题</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/10/15/ccf/ccf_clk_cannot_assigned/">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
