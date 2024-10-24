@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="sdio mshc控制器，采样相位与驱动相位的定义与区别，UHS_REG_EXT配置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SDIO MSHC 采样相位与驱动相位">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/24/sdio/sdio_smpl_ph_vs_drv_ph/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="sdio mshc控制器，采样相位与驱动相位的定义与区别，UHS_REG_EXT配置">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdio_clocks_and_delays.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdio_tuning_flow.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdio_signal.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/UHS_REG_TXT.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdio_gpio_reg.png">
+<meta property="article:published_time" content="2024-10-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-10-24T11:31:07.773Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/sdio_clocks_and_delays.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/10/24/sdio/sdio_smpl_ph_vs_drv_ph/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/24/sdio/sdio_smpl_ph_vs_drv_ph/","path":"2024/10/24/sdio/sdio_smpl_ph_vs_drv_ph/","title":"SDIO MSHC 采样相位与驱动相位"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SDIO MSHC 采样相位与驱动相位 | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%87%87%E6%A0%B7%E7%9B%B8%E4%BD%8D%E5%92%8C%E9%A9%B1%E5%8A%A8%E7%9B%B8%E4%BD%8D"><span class="nav-number">1.</span> <span class="nav-text">采样相位和驱动相位</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/sdio/sdio_smpl_ph_vs_drv_ph/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SDIO MSHC 采样相位与驱动相位 | Coffe Pattern">
+      <meta itemprop="description" content="sdio mshc控制器，采样相位与驱动相位的定义与区别，UHS_REG_EXT配置">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SDIO MSHC 采样相位与驱动相位
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-10-24 00:00:00 / Modified: 19:31:07" itemprop="dateCreated datePublished" datetime="2024-10-24T00:00:00+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sdio/" itemprop="url" rel="index"><span itemprop="name">sdio</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">sdio mshc控制器，采样相位与驱动相位的定义与区别，UHS_REG_EXT配置</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="采样相位和驱动相位"><a href="#采样相位和驱动相位" class="headerlink" title="采样相位和驱动相位"></a>采样相位和驱动相位</h1><p>在SDIO控制器的时钟体系中，一般有两个和tuning相关的时钟：smpl phase clk和drv phase clk，分别是采样相位和驱动相位。之前一直搞不懂这两个采样相位的关系，今天和我们的芯片设计聊了一下，这里做一个总结:</p>
+<p>下图为sdhc控制器的不同时钟和延迟：</p>
+<p><img src="/../../stuff/sdio_clocks_and_delays.png" alt="image-sdio-clocks-delay"></p>
+<p>smpl phase和drv phase 分别用于配置控制红框里的两个clock delay，其中cclk_in_sample将会影响ccmd_in和cdata_in两个时钟，这是输入方向的时钟。cclk_in_drv将会影响ccmd_out,cdata_out,这是输出时钟的延迟。cclk_out是输出给卡的时钟。输出给卡的数据就是drv_clk驱动的。</p>
+<p>一般来说，tuning流程中的第一步中提到的cclk_in_sample即为smpl phase：<br>下图为tuning流程描述：</p>
+<p><img src="/../../stuff/sdio_tuning_flow.png" alt="image-sdio-clocks-delay"></p>
+<p>那么drv phase clk是用来做什么？<br>我理解tuning是为了解决接收端发送数据的时延的，发送端的clk和data也会有时延吗？通过drv_ph去消除时延？</p>
+<p>答：tuning过程中，也可能会用到drv phase，如果卡侧没有delay line，host这边需要把发送的数据和时钟相位进行调整，这也是一种tuning。</p>
+<p>另外，在设计的指示中，SDHC控制器内部还有可以调节相位寄存器：</p>
+<p><img src="/../../stuff/sdio_signal.png" alt="image-sdio-clocks-delay"></p>
+<p>该寄存器名为<strong>UHS_REG_EXT</strong>，bit field描述如下：</p>
+<p><img src="/../../stuff/UHS_REG_TXT.png" alt="image-sdio-clocks-delay"></p>
+<p>据设计说，该寄存器可以做精度更细的调谐。目前我们的软件中只修改了clkgen模块中提供的smpl clk，也许加入对UHS_REG_EXT的配置后，速率提升会更加明显（clkgen调谐后实际速率只有40M）。<br>按这个道理，如果要加入对UHS_REG_EXT寄存器中的smpl域控制的调谐，我的想法是，在对clkgen模块中的smpl clk寄存器做调谐之后，找到一个比较准确的采样点，然后再执行对UHS_REG_EXT的调谐，相当于游标卡尺的<strong>主尺</strong>和<strong>游标</strong></p>
+<p>为了验证我的猜想，我去内核代码里粗略找了一下，对UHS_REG_EXT配置的代码只有hi3660在做：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">luyuan@qudong-MS<span class="number">-7B</span>97:~/workspace/sdk_57B_new/kernel/drivers/mmc$ grep <span class="string">&quot;UHS_REG_EXT&quot;</span> -nr ./</span><br><span class="line">./host/dw_mmc-k3.c:<span class="number">45</span>:<span class="meta">#<span class="keyword">define</span> UHS_REG_EXT_SAMPLE_PHASE_MASK     GENMASK(20, 16)</span></span><br><span class="line">./host/dw_mmc-k3.c:<span class="number">46</span>:<span class="meta">#<span class="keyword">define</span> UHS_REG_EXT_SAMPLE_DRVPHASE_MASK  GENMASK(25, 21)</span></span><br><span class="line">./host/dw_mmc-k3.c:<span class="number">47</span>:<span class="meta">#<span class="keyword">define</span> UHS_REG_EXT_SAMPLE_DLY_MASK       GENMASK(30, 26)</span></span><br><span class="line">./host/dw_mmc-k3.c:<span class="number">256</span>: reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, smpl_phase) |</span><br><span class="line">./host/dw_mmc-k3.c:<span class="number">257</span>:             FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK, smpl_dly) |</span><br><span class="line">./host/dw_mmc-k3.c:<span class="number">258</span>:             FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK, drv_phase);</span><br><span class="line">./host/dw_mmc-k3.c:<span class="number">259</span>: mci_writel(host, UHS_REG_EXT, reg_value);</span><br><span class="line">./host/dw_mmc.h:<span class="number">321</span>:<span class="meta">#<span class="keyword">define</span> SDMMC_UHS_REG_EXT   0x108</span></span><br></pre></td></tr></table></figure>
+
+<p>海思也使用的DW的IP，观察GENMASK那几行和寄存器偏移那一行，bit field和偏移也都一致。</p>
+<p>FIELD_PREP这个宏用于将smpl_phase和smpl_dly配置到它们的bit field中生成reg配置值。<br>再找到海思的tuning接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dw_mci_hi3660_execute_tuning</span><span class="params">(<span class="keyword">struct</span> dw_mci_slot *slot, u32 opcode)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">dw_mci</span> *<span class="title">host</span> =</span> slot-&gt;host;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mmc_host</span> *<span class="title">mmc</span> =</span> slot-&gt;mmc;</span><br><span class="line">	<span class="type">int</span> smpl_phase = <span class="number">0</span>;</span><br><span class="line">	u32 tuning_sample_flag = <span class="number">0</span>;</span><br><span class="line">	<span class="type">int</span> best_clksmpl = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; NUM_PHASES; ++i, ++smpl_phase) &#123;</span><br><span class="line">		smpl_phase %= <span class="number">32</span>;</span><br><span class="line"></span><br><span class="line">		mci_writel(host, TMOUT, ~<span class="number">0</span>);</span><br><span class="line">		dw_mci_hs_set_timing(host, mmc-&gt;ios.timing, smpl_phase);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (!mmc_send_tuning(mmc, opcode, <span class="literal">NULL</span>))</span><br><span class="line">			tuning_sample_flag |= (<span class="number">1</span> &lt;&lt; smpl_phase);</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			tuning_sample_flag &amp;= ~(<span class="number">1</span> &lt;&lt; smpl_phase);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	best_clksmpl = dw_mci_get_best_clksmpl(tuning_sample_flag);</span><br><span class="line">	<span class="keyword">if</span> (best_clksmpl &lt; <span class="number">0</span>) &#123;</span><br><span class="line">		dev_err(host-&gt;dev, <span class="string">&quot;All phases bad!\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> -EIO;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dw_mci_hs_set_timing(host, mmc-&gt;ios.timing, best_clksmpl);</span><br><span class="line"></span><br><span class="line">	dev_info(host-&gt;dev, <span class="string">&quot;tuning ok best_clksmpl %u tuning_sample_flag %x\n&quot;</span>,</span><br><span class="line">		 best_clksmpl, tuning_sample_flag);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>海思的tuning接口写的比较简单，用一个u32长度的bitmap – tuning_sample_flag变量存储所有通过的采样点，再通过dw_mci_get_best_clksmpl函数获取最优采样点。</p>
+<p>但最后它还调用了dw_mci_hs_set_timing函数来设置一些timing参数，这里我不是很理解：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dw_mci_hs_set_timing</span><span class="params">(<span class="keyword">struct</span> dw_mci *host, <span class="type">int</span> timing,</span></span><br><span class="line"><span class="params">				     <span class="type">int</span> smpl_phase)</span></span><br><span class="line">&#123;</span><br><span class="line">	u32 drv_phase;</span><br><span class="line">	u32 smpl_dly;</span><br><span class="line">	u32 use_smpl_dly = <span class="number">0</span>;</span><br><span class="line">	u32 enable_shift = <span class="number">0</span>;</span><br><span class="line">	u32 reg_value;</span><br><span class="line">	<span class="type">int</span> ctrl_id;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">k3_priv</span> *<span class="title">priv</span>;</span></span><br><span class="line"></span><br><span class="line">	priv = host-&gt;priv;</span><br><span class="line">	ctrl_id = priv-&gt;ctrl_id;</span><br><span class="line"></span><br><span class="line">	drv_phase = hs_timing_cfg[ctrl_id][timing].drv_phase;</span><br><span class="line">	smpl_dly   = hs_timing_cfg[ctrl_id][timing].smpl_dly;</span><br><span class="line">	<span class="keyword">if</span> (smpl_phase == <span class="number">-1</span>)</span><br><span class="line">		smpl_phase = (hs_timing_cfg[ctrl_id][timing].smpl_phase_max +</span><br><span class="line">			     hs_timing_cfg[ctrl_id][timing].smpl_phase_min) / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (timing) &#123;</span><br><span class="line">	<span class="keyword">case</span> MMC_TIMING_UHS_SDR104:</span><br><span class="line">		<span class="keyword">if</span> (smpl_phase &gt;= USE_DLY_MIN_SMPL &amp;&amp;</span><br><span class="line">				smpl_phase &lt;= USE_DLY_MAX_SMPL)</span><br><span class="line">			use_smpl_dly = <span class="number">1</span>;</span><br><span class="line">			<span class="comment">/* fallthrough */</span></span><br><span class="line">	<span class="keyword">case</span> MMC_TIMING_UHS_SDR50:</span><br><span class="line">		<span class="keyword">if</span> (smpl_phase &gt;= ENABLE_SHIFT_MIN_SMPL &amp;&amp;</span><br><span class="line">				smpl_phase &lt;= ENABLE_SHIFT_MAX_SMPL)</span><br><span class="line">			enable_shift = <span class="number">1</span>;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	mci_writel(host, GPIO, <span class="number">0x0</span>);</span><br><span class="line">	usleep_range(<span class="number">5</span>, <span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">	reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, smpl_phase) |</span><br><span class="line">		    FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK, smpl_dly) |</span><br><span class="line">		    FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK, drv_phase);</span><br><span class="line">	mci_writel(host, UHS_REG_EXT, reg_value);</span><br><span class="line"></span><br><span class="line">	mci_writel(host, ENABLE_SHIFT, enable_shift);</span><br><span class="line"></span><br><span class="line">	reg_value = FIELD_PREP(GPIO_CLK_DIV_MASK, GENCLK_DIV) |</span><br><span class="line">			     FIELD_PREP(GPIO_USE_SAMPLE_DLY_MASK, use_smpl_dly);</span><br><span class="line">	mci_writel(host, GPIO, (<span class="type">unsigned</span> <span class="type">int</span>)reg_value | GPIO_CLK_ENABLE);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* We should delay 1ms wait for timing setting finished. */</span></span><br><span class="line">	usleep_range(<span class="number">1000</span>, <span class="number">2000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>hs_timing_cfg是海思静态定义的一个timing table，可能存储的是一些经验值，如果tuning流程对bitmap上每一位都置位了，这意味着每一个相位都通过了eMMc的检验，就会使用timing table里的值</p>
+<p>随后它还配置了**mci_writel(host, GPIO, 0x0);**，该寄存器确实为dw ip里的，bit field如下：</p>
+<p><img src="/../../stuff/sdio_gpio_reg.png" alt="image-sdio-gpio-reg"><br>这个寄存器，手册里的信息实在太少了。海思在会首先将该寄存器清零，在配置UHS_REG_EXT寄存器后还会配置这个寄存器，不清楚是何目的。</p>
+<p>总之，我的猜想并不对，没有找到先clkgen调谐再UHS_REG_EXT调谐的例子。<br>和设计那边的讨论也就到此结束了，我们所有芯片系列中，其中有一些只支持clkgen调谐，不支持UHS_REG_EXT调谐。所以代码的兼容性要做好，后期有时间会尝试一下UHS_REG_EXT调谐后的性能。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/15/ccf/ccf_clk_cannot_assigned/" rel="prev" title="CCF - CLK配置失败问题 - Flag误用">
+                  <i class="fa fa-angle-left"></i> CCF - CLK配置失败问题 - Flag误用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/10/24/sdio/sdio_dwc_mshc_vol_switch/" rel="next" title="SDIO MSHC 电压切换">
+                  SDIO MSHC 电压切换 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
