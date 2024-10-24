@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hans">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
@@ -18,51 +18,51 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="sdio eMMc相关知识，包括接口，控制器，总线模型，速率模式，内核初始化过程，hs200模式，tuning方式。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SDIO eMMc相关知识总结">
-<meta property="og:url" content="http://example.com/2024/10/24/sdio/sdio_basic_knowlegde/index.html">
-<meta property="og:site_name" content="雁栖湖">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/24/sdio/sdio_basic_knowlegde/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
 <meta property="og:description" content="sdio eMMc相关知识，包括接口，控制器，总线模型，速率模式，内核初始化过程，hs200模式，tuning方式。">
-<meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/stuff/01db3d8fa2234583802a378998b96274.png">
-<meta property="og:image" content="http://example.com/stuff/01db3d8fa2234583802a378998b96274.png">
-<meta property="og:image" content="http://example.com/stuff/9cae3b56b99748d0a75c134ec3c4f509.png">
-<meta property="og:image" content="http://example.com/stuff/47b106e8b90b4dad93f6939bbac6c780.png">
-<meta property="og:image" content="http://example.com/stuff/b4e03b93893c48f49090a9b2a4271b54.png">
-<meta property="og:image" content="http://example.com/stuff/c0e1669badcb4d208ff9aa615829fd7a.png">
-<meta property="og:image" content="http://example.com/stuff/fa1737d6147844558956ab3ec4eba30b.png">
-<meta property="og:image" content="http://example.com/stuff/d68bdc47e5ec4fdeb81ecac779428c44.png">
-<meta property="og:image" content="http://example.com/stuff/3f6cf2f283a046ebb5d141ccf96b30c2.png">
-<meta property="og:image" content="http://example.com/stuff/16bb965442834c298980dee21e1cdf2b.png">
-<meta property="og:image" content="http://example.com/stuff/565984fdec74475f8e7497d9fc0f8b73.png">
-<meta property="og:image" content="http://example.com/stuff/ed61d4b25ced4fd1b4de4608084ea102.png">
-<meta property="og:image" content="http://example.com/stuff/22927a7b815140e6b5478a3aa28b4ae4.png">
-<meta property="og:image" content="http://example.com/stuff/7c8281c83c5f4bb3bb28660a0e573c1d.png">
-<meta property="og:image" content="http://example.com/stuff/ebf3d4221bd94e1792ca39da1305e9b5.png">
-<meta property="og:image" content="http://example.com/stuff/4236210ed6424bf98ebe9e238cf72d75.png">
-<meta property="og:image" content="http://example.com/stuff/532c911acf5f40e8b000cb9dbe1046f8.png">
-<meta property="og:image" content="http://example.com/stuff/e3b279e8189d4ddab70dce91b227f2b9.png">
-<meta property="og:image" content="http://example.com/stuff/c434d366014a4c8da41d5ec52bfb4b7a.png">
-<meta property="og:image" content="http://example.com/stuff/0db080155a594dba99230de617a98254.png">
-<meta property="og:image" content="http://example.com/stuff/9a006ab49fe6469ea3c72e4ada6ec570.png">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/stuff/01db3d8fa2234583802a378998b96274.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/01db3d8fa2234583802a378998b96274.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/9cae3b56b99748d0a75c134ec3c4f509.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/47b106e8b90b4dad93f6939bbac6c780.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/b4e03b93893c48f49090a9b2a4271b54.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/c0e1669badcb4d208ff9aa615829fd7a.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/fa1737d6147844558956ab3ec4eba30b.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/d68bdc47e5ec4fdeb81ecac779428c44.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/3f6cf2f283a046ebb5d141ccf96b30c2.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/16bb965442834c298980dee21e1cdf2b.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/565984fdec74475f8e7497d9fc0f8b73.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/ed61d4b25ced4fd1b4de4608084ea102.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/22927a7b815140e6b5478a3aa28b4ae4.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/7c8281c83c5f4bb3bb28660a0e573c1d.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/ebf3d4221bd94e1792ca39da1305e9b5.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/4236210ed6424bf98ebe9e238cf72d75.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/532c911acf5f40e8b000cb9dbe1046f8.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/e3b279e8189d4ddab70dce91b227f2b9.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/c434d366014a4c8da41d5ec52bfb4b7a.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/0db080155a594dba99230de617a98254.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/9a006ab49fe6469ea3c72e4ada6ec570.png">
 <meta property="article:published_time" content="2024-10-24T02:15:16.000Z">
 <meta property="article:modified_time" content="2024-10-24T05:02:52.194Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/stuff/01db3d8fa2234583802a378998b96274.png">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/01db3d8fa2234583802a378998b96274.png">
 
 
-<link rel="canonical" href="http://example.com/2024/10/24/sdio/sdio_basic_knowlegde/">
+<link rel="canonical" href="https://kindresy.github.io/2024/10/24/sdio/sdio_basic_knowlegde/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2024/10/24/sdio/sdio_basic_knowlegde/","path":"2024/10/24/sdio/sdio_basic_knowlegde/","title":"SDIO eMMc相关知识总结"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/24/sdio/sdio_basic_knowlegde/","path":"2024/10/24/sdio/sdio_basic_knowlegde/","title":"SDIO eMMc相关知识总结"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>SDIO eMMc相关知识总结 | 雁栖湖</title>
+<title>SDIO eMMc相关知识总结 | Coffe Pattern</title>
   
 
 
@@ -95,7 +95,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <p class="site-title">雁栖湖</p>
+      <p class="site-title">Coffe Pattern</p>
       <i class="logo-line"></i>
     </a>
       <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
@@ -148,13 +148,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
   </nav>
@@ -180,8 +180,8 @@
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/24/sdio/sdio_basic_knowlegde/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/sdio/sdio_basic_knowlegde/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -189,12 +189,12 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="雁栖湖">
+      <meta itemprop="name" content="Coffe Pattern">
       <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="SDIO eMMc相关知识总结 | 雁栖湖">
+      <meta itemprop="name" content="SDIO eMMc相关知识总结 | Coffe Pattern">
       <meta itemprop="description" content="sdio eMMc相关知识，包括接口，控制器，总线模型，速率模式，内核初始化过程，hs200模式，tuning方式。">
     </span>
       <header class="post-header">
@@ -311,6 +311,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/10/24/dma/dma_basic_knowledge/" rel="next" title="DMA Basic Knowledge">
+                  DMA Basic Knowledge <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>

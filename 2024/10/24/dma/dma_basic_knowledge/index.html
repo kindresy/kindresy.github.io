@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="DMA主要功能，组件，参数，驱动配置。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DMA Basic Knowledge">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/24/dma/dma_basic_knowledge/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="DMA主要功能，组件，参数，驱动配置。">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/stuff/088c71ba2a3c1100f28c43f5190e4104.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/4c27f784d952971f861a4cb269c30eca.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/2f74de63850c8d2a07f93d5c0af4bda7.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/39057b6ed7c4109f717aa89b7bdccef1.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/113d41772ea3d44400453247836a33e4.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/e5510afc23772f2bdd3408845514fdda.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/055a5707f176c9375f717af5dc644466.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/6cdb17c0c3a3a2c374309a9d47085050.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/0cd9d71c226eedf0ea552ed90e5b53c0.png">
+<meta property="article:published_time" content="2024-10-24T02:15:16.000Z">
+<meta property="article:modified_time" content="2024-10-24T07:35:29.260Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/088c71ba2a3c1100f28c43f5190e4104.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/10/24/dma/dma_basic_knowledge/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/24/dma/dma_basic_knowledge/","path":"2024/10/24/dma/dma_basic_knowledge/","title":"DMA Basic Knowledge"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DMA Basic Knowledge | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA%E5%AE%9A%E4%B9%89%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">DMA定义：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA%E4%BC%A0%E8%BE%93%E6%96%B9%E5%BC%8F%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">DMA传输方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DW-AHB-DMA-%E4%B8%BB%E8%A6%81%E7%BB%84%E4%BB%B6%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">DW_AHB_DMA 主要组件：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">DMA的应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA%E7%9B%B8%E5%85%B3%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><span class="nav-number">5.</span> <span class="nav-text">DMA相关的基本定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Source-Destination-Peripheral"><span class="nav-number">5.1.</span> <span class="nav-text">Source&#x2F;Destination Peripheral</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Memory-Non-Memory-Peripheral"><span class="nav-number">5.2.</span> <span class="nav-text">Memory&#x2F;Non-Memory Peripheral</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Master-Slave-Interface"><span class="nav-number">5.3.</span> <span class="nav-text">Master&#x2F;Slave Interface</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Handshaking-Interface"><span class="nav-number">5.4.</span> <span class="nav-text">Handshaking Interface</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Channel"><span class="nav-number">5.5.</span> <span class="nav-text">Channel</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA-%E4%BC%A0%E8%BE%93%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84"><span class="nav-number">6.</span> <span class="nav-text">DMA 传输层级结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Non-Memory-Peripherals"><span class="nav-number">6.1.</span> <span class="nav-text">Non-Memory Peripherals</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Memory"><span class="nav-number">6.2.</span> <span class="nav-text">Memory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A%EF%BC%9A"><span class="nav-number">6.3.</span> <span class="nav-text">解释：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Block"><span class="nav-number">6.3.1.</span> <span class="nav-text">Block:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Transaction"><span class="nav-number">6.3.2.</span> <span class="nav-text">Transaction:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DMA%E4%BC%A0%E8%BE%93%E6%96%B9%E5%BC%8F"><span class="nav-number">6.3.3.</span> <span class="nav-text">DMA传输方式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA%E4%BC%A0%E8%BE%93%E7%9B%B8%E5%85%B3%E8%AE%BE%E7%BD%AE"><span class="nav-number">7.</span> <span class="nav-text">DMA传输相关设置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E7%B1%BB%E5%9E%8B"><span class="nav-number">7.1.</span> <span class="nav-text">传输类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E6%8E%A7%E5%88%B6%E5%99%A8-%E2%80%94-%E6%B5%81%E6%8E%A7%E5%88%B6%E5%99%A8-Flow-Controller"><span class="nav-number">7.2.</span> <span class="nav-text">传输控制器 — 流控制器 Flow Controller</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E5%AE%BD%E5%BA%A6"><span class="nav-number">7.3.</span> <span class="nav-text">传输宽度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E6%97%B6%E5%9C%B0%E5%9D%80%E5%8F%98%E5%8C%96%E6%96%B9%E5%BC%8F"><span class="nav-number">7.4.</span> <span class="nav-text">传输时地址变化方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E9%81%93%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">7.5.</span> <span class="nav-text">通道优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FIFO%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">7.6.</span> <span class="nav-text">FIFO的作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AA%81%E5%8F%91%E6%A8%A1%E5%BC%8F%E5%92%8C%E5%BE%AA%E7%8E%AF%E6%8C%AA%E7%94%A8%E6%A8%A1%E5%BC%8F"><span class="nav-number">7.7.</span> <span class="nav-text">突发模式和循环挪用模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AA%81%E5%8F%91%E6%A8%A1%E5%BC%8F%EF%BC%9A"><span class="nav-number">7.7.1.</span> <span class="nav-text">突发模式：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E6%8C%AA%E7%94%A8%E6%A8%A1%E5%BC%8F%EF%BC%9A"><span class="nav-number">7.7.2.</span> <span class="nav-text">循环挪用模式：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%BD%BF%E7%94%A8%E7%AA%81%E5%8F%91%E6%A8%A1%E5%BC%8F%EF%BC%9A"><span class="nav-number">7.8.</span> <span class="nav-text">什么时候使用突发模式：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA-Relative-Register"><span class="nav-number">8.</span> <span class="nav-text">DMA Relative Register</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E9%81%93%E9%85%8D%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">8.1.</span> <span class="nav-text">通道配置寄存器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA%E7%BC%96%E7%A8%8B%E7%A4%BA%E4%BE%8B"><span class="nav-number">9.</span> <span class="nav-text">DMA编程示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E4%B8%80%E4%B8%AA%E9%80%9A%E9%81%93"><span class="nav-number">9.1.</span> <span class="nav-text">配置一个通道</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E4%B8%8E%E8%AE%BE%E8%AE%A1%E6%B2%9F%E9%80%9A%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">10.</span> <span class="nav-text">需要与设计沟通的地方</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%B8%E6%9D%BF%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">11.</span> <span class="nav-text">裸板代码分析</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/dma/dma_basic_knowledge/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DMA Basic Knowledge | Coffe Pattern">
+      <meta itemprop="description" content="DMA主要功能，组件，参数，驱动配置。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DMA Basic Knowledge
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-10-24 10:15:16 / Modified: 15:35:29" itemprop="dateCreated datePublished" datetime="2024-10-24T10:15:16+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/DMA/" itemprop="url" rel="index"><span itemprop="name">DMA</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">DMA主要功能，组件，参数，驱动配置。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="DMA定义："><a href="#DMA定义：" class="headerlink" title="DMA定义："></a>DMA定义：</h3><p><strong>DMA用来提供在外设和存储器之间或者存储器和存储器之间的高速数据传输。无须CPU的干预，通过DMA数据可以快速地移动。这就节省了CPU的资源来做其他操作。</strong></p>
+<h3 id="DMA传输方式："><a href="#DMA传输方式：" class="headerlink" title="DMA传输方式："></a>DMA传输方式：</h3><p>DMA的作用就是实现数据的直接传输，而去掉了传统数据传输需要CPU寄存器参与的环节，主要涉及四种情况的数据传输，但本质上是一样的，都是从内存的某一区域传输到内存的另一区域（外设的数据寄存器本质上就是内存的一个存储单元）。四种情况的数据传输如下：</p>
+<ul>
+<li>外设到内存</li>
+<li>内存到外设</li>
+<li>内存到内存</li>
+<li>外设到外设</li>
+</ul>
+<h3 id="DW-AHB-DMA-主要组件："><a href="#DW-AHB-DMA-主要组件：" class="headerlink" title="DW_AHB_DMA 主要组件："></a>DW_AHB_DMA 主要组件：</h3><ol>
+<li>DMA Hardware Requeset Interface</li>
+<li>AHB Master Interface</li>
+<li>AHB Slave Interface</li>
+<li>Arbiter（仲裁器）</li>
+<li>DMA Channel x</li>
+<li>FIFO of DMA Channel x</li>
+<li>DMA Controller</li>
+</ol>
+<p><img src="/../../stuff/088c71ba2a3c1100f28c43f5190e4104.png" alt="在这里插入图片描述"></p>
+<h3 id="DMA的应用"><a href="#DMA的应用" class="headerlink" title="DMA的应用"></a>DMA的应用</h3><p>DMA主适用于一些高速、大数据量的I&#x2F;O设备。对于这类高速I&#x2F;O设备，如果采用输入输出指令或采用中断的方式传输信息，会占用大量CPU的时间，同时也容易造成数据的丢失。DMA方式能使I&#x2F;O设备直接和存储器进行成批数据的快速传输。<br>常见应用如下：</p>
+<ul>
+<li>FLASH</li>
+<li>AUDIO</li>
+<li>VIDEO</li>
+</ul>
+<h3 id="DMA相关的基本定义"><a href="#DMA相关的基本定义" class="headerlink" title="DMA相关的基本定义"></a>DMA相关的基本定义</h3><h4 id="Source-Destination-Peripheral"><a href="#Source-Destination-Peripheral" class="headerlink" title="Source&#x2F;Destination Peripheral"></a>Source&#x2F;Destination Peripheral</h4><p>Source Peripheral :DMAC从AHB层读取数据的设备，然后DMAC将数据存储在通道FIFO中。</p>
+<p>Source Peripheral 可以挂在AHB总线或者APB总线上。</p>
+<p>Destination Peripheral DMAC 从FIFO中存储的数据的设备（从Source Peripheral读取的）</p>
+<p>Destination Peripheral 可以挂在AHB总线或者APB总线上。</p>
+<h4 id="Memory-Non-Memory-Peripheral"><a href="#Memory-Non-Memory-Peripheral" class="headerlink" title="Memory&#x2F;Non-Memory Peripheral"></a>Memory&#x2F;Non-Memory Peripheral</h4><p>始终“准备就绪”进行DMA传输的Source Peripheral 或者 Destination Peripheral,不需要握手接口即可与DMA进行交互，仅当外围设备插入的等待状态不超过16个时，才应当将其定义为Memory Peripheral。反之，则应当定义为Non-Memory Peripheral并使用握手接口，以便在其准备好接收&#x2F;发送数据时发出信号通知DMA。</p>
+<h4 id="Master-Slave-Interface"><a href="#Master-Slave-Interface" class="headerlink" title="Master&#x2F;Slave Interface"></a>Master&#x2F;Slave Interface</h4><p>Master Interface：DW_ahb_dmac是通过AHB总线上的一个master interface，DW_ahb_dmac通过AHB总线从source读取数据并写入数据到destination<br>Slave Interface：CPU编程DW_ahb_dmac的AHB接口。主要是作为从设备接口部分，供AHB总线上的其他主设备来访问自身控制寄存器。</p>
+<h4 id="Handshaking-Interface"><a href="#Handshaking-Interface" class="headerlink" title="Handshaking Interface"></a>Handshaking Interface</h4><p>一组信号或软件寄存器，他们符合DMAC与Source Peripheral&#x2F;Destination Peripheral之间的握手协议，以控制他们之间的Single&#x2F;Brust 事务。</p>
+<p>该接口用于请求、确认、控制DMAC事务。一般情况DMAC可以通过以下3种方式接收请求：</p>
+<ul>
+<li>**Hardware handshaking interface: **使用硬件信号来控制DMAC与源或目标外围设备之间的Single&#x2F;Brust 事务。</li>
+<li><strong>Software handshaking interface:</strong> 使用一组软件寄存器DMAC与源或目标外围设备之间的Single&#x2F;Brust 事务。</li>
+<li><strong>Peripheral interrupt handshaking interface:</strong> 在这种模式下，来自外围设备的中断线被绑定到硬件握手接口的dma_req输入;忽略其他接口信号。</li>
+</ul>
+<h4 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h4><p>通道-在一个配置的AHB层上的源外设和同一或不同AHB层上的目标外设之间通过通道FIFO进行的<strong>读&#x2F;写数据路径</strong>。</p>
+<p>如果源外设不是内存，则将源握手接口分配给通道。</p>
+<p>如果目标外设不是内存，则将目标握手接口分配给通道。源和目标握手接口可以通过编程通道寄存器来动态分配</p>
+<p>。</p>
+<p>通道可以理解成一个小型的程序，它是一个简单的IO控制程序，只能处理对应外设，mem之间的数据传输，工作之前需要配置DMA里使用哪个通道。</p>
+<p>每一个通道都有一个相应的FIFO，该FIFO的缓冲长度可以编程配置</p>
+<h3 id="DMA-传输层级结构"><a href="#DMA-传输层级结构" class="headerlink" title="DMA 传输层级结构"></a>DMA 传输层级结构</h3><h4 id="Non-Memory-Peripherals"><a href="#Non-Memory-Peripherals" class="headerlink" title="Non-Memory Peripherals"></a>Non-Memory Peripherals</h4><p><img src="/../../stuff/4c27f784d952971f861a4cb269c30eca.png" alt="在这里插入图片描述"></p>
+<h4 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h4><p><img src="/../../stuff/2f74de63850c8d2a07f93d5c0af4bda7.png" alt="在这里插入图片描述"></p>
+<h4 id="解释："><a href="#解释：" class="headerlink" title="解释："></a>解释：</h4><h5 id="Block"><a href="#Block" class="headerlink" title="Block:"></a>Block:</h5><p>Block- DW_ahb_dmac数据的块，其数量即块长，由流量控制器决定。对于DW_ahb_dmac和内存之间的传输，块被直接分解为突发序列和单个传输。对于DW_ahb_dmac和非内存外设之间的传输，块被分解为DW_ahb_dmac事务序列(单个事务和突发事务)。这些又被分解成AHB传输序列。</p>
+<h5 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction:"></a>Transaction:</h5><p>事务——DW_ahb_dmac传输的基本单元，由<strong>硬件或软件握手接口决定</strong>。</p>
+<p>如果外设是非内存设备，则事务仅与DW_ahb_dmac与源外设或目标外设之间的传输相关。</p>
+<p>有两种类型的事务:</p>
+<ul>
+<li>单个事务—单个事务的长度始终为1，并转换为单个AHB转移。</li>
+<li>突发事务—突发事务的长度被编程到DW_ahb_dmac中。突发事务被转换为一系列突发和AHB单传输。突发事务长度由程序控制，通常与dmac和源&#x2F;目的外设中的FIFO大小有一定关系。</li>
+</ul>
+<h5 id="DMA传输方式"><a href="#DMA传输方式" class="headerlink" title="DMA传输方式"></a>DMA传输方式</h5><p>软件控制DMAC传输的块数量，在DMA传输完成时DW_AHB_DMAC硬件关闭通道并产生一个DMA传输完毕的中断信号，程序员可以为一个新的DMA传输重编程通道</p>
+<p>根据传输块的分布情况可以分为两种</p>
+<p>第一种：Single-block DMA transfer</p>
+<p>一片连续的组合块</p>
+<p>第二种：Multi-block DMA transfer</p>
+<p>Multi-block DMA transfer可能由多个DW_ahb_dmac块组成。对多块DMA传输通过以下方式支持：</p>
+<ul>
+<li>块链(链表指针)  linked list pointer</li>
+<li>自动重新加载通道寄存器</li>
+<li>连续块</li>
+</ul>
+<p>源和目标可以独立地选择要使用的方法。</p>
+<p><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Scatter&spm=1001.2101.3001.7020">Scatter</a>-gather DMA方式是与block DMA方式相对应的一种DMA方式。</p>
+<p>在DMA传输数据的过程中，要求源物理地址和目标物理地址必须是连续的。但是在某些计算机体系中，如IA架构，连续的存储器地址在物理上不一定是连续的，所以DMA传输要分成多次完成。</p>
+<p>如果在传输完一块物理上连续的数据后引起一次中断，然后再由主机进行下一块物理上连续的数据传输，那么这种方式就是block DMA方式。</p>
+<p>Scatter-gather DMA方式则不同，<strong>它使用一个链表描述物理上不连续的存储空间（这个链表），然后把链表首地址告诉DMA master</strong>。DMA master在传输完一块物理连续的数据后，不用发起中断，而是根据链表来传输下一块物理上连续的数据，直到传输完毕后再发起一次中断。</p>
+<p>感觉对于物理地址不连续离散的使用block dma和sg dma是不一样，sg dma效率更高，可是如果是连续的物理地址，感觉block dma和sg dma效率其实是差不多的。</p>
+<p>S-G传输的两种场景：</p>
+<p>将一片连续内存数据搬运到一片不连续的的内存空间（且间隔是相等的）</p>
+<p>源内存：连续</p>
+<p>目的内存：离散</p>
+<p>这个时候就可以用到DMA的 <strong>Destination Scatter Transfer</strong></p>
+<p><img src="/../../stuff/39057b6ed7c4109f717aa89b7bdccef1.png" alt="img"></p>
+<p>场景2：</p>
+<p>将一片内存区域中等间隔的多段数据拷贝到一段连续内存中（常见的2D矩形抠图就是这种场景的典型应用）</p>
+<p>源内存：分散</p>
+<p>目的内存：聚合</p>
+<p>这种场景就可以使用DMA的<strong>Source Gather transfer</strong></p>
+<p><img src="/../../stuff/113d41772ea3d44400453247836a33e4.png" alt="img"></p>
+<hr>
+<h3 id="DMA传输相关设置"><a href="#DMA传输相关设置" class="headerlink" title="DMA传输相关设置"></a>DMA传输相关设置</h3><h4 id="传输类型"><a href="#传输类型" class="headerlink" title="传输类型"></a>传输类型</h4><ul>
+<li>Memory to Memory</li>
+<li>Memory to Peripheral</li>
+<li>Peripheral to Memory</li>
+<li>Peripheral to Peripheral</li>
+</ul>
+<h4 id="传输控制器-—-流控制器-Flow-Controller"><a href="#传输控制器-—-流控制器-Flow-Controller" class="headerlink" title="传输控制器 — 流控制器 Flow Controller"></a>传输控制器 — 流控制器 Flow Controller</h4><p>流控制器：确定DMA块传输长度并终止它的设备</p>
+<p>流控制器一般有以下选择：</p>
+<ul>
+<li>DMAC</li>
+<li>Source Peripheral</li>
+<li>Destination Peripheral</li>
+</ul>
+<p>流控制器设置规则：</p>
+<p>如果在传输之前知道块大小，则应将DMAC设为流控。<br>如果在传输之前不知道块大小，则Source Peripheral&#x2F;Destination Peripheral必须为流控</p>
+<h4 id="传输宽度"><a href="#传输宽度" class="headerlink" title="传输宽度"></a>传输宽度</h4><p>多数通用DMA是挂在AHB总线上的，即AHB总线的位宽则为DMA的传输宽度的上限。</p>
+<p>以STM32单片机为例，DMA的传输宽度 &lt;&#x3D; 32。则常见有Byte-8bit、HalfWord-16bit、Word-32bit方式</p>
+<p>DT53的AHB总线位宽为CPU位宽，同STM32一样都是32位，可以使用Byte-8bit、HalfWord-16bit、Word-32bit方式</p>
+<h4 id="传输时地址变化方式"><a href="#传输时地址变化方式" class="headerlink" title="传输时地址变化方式"></a>传输时地址变化方式</h4><p>DMA传输过程是没有CPU干预的，DMAC怎么知道下一个数据去哪里搬运，也需要事先告诉DMA地址的变化规律。</p>
+<p>即三种地址方式：</p>
+<ol>
+<li>递增</li>
+<li>递减</li>
+<li>不变</li>
+</ol>
+<h4 id="通道优先级"><a href="#通道优先级" class="headerlink" title="通道优先级"></a>通道优先级</h4><p>对于独立的通用DMA，都会有多条通道，每条通道有独立的FIFO、配置寄存器、中断等硬件。但是DMA的Master Interface仅有一个，故多个通道会竞争该Master Interface资源。</p>
+<p>值得注意的是，高优先级通道可以随时提出对主总线接口的请求，但是仅在当前AHB传输（突发或单次）完成后才被授予。因此，当Master Interface正在为底优先级通道传输数据而高优先级通道请求服务时，它会在切换为高优先级通道传输数据之前完成低优先级通道当前的AHB传输（Single 或 Brust）。另外，当优先级相同时（寄存器配置），DMAC一般会根据通道号来选择优先运行的通道。</p>
+<h4 id="FIFO的作用"><a href="#FIFO的作用" class="headerlink" title="FIFO的作用"></a>FIFO的作用</h4><p>启用DMA的FIFO可以最大程度地避免数据传输过程中的溢出问题，可以减少DMA对内存的访问次数从而减少总线访问竞争</p>
+<p>每个DMA stream都有4个字的FIFO可用。它用来暂存来自DMA源端的数据，每当FIFO里存放的数据达到设定的阈值后，数据就会被移走。阈值可以设置为从1个字到4个字的深度</p>
+<h4 id="突发模式和循环挪用模式"><a href="#突发模式和循环挪用模式" class="headerlink" title="突发模式和循环挪用模式"></a>突发模式和循环挪用模式</h4><p>DMA和CPU共用总线，所以这两种模式是为解决如何共用总线提供了三种方法。</p>
+<p>官方文档：</p>
+<p>突发模式 - 以一个连续的顺序传输整个数据块。<br>一旦CPU授予DMA控制器对系统总线的访问权限，它就会在释放对系统总线的控制返回给CPU之前传输数据块中的所有字节数据，但会使CPU在相对较长的时间内处于非活动状态。该模式也称为“块传输模式”。它还用于停止不必要的数据。</p>
+<p>周期挪用模式 - 周期挪用模式用于在突发传输模式所需的时间长度内不应禁用CPU的系统。在周期挪用模式中，DMA控制器以与突发模式相同的方式获得对系统总线的访问，使用BR(总线请求)和BG(总线授权)信号，这两个信号控制CPU和DMA控制器之间的接口。然而，在周期挪用模式下，在一个字节的数据传输之后，系统总线的控制通过BG解除对CPU的断言。然后通过BR不断地再次请求，每次请求传输一个字节的数据，直到整个数据块传输完毕。<br>通过不断地获得和释放对系统总线的控制，DMA控制器实质上交替的完成了指令和数据传输。CPU处理一条指令，然后DMA控制器传输一个数据值，以此类推。一方面，数据块在周期窃取模式中的传输速度不如在突发模式中那么快，但另一方面，CPU的空闲时间并不像突发模式中的那样长。<br>周期窃取模式对于实时监控数据的控制器很有用。</p>
+<h5 id="突发模式："><a href="#突发模式：" class="headerlink" title="突发模式："></a>突发模式：</h5><p>当DMA申请总线成功后会连续传送数据，而不给cpu使用总线的机会，直到数据传送完毕。比如<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=stm32&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:220800578%7D">stm32</a>设置了4个节拍的突发传输，传输宽度位8位，则一个<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=dma&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:220800578%7D">dma</a>请求会连续传送4个字节，是单次传输的4倍。</p>
+<p>Burst操作还是要通过CPU的参与的，与单独的一次读写操作相比，burst只需要提供一个其实地址就行了，以后的地址依次加1，而非burst操作每次都要给出地址，以及需要中间的一些应答、等待状态等等。如果是对地址连续的读取，burst效率高得多，但如果地址是跳跃的，则无法采用burst操作</p>
+<p>dma实际上是一次一次的申请总线，把要传的数据总量分成一个一个小的数据块。比如要传64个字节，那么dma内部可能分为2次，一次传64&#x2F;2&#x3D;32个字节，这个2(a)次呢，就叫做burst。这个burst是可以设置的。这32个字节又可以分为32位 <em>8或者16位</em>16来传输。</p>
+<h5 id="循环挪用模式："><a href="#循环挪用模式：" class="headerlink" title="循环挪用模式："></a>循环挪用模式：</h5><p>这应该是常用的dma模式，就是一个dma请求就申请一次总线，传输1个字节。</p>
+<h4 id="什么时候使用突发模式："><a href="#什么时候使用突发模式：" class="headerlink" title="什么时候使用突发模式："></a>什么时候使用突发模式：</h4><p>在封装&#x2F;解封数据的过程中，如果在数据完全封装&#x2F;解封前中断操作，则有数据损坏的危险。因此，<strong>为了确保数据一致性</strong>，可将数据流配置成生成<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=%E7%AA%81%E5%8F%91%E4%BC%A0%E8%BE%93&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:220800578%7D">突发传输</a>：在这种情况下，属于一个突发的每组传输不可分割。</p>
+<p>为什么封装&#x2F;解封会有数据损坏的危险呢？举个例子，有个外设的一组寄存器是实时联动的，也就是随着时间的变化，这组寄存器会改变。如果我们第一时刻取前一半寄存器的值，后一时刻区取后后一半寄存器的值，将两者封装起来就会损坏数据。所以我们需要在同一时刻取出所有值，这时就要用到突发传输，因为在传输时只有dma用总线，寄存器不会改变。</p>
+<h3 id="DMA-Relative-Register"><a href="#DMA-Relative-Register" class="headerlink" title="DMA Relative Register"></a>DMA Relative Register</h3><p>DW_AHB_DMAC的所有寄存器都是64位对齐的，都是64位宽，但是一般高32位都是Reserved。</p>
+<p>DT53一共有两个DMAC，两条物理通道，每个DMAC有3条Channel。</p>
+<h4 id="通道配置寄存器"><a href="#通道配置寄存器" class="headerlink" title="通道配置寄存器"></a>通道配置寄存器</h4><p><img src="/../../stuff/e5510afc23772f2bdd3408845514fdda.png" alt="在这里插入图片描述"></p>
+<p>AHB有4个独立的AHB主接口，4个接口可以同时传输，可以在不同的AHB上存在主接口(multi-layer)。</p>
+<p>源与目的可以在不同的AHB总线上</p>
+<p>每个AHB主接口可配置的数据总线宽度（256bits）</p>
+<p>通过APBbridge与APB外设通信</p>
+<h3 id="DMA编程示例"><a href="#DMA编程示例" class="headerlink" title="DMA编程示例"></a>DMA编程示例</h3><p>DMA传输可以由单个或多个块传输组成。</p>
+<p>在多块传输的连续块上，DW_ahb_dmac中的SARx&#x2F;DARx寄存器使用以下方法之一重新编程:</p>
+<ol>
+<li>使用链表的块链</li>
+<li>Auto-reloading</li>
+<li>块之间的连续地址</li>
+</ol>
+<p>在多块传输的连续块上，DW_ahb_dmac中的CTLx寄存器使用以下方法之一重新编程:</p>
+<ol>
+<li>使用链表的块链</li>
+<li>Auto-reloading</li>
+</ol>
+<p>当块链时，使用链表是多块方法的选择。在连续的块上，DW_ahb_dmac中的LLPx寄存器使用带链表的块链重新编程。</p>
+<p>块描述符由六个寄存器组成:SARx、DARx、LLPx、CTLx、SSTATx和DSTATx。DW_ahb_dmac使用前四个寄存器和CFGx寄存器来设置和描述块传输。</p>
+<p><img src="/../../stuff/055a5707f176c9375f717af5dc644466.png" alt="在这里插入图片描述"></p>
+<h4 id="配置一个通道"><a href="#配置一个通道" class="headerlink" title="配置一个通道"></a>配置一个通道</h4><ol>
+<li><p>读取ChEnReg通道使能寄存器，寻找当前空闲的通道，然后按照优先级使能该通道</p>
+</li>
+<li><p>通过向interrupt clear registers寄存器组中写值去清除上次DMA传输的通道中任何pending interrupts。读取中断原始状态和中断状态寄存器确认所有中断都已清除。</p>
+</li>
+<li><p>编程以下通道寄存器</p>
+<p>a. 设置源起始地址，即配置SARx寄存器，x为通道号</p>
+<pre><code>   b. 设置目的起始地址，即配置DARx寄存器，x为通道号
+</code></pre>
+<p>   c.  配置CTLx&#x3D;0和CFGx&#x3D;1，配置LLPx寄存器为0（DMA传输时不使用链表）（根据表格的ROW1）</p>
+<p>   d. 配置CTLx寄存器以为DMA传输设置控制信息</p>
+<pre><code>           i.  设置传输类型(memroy or non-memory peripheral  for source and destination) 和流控制器设备
+
+                通过编程CTLx寄存器的TT_FC域
+
+                参考下表
+</code></pre>
+</li>
+</ol>
+<p><img src="/../../stuff/6cdb17c0c3a3a2c374309a9d47085050.png" alt="在这里插入图片描述"></p>
+<pre><code>                ii.  设置传输特性，例如：
+
+                        ★配置源端传输宽度，SRC_TR_WIDTH域
+
+                        ★配置目的端传输宽度，DST_TR_WIDTH域
+</code></pre>
+<p><img src="/../../stuff/0cd9d71c226eedf0ea552ed90e5b53c0.png" alt="在这里插入图片描述"></p>
+<pre><code>                        ★配置source master layer, SMS域
+
+                        ★配置destination master layer，DMS域
+
+                        ★配置源递增/递减/固定地址，SINC域
+
+                        ★配置目的递增/递减/固定地址，DINC域
+
+                iii. 写入通道配置信息到CFGx寄存器
+
+                        为源和目标外设指定握手接口类型(硬件或软件);这不是内存所必需的。这一步需要分别编程HS_SEL_SRC/HS_SEL_DST位。
+
+                        写入0可以激活硬件握手接口来处理源/目标请求。写入1激活软件握手接口来处理源和目标请求。
+
+                        如果源或目标外设的硬件握手接口被激活，向源和目标外设提供握手接口:这是必需的分别编程SRC_PER和DEST_PER位。
+
+
+
+        f.  如果启用了gather(参数DMAH_CHx_SRC_GAT_EN = True, CTLx. log = True)。SRC_GATHER_EN已启用)，为通道x编程SGRx寄存器。
+
+        g.  如果启用了scatter(参数DMAH CHx DST SCA EN-True和CTLx.DST_SCATTER_EN)，则为通道x编程DSRxregister。
+</code></pre>
+<ol start="4">
+<li>在写入ChEnReg之前，确保DmaCfgReg寄存器的第0位是启用的。</li>
+<li>源和目标请求单个和突发DMA事务，以便传输数据块(假设是非内存外设)。DW_ahb_dmac在块中的每个事务(突发事务和单个事务)完成时确认，并执行块传输。</li>
+<li>传输完成后，硬件设置中断并禁用通道。此时，您可以响应Block Complete或Transfer Complete中断，或者轮询传输完成原始中断状态寄存器(RawTfr[n]， n&#x3D;通道号)，直到硬件设置完毕，以便检测传输何时完成。注意，如果使用这种轮询，软件必须确保在通道启用之前，通过写入中断清除寄存器ClearTfr[n]来清除传输完成中断。</li>
+</ol>
+<h3 id="需要与设计沟通的地方"><a href="#需要与设计沟通的地方" class="headerlink" title="需要与设计沟通的地方"></a>需要与设计沟通的地方</h3><p>每个芯片的DMA设计都不同，如SRC_Master 与DST_Master的选择。它们在代码中以idx的形式给出，设计对每个芯片选择的Master是不同的idx。（0&#x2F;1&#x2F;2&#x2F;3）</p>
+<p>handshaking也需要沟通，handshaking是一组信号或软件寄存器，他们符合DMAC与Source Peripheral&#x2F;Destination Peripheral之间的握手协议，以控制他们之间的Single&#x2F;Brust 事务。每款芯片的设计，其各个外设，不管是源外设还是目的外设，他们要控制DMAC都可以看作与DMAC的一个连线，这个连线是需要标记出来并设置到寄存器中的，每款芯片的设计不同，这些连线的标记也会不同。比如I2C要作为Source Peripheral去请求DMA，它和DMAC的连线可能在DT56中标记为1，在DT53中的标记为2。开发不同的芯片的DMAC驱动时一定要注意修改这一点。</p>
+<h3 id="裸板代码分析"><a href="#裸板代码分析" class="headerlink" title="裸板代码分析"></a>裸板代码分析</h3><p>在这里主要分析裸板代码的内存到内存的single传输：</p>
+<p><strong>代码4-1</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">dw_ahb_dma_mem2mem_single</span><span class="params">(u32 idx, u32 ch, u32 cfg)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">xfer_buff</span> *<span class="title">tr_buff</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">	tr_buff = dw_ahb_dmac_get_buff(idx);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 1.init src buffer once */</span></span><br><span class="line">	<span class="keyword">if</span> ((idx == <span class="number">0</span>) &amp;&amp; (cfg == DW_AHB_CHANNEL_CFG_0)) &#123;</span><br><span class="line">		<span class="keyword">for</span> (u32 i = <span class="number">0</span>; i &lt; tr_buff-&gt;buff_size; i++) &#123;</span><br><span class="line">			tr_buff-&gt;src[i] = i &amp; <span class="number">0xff</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 2.clear dest buffer */</span></span><br><span class="line">	<span class="built_in">memset</span>(tr_buff-&gt;dst, <span class="number">0x0</span>, tr_buff-&gt;buff_size);</span><br><span class="line">	<span class="keyword">if</span> (dma_cache_on) &#123;</span><br><span class="line">		cleanDCache();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 3.config dmac and start transferring */</span></span><br><span class="line">	<span class="type">qw_cpu_dmac_cfg_t</span> *cpu_dmac_cfg = &amp;cpu_dmac_config[idx][ch];</span><br><span class="line"></span><br><span class="line">	<span class="type">dw_ahb_dmac_handle_t</span> dmac_handle;</span><br><span class="line">	<span class="type">dw_ahb_dmac_priv_t</span> *dmac_priv;</span><br><span class="line"></span><br><span class="line">	dmac_handle = dw_ahb_dmac_initialize(idx, dw_ahb_dmac_test_callback);</span><br><span class="line">	dmac_priv = (<span class="type">dw_ahb_dmac_priv_t</span> *)dmac_handle;</span><br><span class="line">	<span class="type">qw_cpu_dmac_reg_t</span> *cpu_dmac = (<span class="type">qw_cpu_dmac_reg_t</span> *)(<span class="type">uintptr_t</span>)(dmac_priv-&gt;base);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	cpu_dmac_cfg-&gt;src_addr = (u32)tr_buff-&gt;src + ADDR_OFFSET;</span><br><span class="line">	cpu_dmac_cfg-&gt;dst_addr = (u32)tr_buff-&gt;dst + ADDR_OFFSET;</span><br><span class="line"></span><br><span class="line">	cpu_dmac_cfg-&gt;src_master = <span class="number">1</span>;<span class="comment">//idx;</span></span><br><span class="line">	cpu_dmac_cfg-&gt;dst_master = <span class="number">1</span>;<span class="comment">//idx;</span></span><br><span class="line">	<span class="keyword">if</span> (cfg == DW_AHB_CHANNEL_CFG_0) &#123;</span><br><span class="line">		cpu_dmac_cfg-&gt;src_bus_width = CPU_DMAC_TR_WIDTH_8BITS;</span><br><span class="line">		cpu_dmac_cfg-&gt;dst_bus_width = CPU_DMAC_TR_WIDTH_8BITS;</span><br><span class="line">		cpu_dmac_cfg-&gt;src_burst_size = CPU_DMAC_MSIZE_8;</span><br><span class="line">		cpu_dmac_cfg-&gt;dst_burst_size = CPU_DMAC_MSIZE_8;</span><br><span class="line">		cpu_dmac_cfg-&gt;block_size = BLOCK_SIZE0;</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (cfg == DW_AHB_CHANNEL_CFG_1) &#123;</span><br><span class="line">		cpu_dmac_cfg-&gt;src_bus_width = CPU_DMAC_TR_WIDTH_32BITS;</span><br><span class="line">		cpu_dmac_cfg-&gt;dst_bus_width = CPU_DMAC_TR_WIDTH_32BITS;</span><br><span class="line">		cpu_dmac_cfg-&gt;src_burst_size = CPU_DMAC_MSIZE_4;</span><br><span class="line">		cpu_dmac_cfg-&gt;dst_burst_size = CPU_DMAC_MSIZE_4;</span><br><span class="line">		cpu_dmac_cfg-&gt;block_size = BLOCK_SIZE1;</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (cfg == DW_AHB_CHANNEL_CFG_2) &#123;</span><br><span class="line">		cpu_dmac_cfg-&gt;src_bus_width = CPU_DMAC_TR_WIDTH_32BITS;</span><br><span class="line">		cpu_dmac_cfg-&gt;dst_bus_width = CPU_DMAC_TR_WIDTH_16BITS;</span><br><span class="line">		cpu_dmac_cfg-&gt;src_burst_size = CPU_DMAC_MSIZE_4;</span><br><span class="line">		cpu_dmac_cfg-&gt;dst_burst_size = CPU_DMAC_MSIZE_8;</span><br><span class="line">		cpu_dmac_cfg-&gt;block_size = BLOCK_SIZE2;</span><br><span class="line">	&#125;</span><br><span class="line">	dw_ahb_dmac_init_chn_stat(idx, ch,</span><br><span class="line">		COUNT_MAX &gt;&gt; cpu_dmac_cfg-&gt;src_bus_width,</span><br><span class="line">		cpu_dmac_cfg-&gt;block_size);</span><br><span class="line"></span><br><span class="line">	cpu_dmac_cfg-&gt;src_addr_change_mode = CPU_DMAC_ADDR_INCREASE;</span><br><span class="line">	cpu_dmac_cfg-&gt;dst_addr_change_mode = CPU_DMAC_ADDR_INCREASE;</span><br><span class="line">	cpu_dmac_cfg-&gt;trans_mode = CPU_DMAC_CTL_TT_MEM2MEM;</span><br><span class="line">	cpu_dmac_cfg-&gt;fifo_mode = CPU_DMAC_FIFO_MODE_EN;</span><br><span class="line"></span><br><span class="line">	drv_cpu_dmac_init(cpu_dmac, ch, cpu_dmac_cfg);</span><br><span class="line">	<span class="comment">//pr_info(&quot;---dma%d DMAC_CTL0 0x%llx\r\n&quot;, idx, cpu_dmac-&gt;DMAC_CTL0);</span></span><br><span class="line"></span><br><span class="line">	DMA_DBG(<span class="string">&quot;---src_bus_width 0x%x, src_burst_size 0x%x\r\n&quot;</span>,</span><br><span class="line">			cpu_dmac_cfg-&gt;src_bus_width, cpu_dmac_cfg-&gt;src_burst_size);</span><br><span class="line">	DMA_DBG(<span class="string">&quot;---src_master 0x%x, dst_master 0x%x\r\n&quot;</span>,</span><br><span class="line">			cpu_dmac_cfg-&gt;src_master, cpu_dmac_cfg-&gt;dst_master);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* enable selected channel&#x27;s interrupt */</span></span><br><span class="line">	drv_cpu_dmac_enable_intr(cpu_dmac, ch, CPU_DMAC_BLOCK_INTR, CPU_DMAC_INTR_EN);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* enable dmac */</span></span><br><span class="line">	drv_cpu_dmac_enable_dmac(cpu_dmac, CPU_DMAC_EN);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* enable selected channel */</span></span><br><span class="line">	drv_cpu_dmac_enable_ch(cpu_dmac, ch, CPU_DMAC_CH_EN);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>dw_ahb_dmac_initialize初始化一个DMAC控制器dw_ahb_dmac_priv_t* dmac_priv后，就要利用dmac_priv-&gt;base开始配置qw_cpu_dmac_reg_t *cpu_dmac</p>
+<p>cpu_dmac是寄存器组，前面定义的qw_cpu_dmac_cfg_t *cpu_dmac_cfg是damc配置信息的对象。</p>
+<p>DMA驱动的一大任务就是封装对dmac配置信息设置寄存器的函数。这些函数从dmac配置信息来具体地设置DMA寄存器。</p>
+<p>drv_cpu_dmac_init就是做这件事：</p>
+<p><strong>代码4-2：</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">s32 <span class="title function_">drv_cpu_dmac_init</span><span class="params">(<span class="type">qw_cpu_dmac_reg_t</span> *addr, u32 channel, <span class="type">qw_cpu_dmac_cfg_t</span> *cpu_dmac_cfg)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (channel &gt; CPU_DMAC_MAX_CHANNEL)</span><br><span class="line">		<span class="keyword">return</span> ERROR;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s source address */</span></span><br><span class="line">	drv_cpu_dmac_set_src_addr(addr, channel, cpu_dmac_cfg-&gt;src_addr);</span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s destination address */</span></span><br><span class="line">	drv_cpu_dmac_set_dst_addr(addr, channel, cpu_dmac_cfg-&gt;dst_addr);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s block size */</span></span><br><span class="line">	drv_cpu_dmac_set_block_size(addr, channel, cpu_dmac_cfg-&gt;block_size);</span><br><span class="line"></span><br><span class="line">	drv_cpu_dmac_set_src_master(addr, channel, cpu_dmac_cfg-&gt;src_master);</span><br><span class="line">	drv_cpu_dmac_set_dst_master(addr, channel, cpu_dmac_cfg-&gt;dst_master);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s transfer mode */</span></span><br><span class="line">	drv_cpu_dmac_set_trans_mode(addr, channel, cpu_dmac_cfg-&gt;trans_mode);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s source transfer bus width */</span></span><br><span class="line">	drv_cpu_dmac_set_src_trans_bus_width(addr, channel, cpu_dmac_cfg-&gt;src_bus_width);</span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s destination transfer bus width */</span></span><br><span class="line">	drv_cpu_dmac_set_dst_trans_bus_width(addr, channel, cpu_dmac_cfg-&gt;dst_bus_width);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s source burst transfer size */</span></span><br><span class="line">	drv_cpu_dmac_set_src_burst_size(addr, channel, cpu_dmac_cfg-&gt;src_burst_size);</span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s destination burst transfer size */</span></span><br><span class="line">	drv_cpu_dmac_set_dst_burst_size(addr, channel, cpu_dmac_cfg-&gt;dst_burst_size);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s source address change mode */</span></span><br><span class="line">	drv_cpu_dmac_set_src_addr_change_mode(addr, channel, cpu_dmac_cfg-&gt;src_addr_change_mode);</span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s destination address change mode */</span></span><br><span class="line">	drv_cpu_dmac_set_dst_addr_change_mode(addr, channel, cpu_dmac_cfg-&gt;dst_addr_change_mode);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s source handshake mode, soft or hard */</span></span><br><span class="line">	drv_cpu_dmac_set_src_hs_mode(addr, channel, cpu_dmac_cfg-&gt;src_hs_mode);</span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s destination handshake mode, soft or hard */</span></span><br><span class="line">	drv_cpu_dmac_set_dst_hs_mode(addr, channel, cpu_dmac_cfg-&gt;dst_hs_mode);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s source hard handshake number */</span></span><br><span class="line">	drv_cpu_dmac_set_src_hs_num(addr, channel, cpu_dmac_cfg-&gt;src_hs_num);</span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s destination hard handshake number */</span></span><br><span class="line">	drv_cpu_dmac_set_dst_hs_num(addr, channel, cpu_dmac_cfg-&gt;dst_hs_num);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* set selected channel&#x27;s block size */</span></span><br><span class="line">	drv_cpu_dmac_set_fifo_mode(addr, channel, cpu_dmac_cfg-&gt;fifo_mode);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>先不具体看这些设置寄存器的函数，而继续回到代码4-1的dw_ahb_dma_mem2mem_single看它是如何配置cpu_dmac_cfg配置信息对象的。</p>
+<p>首先是31-32行 配置源地址与目的地址，其中tr_buff对象是xfer_buff类型，保存了一次传输的基本信息，它由dw_ahb_dmac_get_buff(idx)函数配置，为传输准备源&#x2F;目的内存空间。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xfer_buff</span> &#123;</span></span><br><span class="line">  u8 *src;</span><br><span class="line">  u8 *dst;</span><br><span class="line">  u32 buff_size;</span><br><span class="line">&#125; g_xfer_buff[DW_AHB_DMAC_MAX];</span><br></pre></td></tr></table></figure>
+
+<p>34-46行 是根据AHB传输通道的不同选择来配置以下两点</p>
+<ol>
+<li><p>SRC_Master 与DST_Master，这里需要与芯片设计沟通，看mem2mem的传输应该具体如何选择。</p>
+</li>
+<li><p>设置传输特性，源端&#x2F;目的端的传输宽度以及burst大小，以及每次传输的block大小</p>
+</li>
+</ol>
+<p>73行 需要使能被选择通道的中断，这里选择的是Block Complete中断</p>
+<p>76和79行 前后使能DMAC和Channel</p>
+<p>关于AHB传输通道的传输特性，各个参数之间的关系还需要进一步理解：</p>
+<p>数据宽度设置为8bit，也就是transfer size&#x3D;8bits &#x3D; 1byte(<strong>SRC_TR_WIDTH</strong>)</p>
+<p>一次传8个transfer size，即burst size&#x3D;8	(<strong>SRC_MSIZE &#x3D; Source Burst Transaction Length:Number of data items each of width CTLx.SRC_TR_WIDTH to be read from the source every time a burst transaferred request is made from either the corresponding hardware or software handshaking interface</strong>)</p>
+<p>传输块大小设置为4092，也就是Block transfer size&#x3D;4092（<strong>the total number of single transaction to perform for every block transfer</strong>）</p>
+<p>意味着一次传输，实际DMA 将会从源端传输4092个8bit也就是4092bytes</p>
+<p>一次burst请求能传送 8bit*8 &#x3D; 8个字节</p>
+<p>4092字节在burst事务会分为4092字节&#x2F;8字节&#x3D;511…..4 即进行512次burst事务传完一个block</p>
+<p>基于FIFO的burst模式的DMA传输时，BURST的大小乘以数据宽度不得超过设置的FIFO阈值大小，否则会出错。</p>
+<p>总的来说dw_ahb_dma_mem2mem_single的配置过程和前面DMA编程示例中给出的“配置一个通道”中的示例类似。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/24/sdio/sdio_basic_knowlegde/" rel="prev" title="SDIO eMMc相关知识总结">
+                  <i class="fa fa-angle-left"></i> SDIO eMMc相关知识总结
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
