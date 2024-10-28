@@ -20,15 +20,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="uboot����Խ�絼������ʧ������">
+    <meta name="description" content="uboot数组越界导致启动失败问题">
 <meta property="og:type" content="article">
-<meta property="og:title" content="uboot����Խ�絼������ʧ������">
+<meta property="og:title" content="uboot数组越界导致启动失败问题">
 <meta property="og:url" content="https://kindresy.github.io/2024/10/28/debug/pinctrl_crossborder/index.html">
 <meta property="og:site_name" content="Coffe Pattern">
-<meta property="og:description" content="uboot����Խ�絼������ʧ������">
+<meta property="og:description" content="uboot数组越界导致启动失败问题">
 <meta property="og:locale">
 <meta property="article:published_time" content="2024-10-28T00:15:16.000Z">
-<meta property="article:modified_time" content="2024-10-28T09:18:43.383Z">
+<meta property="article:modified_time" content="2024-10-28T09:33:11.538Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 
@@ -37,10 +37,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/28/debug/pinctrl_crossborder/","path":"2024/10/28/debug/pinctrl_crossborder/","title":"uboot����Խ�絼������ʧ������"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/28/debug/pinctrl_crossborder/","path":"2024/10/28/debug/pinctrl_crossborder/","title":"uboot数组越界导致启动失败问题"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>uboot����Խ�絼������ʧ������ | Coffe Pattern</title>
+<title>uboot数组越界导致启动失败问题 | Coffe Pattern</title>
   
 
 
@@ -113,7 +113,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BDw%EF%BF%BD%EF%BF%BD"><span class="nav-number">1.</span> <span class="nav-text">���ⱳ��</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">2.</span> <span class="nav-text">�������</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%CE%BB%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">3.</span> <span class="nav-text">��λ����</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">问题背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">问题分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9A%E4%BD%8D%E7%BB%8F%E8%BF%87"><span class="nav-number">3.</span> <span class="nav-text">定位经过</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -172,12 +172,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="uboot����Խ�絼������ʧ������ | Coffe Pattern">
-      <meta itemprop="description" content="uboot����Խ�絼������ʧ������">
+      <meta itemprop="name" content="uboot数组越界导致启动失败问题 | Coffe Pattern">
+      <meta itemprop="description" content="uboot数组越界导致启动失败问题">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          uboot����Խ�絼������ʧ������
+          uboot数组越界导致启动失败问题
         </h1>
 
         <div class="post-meta-container">
@@ -189,7 +189,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2024-10-28 08:15:16 / Modified: 17:18:43" itemprop="dateCreated datePublished" datetime="2024-10-28T08:15:16+08:00">2024-10-28</time>
+      <time title="Created: 2024-10-28 08:15:16 / Modified: 17:33:11" itemprop="dateCreated datePublished" datetime="2024-10-28T08:15:16+08:00">2024-10-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -211,57 +211,57 @@
     </span>
 </div>
 
-            <div class="post-description">uboot����Խ�絼������ʧ������</div>
+            <div class="post-description">uboot数组越界导致启动失败问题</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="���w��"><a href="#���w��" class="headerlink" title="���ⱳ��"></a>���ⱳ��</h1><p>�⼸��������һ��оƬ��evb��Ҫ��֧��1.8v�İ��ӣ�Ӳ�����Ž�����rework�ú������������Ŷ���һ��ͬ��ȥ���ԣ������λͬ�·�ӳ����dts��ͨ��pinctrl��of��������gmac���ŵ�ѹ�󣬵�ѹ���Գɹ����óɹ�������������ʱ�ᱨ����</p>
+    <div class="post-body" itemprop="articleBody"><h1 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h1><p>这几天我们有一款芯片的evb板要换支持1.8v的板子，硬件部门将板子rework好后，这个活交由我们团队另一名同事去测试，结果这位同事反映，在dts中通过pinctrl的of机制配置gmac引脚电压后，电压可以成功配置成功，但是在启动时会报错：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;Synchronous Abort&quot;</span> handler, esr <span class="number">0x02000000</span>                                     </span><br><span class="line">elr: ffffffff812da000 lr : <span class="number">000000000103f</span>e74 (reloc)                             </span><br><span class="line">elr: <span class="number">0000000000200000</span> lr : <span class="number">000000007f</span>f65e74                                     </span><br><span class="line">x0 : <span class="number">000000007</span>df1f5e0 x1 : <span class="number">0000000000200000</span>                                     </span><br><span class="line">x2 : <span class="number">000000000000000</span>a x3 : <span class="number">00000000f</span>03e7000                                     </span><br><span class="line">x4 : <span class="number">00000000f</span>03e7000 x5 : <span class="number">000000007</span>dbff608                                     </span><br><span class="line">x6 : <span class="number">0000000000000030</span> x7 : <span class="number">000000007</span>dbff62d                                     </span><br><span class="line">x8 : <span class="number">000000007f</span>f9f74d x9 : <span class="number">0000000000000004</span>                                     </span><br><span class="line">x10: <span class="number">0000000000200000</span> x11: <span class="number">00000000000186</span>a0                                     </span><br><span class="line">x12: <span class="number">000000000001869f</span> x13: <span class="number">0000000000000021</span>                                     </span><br><span class="line">x14: <span class="number">0000000000000010</span> x15: <span class="number">000000007</span>dbff626                                     </span><br><span class="line">x16: <span class="number">0000000000200000</span> x17: <span class="number">0000000000000000</span>                                     </span><br><span class="line">x18: <span class="number">000000007</span>dbffde0 x19: <span class="number">000000007</span>df1f6b0                                     </span><br><span class="line">x20: <span class="number">000000007</span>df1f6b0 x21: <span class="number">000000007f</span>fa430c                                     </span><br><span class="line">x22: <span class="number">000000007f</span>f99c52 x23: <span class="number">0000000000000002</span>                                     </span><br><span class="line">x24: <span class="number">000000007f</span>fce5c8 x25: <span class="number">0000000000000000</span>                                     </span><br><span class="line">x26: <span class="number">0000000000000000</span> x27: <span class="number">0000000000000000</span>                                     </span><br><span class="line">x28: <span class="number">0000000000000000</span> x29: <span class="number">000000007</span>dbffb00                                     </span><br><span class="line">Code: ffffffff ffffffff ffffffff <span class="title function_">ffffffff</span> <span class="params">(ffffffff)</span>                            </span><br><span class="line">Resetting CPU ...                                                                       </span><br><span class="line">### ERROR ### Please RESET the board ###                                       </span><br></pre></td></tr></table></figure>
 
-<p>ͨ��dts���������ŵ�ѹ�����feat֮ǰ�������ģ�������������debugҲ�ͽ���������ߡ�</p>
-<h1 id="�������"><a href="#�������" class="headerlink" title="�������"></a>�������</h1><p>�������Ƚ���֣�����������ô�����ɻ�</p>
+<p>通过dts来配置引脚电压，这个feat之前是我做的，所以这个问题的debug也就交到了我这边。</p>
+<h1 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h1><p>这个问题比较奇怪，我首先有这么几点疑惑：</p>
 <ol>
-<li>�����������ʱ��������ʽ��nandflash��Ϊʲô����õ�gmac��</li>
-<li>Ϊʲô����ģ������������õ�ѹʱ���������óɹ����Ҳ�������������</li>
+<li>触发这个问题时，启动方式是nandflash，为什么会调用到gmac？</li>
+<li>为什么其他模块的引脚在配置电压时，可以配置成功，且不会造成这个错误？</li>
 </ol>
-<p>��������������ϲ���������ɣ��Ҳ�������㣬����uboot���쳣����ʱdump�����쳣�ֳ����ȳ��Դ�<br>�쳣�ֳ�����</p>
-<h1 id="��λ����"><a href="#��λ����" class="headerlink" title="��λ����"></a>��λ����</h1><p>�����쳣�ֳ���lr�Ĵ���ֵ��000000000103fe74��lr�Ǵ����쳣�ĺ�����תǰ����һ��ָ��ĵ�ַ.<br>�������ַ�õ�uboot��Ŀ¼�µ�System.map�в���:</p>
+<p>这种问题从现象上不好摸清规律，找不到切入点，好在uboot在异常发生时dump出了异常现场，先尝试从<br>异常现场入手</p>
+<h1 id="定位经过"><a href="#定位经过" class="headerlink" title="定位经过"></a>定位经过</h1><p>根据异常现场的lr寄存器值：000000000103fe74，lr是触发异常的函数跳转前的下一条指令的地址.<br>将这个地址拿到uboot根目录下的System.map中查找:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">00000000103fd7c T mmc_dump_capabilities</span><br><span class="line">000000000103fd80 T mmc_get_op_cond</span><br><span class="line">000000000103fe2c T mmc_start_init</span><br><span class="line">000000000103feb8 T mmc_init</span><br><span class="line">000000000103ff94 T mmc_set_dsr</span><br><span class="line">000000000103ffa4 T mmc_initialize</span><br><span class="line">000000000103fff4 t mmc_blk_probe</span><br><span class="line">0000000001040010 T dm_mmc_set_ios</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>���Կ���103fe74�����ַ������<strong>mmc_start_init</strong>��<strong>mmc_init</strong>��������֮�䡣<br>Ϊ�˸�����Ķ�λ��ĳһ�У�����ִ��objdump����࣬�ӷ�������в��ң�</p>
+<p>可以看到103fe74这个地址，处于<strong>mmc_start_init</strong>和<strong>mmc_init</strong>这俩函数之间。<br>为了更具体的定位到某一行，可以执行objdump反汇编，从反汇编结果中查找：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">103f</span>e60:	f00001e0 	adrp	x0, <span class="number">107e000</span> &lt;hex_asc+<span class="number">0x427</span>&gt;</span><br><span class="line"><span class="number">103f</span>e64:	<span class="number">910</span>c3000 	add	x0, x0, #<span class="number">0x30c</span></span><br><span class="line"><span class="number">103f</span>e68:	<span class="number">94009</span>ea3 	bl	<span class="number">10678f</span>4 &lt;<span class="built_in">printf</span>&gt;</span><br><span class="line"><span class="number">103f</span>e6c:	aa1303e0 	mov	x0, x19</span><br><span class="line"><span class="number">103f</span>e70:	<span class="number">940000</span>af 	bl	<span class="number">104012</span>c &lt;mmc_deferred_probe&gt;</span><br><span class="line"><span class="number">103f</span>e74:	aa1303e0 	mov	x0, x19</span><br><span class="line"><span class="number">103f</span>e78:	<span class="number">9400008</span>c 	bl	<span class="number">10400</span>a8 &lt;mmc_getcd&gt;</span><br><span class="line"><span class="number">103f</span>e7c:	<span class="number">35000120</span> 	cbnz	w0, <span class="number">103f</span>ea0 &lt;mmc_start_init+<span class="number">0x74</span>&gt;</span><br><span class="line"><span class="number">103f</span>e80:	b9001a7f 	str	wzr, [x19, #<span class="number">24</span>]</span><br><span class="line"><span class="number">103f</span>e84:	f00001e0 	adrp	x0, <span class="number">107e000</span> &lt;hex_asc+<span class="number">0x427</span>&gt;</span><br></pre></td></tr></table></figure>
-<p>���Կ������쳣������λ�ã�����mmc_deferred_probe�����У�</p>
+<p>可以看出，异常触发的位置，就在mmc_deferred_probe函数中：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">dm_mmc_deferred_probe</span><span class="params">(<span class="keyword">struct</span> udevice *dev)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">dm_mmc_ops</span> *<span class="title">ops</span> =</span> mmc_get_ops(dev);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;ops-&gt;deferred_probe:%p\n&quot;</span>, (<span class="type">void</span>*)ops-&gt;deferred_probe);</span><br><span class="line">	<span class="keyword">if</span> (ops-&gt;deferred_probe)</span><br><span class="line">		<span class="keyword">return</span> ops-&gt;deferred_probe(dev);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">mmc_deferred_probe</span><span class="params">(<span class="keyword">struct</span> mmc *mmc)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;_finc_:%s line:%d \n&quot;</span>, __func__, __LINE__);</span><br><span class="line">	<span class="keyword">return</span> dm_mmc_deferred_probe(mmc-&gt;dev);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>�������������мӴ�ӡ�������������ܼ򵥣�����dm_mmc_deferred_probe����һ����ops��һ������ָ��ķ��ʣ��ܴ��������������⡣<br>�����ӡ�󣬴����쳣�ֳ���ʵ�����ǣ�</p>
+<p>在这两个函数中加打印，这俩个函数很简单，而且dm_mmc_deferred_probe中有一个对ops中一个函数指针的访问，很大概率是这里的问题。<br>加入打印后，触发异常现场，实测结果是：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_finc_:mmc_deferred_probe line:<span class="number">172</span>                                              </span><br><span class="line">ops-&gt;deferred_probe:<span class="number">0000000000200000</span>                                            </span><br></pre></td></tr></table></figure>
-<p>��Ϊ�Աȣ��ҽ�gmac��dts������ĵ�ѹ������һ��ȥ�����ָ������������ٿ�����Ĵ�ӡ��deferred_probe��ֵΪ0��</p>
-<p>�쳣����£�deferred_probeָ��ĵ�ַ200000���Ѿ�������uboot���ӵ�ַ�ķ�Χ��</p>
-<p>ops��Ա��һ���ڸ���mmc�������У���static���壬����ȫ�ֶ��壬����Ӧ�ô���data�Ρ�<br>��uboot�����У�ȫ������deferred_probe:</p>
+<p>作为对比，我将gmac的dts配置里的电压配置那一行去掉，恢复正常启动，再看这里的打印，deferred_probe的值为0。</p>
+<p>异常情况下，deferred_probe指向的地址200000，已经超出了uboot链接地址的范围。</p>
+<p>ops成员，一般在各个mmc的驱动中，用static定义，或者全局定义，所以应该处于data段。<br>在uboot代码中，全局搜索deferred_probe:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">dm_mmc_ops</span> <span class="title">sdhci_ops</span> =</span> &#123;</span><br><span class="line">	.send_cmd	= sdhci_send_command,</span><br><span class="line">	.set_ios	= sdhci_set_ios,</span><br><span class="line">	.get_cd		= sdhci_get_cd,</span><br><span class="line">	.deferred_probe	= sdhci_deferred_probe,</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MMC_SUPPORTS_TUNING</span></span><br><span class="line">	.execute_tuning	= sdhci_execute_tuning,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<p>�������Ҳ�ͽ�Ϊ�����ˣ�data����ĳ�����򱻱��λ�ò����ڴ档</p>
-<p>���ֽ�ops�ĵ�ַ��ӡ���������Ϊ7ffd7588�����ַ����system.map�У������ַ���Ҳ����ģ�uboot��������ʱ���ض�λ<br>relocate�ɵ�global_data���µ�global_data�Ŀռ��ϣ������޸�relocate֮��ȫ�ֱ�����label��</p>
-<p>����֪ʶ�عˣ�<br>��ִ��һ��C���Գ���ʱ���˳���ӵ��Ψһ�ġ��ڴ�������–������ջ����ȫ��������������</p>
-<p>���У�ջ�����ɱ������Զ����䣬��ź������βΣ��ֲ������ȣ�����ִ�����ʱ�Զ��ͷš�</p>
-<p>����������Ա�ֶ������ͷţ�����malloc,free�Ⱥ����漰����</p>
-<p>ȫ���������ȫ�ֱ����ͣ�static����̬����������ϸ����һ�����������ַ�����������������Ҳ����ڴˡ��������ڳ���������ɲ���ϵͳ�ͷţ�</p>
-<p>���䣺ȫ�ֱ����;�̬�����Ĵ洢�Ƿ���һ��ģ���ʼ����ȫ�ֱ����;�̬������һ������ δ��ʼ����ȫ�ֱ�����δ��ʼ���ľ�̬���������ڵ���һ������</p>
-<p>����������ų���ִ�д����һ���ڴ����������Ƕ����ƵĴ��롢�ڴ�����ͨ������ֻ��, ĳЩ�ܹ�Ҳ���������Ϊ��д����ʵ���Ǵ�Ŵ����ܡ�����˵�����塢������ĵط���</p>
-<p>��ôuboot�������ڴ�ͼ��ζ�ӦC���ڴ������أ�ȫ������ι��ɣ�</p>
-<p>������&#x3D;start.o+*(.text)</p>
-<p>ȫ���� &#x3D; <em>(.rodata</em>)+<em>(.data)+</em>(.u_boot_cmd)+<em>(.rel</em>)+<em>(.dynsym)+</em>(.mmutable)+*(.bss)?</p>
-<p>����</p>
-<p>ȫ���� &#x3D;?<em>(.rodata</em>)+<em>(.data)+��+</em>(.bss)?</p>
-<p>һ��ʼ�ҵ�˼·���ǣ��ҵ�ops�ĵ�ַ���Լ��丽����ַ������Ӧ��relocateǰ�ĵ�ַ����Ϳ�����system.map�����ҵ���Щ��ַ��Ӧ�ķ��š�Ҳ��֪����˭�������ַ�������ˡ�</p>
-<p>�����Ҽ�ѧ��һ��relocate���̣�������Щ�����������Ի������������취��<br>����1��ͨ����������ֱ�Ӵ���watchpoint�������ڴ����޸�ops��deferred_probeʱͣ������<br>����2�����ڴ�����������pinctrl�Ե�ѹ�����ã����Ե���һ����븽����һ�ҿ��ɵĵط���</p>
-<p>����pinctrl�Ĵ���������ڸ������ԱȽ���Ϥ������consumer����ofģ��ĵ��ã��ײ����һ�����ᱻ�ص���</p>
+<p>这个问题也就较为明朗了，data段中某块区域被别的位置踩了内存。</p>
+<p>我又将ops的地址打印出来，结果为7ffd7588这个地址，在system.map中，这个地址是找不到的，uboot会在运行时做重定位<br>relocate旧的global_data到新的global_data的空间上，并且修改relocate之后全局变量的label。</p>
+<p>基础知识回顾：<br>在执行一个C语言程序时，此程序将拥有唯一的“内存四区”–堆区，栈区，全局区，代码区。</p>
+<p>其中，栈区：由编译器自动分配，存放函数的形参，局部变量等，函数执行完毕时自动释放。</p>
+<p>堆区：程序员手动分配释放（常见malloc,free等函数涉及）。</p>
+<p>全局区：存放全局变量和（static）静态变量，里面细分有一个常量区，字符串常量和其他常量也存放在此。该区域在程序结束后由操作系统释放，</p>
+<p>补充：全局变量和静态变量的存储是放在一块的，初始化的全局变量和静态变量在一块区域， 未初始化的全局变量和未初始化的静态变量在相邻的另一块区域。</p>
+<p>代码区：存放程序执行代码的一块内存区域、里面是二进制的代码、内存区域通常属于只读, 某些架构也允许代码段为可写，其实就是存放代码框架、或者说函数体、代码体的地方。</p>
+<p>那么uboot的上述内存图如何对应C的内存四区呢？全局区如何构成？</p>
+<p>代码区&#x3D;start.o+*(.text)</p>
+<p>全局区 &#x3D; <em>(.rodata</em>)+<em>(.data)+</em>(.u_boot_cmd)+<em>(.rel</em>)+<em>(.dynsym)+</em>(.mmutable)+*(.bss) </p>
+<p>或者</p>
+<p>全局区 &#x3D; <em>(.rodata</em>)+<em>(.data)+空+</em>(.bss) </p>
+<p>一开始我的思路就是，找到ops的地址，以及其附近地址，所对应的relocate前的地址，这就可以在system.map里面找到这些地址对应的符号。也就知道是谁将这个地址给覆盖了。</p>
+<p>但是我简单学了一下relocate流程，发现有些看不懂，所以还是想了其他办法。<br>方法1：通过仿真器，直接打上watchpoint，可以在代码修改ops里deferred_probe时停下来。<br>方法2：由于触发条件，是pinctrl对电压的配置，可以到这一块代码附近找一找可疑的地方。</p>
+<p>由于pinctrl的代码就是我在负责，所以比较熟悉，经过consumer或者of模块的调用，底层的这一函数会被回调：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> xxx_pins_param[ARRAY_SIZE(ts_tx5336_pins)];</span><br><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> xxxx_pins_value[ARRAY_SIZE(ts_tx5336_pins)];</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">xxxxx_pinconf_set</span><span class="params">(<span class="keyword">struct</span> udevice *dev, <span class="type">unsigned</span> pin_selector,</span></span><br><span class="line"><span class="params">			       <span class="type">unsigned</span> param, <span class="type">unsigned</span> argument)</span></span><br><span class="line">	xxx_pins_param[pin_selector] |= BIT(param);</span><br><span class="line">	<span class="keyword">if</span> (argument)</span><br><span class="line">		xxxx_pins_value[pin_selector] |= BIT(param);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		xxxx_pins_value[pin_selector] &amp;= ~BIT(param);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>�����������Ǿ�̬����ģ�������sizeֻ��8���ֽڡ���̬����ı���Ҳ�ᴦ��data������������ܿ��ܾ�������Խ������ˡ�</p>
-<p>������ʱ����pin_selector������gmac���Ǽ���pin��Ӧ��pin_selectorֵ��60�࣬�϶���Խ���ˡ�<br>�ҽ���������ĵ�ַ��ӡ�������Լ�������map�ļ��еĵ�ַ�����ջ�����һ������</p>
-<p>symb        reloc��     relocǰ<br>sdhci_ops   7ffd7588 - 106f780<br>pins_param  7ffd752c - 10b152c<br>value       7ffd7550 - 10b1550</p>
-<p>7ffd7550��7ffd7588֮��ľ���ֻ��0x38����56���ֽڡ�<br>��ʱ�Ľ�������ǽ�ts_tx5336_pins�������Ĵ�Сָ��ΪPIN_MAXֵ�ˣ����ҽ�xxxxx_pinconf_set�����ж�xxx_pins_param�Լ�xxxx_pins_value��������ĸ�ֵȡ�������ٴ�������uboot��ͨ�ˡ�</p>
+<p>这两个数组是静态定义的，且数组size只有8个字节。静态定义的变量也会处于data区，所以问题很可能就是它被越界访问了。</p>
+<p>在运行时，将pin_selector，发现gmac的那几个pin对应的pin_selector值是60多，肯定是越界了。<br>我将这俩数组的地址打印出来，以及它们在map文件中的地址，最终汇总了一个表格：</p>
+<p>symb        reloc后     reloc前<br>sdhci_ops   7ffd7588 - 106f780<br>pins_param  7ffd752c - 10b152c<br>value       7ffd7550 - 10b1550</p>
+<p>7ffd7550与7ffd7588之间的距离只有0x38，即56个字节。<br>临时的解决方法是将ts_tx5336_pins这个数组的大小指定为PIN_MAX值了，并且将xxxxx_pinconf_set函数中对xxx_pins_param以及xxxx_pins_value这俩数组的赋值取消掉。再次启动，uboot就通了。</p>
 
     </div>
 
