@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="uboot����Խ�絼������ʧ������">
+<meta property="og:type" content="article">
+<meta property="og:title" content="uboot����Խ�絼������ʧ������">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/28/debug/pinctrl_crossborder/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="uboot����Խ�絼������ʧ������">
+<meta property="og:locale">
+<meta property="article:published_time" content="2024-10-28T00:15:16.000Z">
+<meta property="article:modified_time" content="2024-10-28T09:18:43.383Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/10/28/debug/pinctrl_crossborder/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/28/debug/pinctrl_crossborder/","path":"2024/10/28/debug/pinctrl_crossborder/","title":"uboot����Խ�絼������ʧ������"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>uboot����Խ�絼������ʧ������ | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BDw%EF%BF%BD%EF%BF%BD"><span class="nav-number">1.</span> <span class="nav-text">���ⱳ��</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">2.</span> <span class="nav-text">�������</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%CE%BB%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">3.</span> <span class="nav-text">��λ����</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/28/debug/pinctrl_crossborder/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="uboot����Խ�絼������ʧ������ | Coffe Pattern">
+      <meta itemprop="description" content="uboot����Խ�絼������ʧ������">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          uboot����Խ�絼������ʧ������
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-10-28 08:15:16 / Modified: 17:18:43" itemprop="dateCreated datePublished" datetime="2024-10-28T08:15:16+08:00">2024-10-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/debug/" itemprop="url" rel="index"><span itemprop="name">debug</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">uboot����Խ�絼������ʧ������</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="���w��"><a href="#���w��" class="headerlink" title="���ⱳ��"></a>���ⱳ��</h1><p>�⼸��������һ��оƬ��evb��Ҫ��֧��1.8v�İ��ӣ�Ӳ�����Ž�����rework�ú������������Ŷ���һ��ͬ��ȥ���ԣ������λͬ�·�ӳ����dts��ͨ��pinctrl��of��������gmac���ŵ�ѹ�󣬵�ѹ���Գɹ����óɹ�������������ʱ�ᱨ����</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;Synchronous Abort&quot;</span> handler, esr <span class="number">0x02000000</span>                                     </span><br><span class="line">elr: ffffffff812da000 lr : <span class="number">000000000103f</span>e74 (reloc)                             </span><br><span class="line">elr: <span class="number">0000000000200000</span> lr : <span class="number">000000007f</span>f65e74                                     </span><br><span class="line">x0 : <span class="number">000000007</span>df1f5e0 x1 : <span class="number">0000000000200000</span>                                     </span><br><span class="line">x2 : <span class="number">000000000000000</span>a x3 : <span class="number">00000000f</span>03e7000                                     </span><br><span class="line">x4 : <span class="number">00000000f</span>03e7000 x5 : <span class="number">000000007</span>dbff608                                     </span><br><span class="line">x6 : <span class="number">0000000000000030</span> x7 : <span class="number">000000007</span>dbff62d                                     </span><br><span class="line">x8 : <span class="number">000000007f</span>f9f74d x9 : <span class="number">0000000000000004</span>                                     </span><br><span class="line">x10: <span class="number">0000000000200000</span> x11: <span class="number">00000000000186</span>a0                                     </span><br><span class="line">x12: <span class="number">000000000001869f</span> x13: <span class="number">0000000000000021</span>                                     </span><br><span class="line">x14: <span class="number">0000000000000010</span> x15: <span class="number">000000007</span>dbff626                                     </span><br><span class="line">x16: <span class="number">0000000000200000</span> x17: <span class="number">0000000000000000</span>                                     </span><br><span class="line">x18: <span class="number">000000007</span>dbffde0 x19: <span class="number">000000007</span>df1f6b0                                     </span><br><span class="line">x20: <span class="number">000000007</span>df1f6b0 x21: <span class="number">000000007f</span>fa430c                                     </span><br><span class="line">x22: <span class="number">000000007f</span>f99c52 x23: <span class="number">0000000000000002</span>                                     </span><br><span class="line">x24: <span class="number">000000007f</span>fce5c8 x25: <span class="number">0000000000000000</span>                                     </span><br><span class="line">x26: <span class="number">0000000000000000</span> x27: <span class="number">0000000000000000</span>                                     </span><br><span class="line">x28: <span class="number">0000000000000000</span> x29: <span class="number">000000007</span>dbffb00                                     </span><br><span class="line">Code: ffffffff ffffffff ffffffff <span class="title function_">ffffffff</span> <span class="params">(ffffffff)</span>                            </span><br><span class="line">Resetting CPU ...                                                                       </span><br><span class="line">### ERROR ### Please RESET the board ###                                       </span><br></pre></td></tr></table></figure>
+
+<p>ͨ��dts���������ŵ�ѹ�����feat֮ǰ�������ģ�������������debugҲ�ͽ���������ߡ�</p>
+<h1 id="�������"><a href="#�������" class="headerlink" title="�������"></a>�������</h1><p>�������Ƚ���֣�����������ô�����ɻ�</p>
+<ol>
+<li>�����������ʱ��������ʽ��nandflash��Ϊʲô����õ�gmac��</li>
+<li>Ϊʲô����ģ������������õ�ѹʱ���������óɹ����Ҳ�������������</li>
+</ol>
+<p>��������������ϲ���������ɣ��Ҳ�������㣬����uboot���쳣����ʱdump�����쳣�ֳ����ȳ��Դ�<br>�쳣�ֳ�����</p>
+<h1 id="��λ����"><a href="#��λ����" class="headerlink" title="��λ����"></a>��λ����</h1><p>�����쳣�ֳ���lr�Ĵ���ֵ��000000000103fe74��lr�Ǵ����쳣�ĺ�����תǰ����һ��ָ��ĵ�ַ.<br>�������ַ�õ�uboot��Ŀ¼�µ�System.map�в���:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">00000000103fd7c T mmc_dump_capabilities</span><br><span class="line">000000000103fd80 T mmc_get_op_cond</span><br><span class="line">000000000103fe2c T mmc_start_init</span><br><span class="line">000000000103feb8 T mmc_init</span><br><span class="line">000000000103ff94 T mmc_set_dsr</span><br><span class="line">000000000103ffa4 T mmc_initialize</span><br><span class="line">000000000103fff4 t mmc_blk_probe</span><br><span class="line">0000000001040010 T dm_mmc_set_ios</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>���Կ���103fe74�����ַ������<strong>mmc_start_init</strong>��<strong>mmc_init</strong>��������֮�䡣<br>Ϊ�˸�����Ķ�λ��ĳһ�У�����ִ��objdump����࣬�ӷ�������в��ң�</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">103f</span>e60:	f00001e0 	adrp	x0, <span class="number">107e000</span> &lt;hex_asc+<span class="number">0x427</span>&gt;</span><br><span class="line"><span class="number">103f</span>e64:	<span class="number">910</span>c3000 	add	x0, x0, #<span class="number">0x30c</span></span><br><span class="line"><span class="number">103f</span>e68:	<span class="number">94009</span>ea3 	bl	<span class="number">10678f</span>4 &lt;<span class="built_in">printf</span>&gt;</span><br><span class="line"><span class="number">103f</span>e6c:	aa1303e0 	mov	x0, x19</span><br><span class="line"><span class="number">103f</span>e70:	<span class="number">940000</span>af 	bl	<span class="number">104012</span>c &lt;mmc_deferred_probe&gt;</span><br><span class="line"><span class="number">103f</span>e74:	aa1303e0 	mov	x0, x19</span><br><span class="line"><span class="number">103f</span>e78:	<span class="number">9400008</span>c 	bl	<span class="number">10400</span>a8 &lt;mmc_getcd&gt;</span><br><span class="line"><span class="number">103f</span>e7c:	<span class="number">35000120</span> 	cbnz	w0, <span class="number">103f</span>ea0 &lt;mmc_start_init+<span class="number">0x74</span>&gt;</span><br><span class="line"><span class="number">103f</span>e80:	b9001a7f 	str	wzr, [x19, #<span class="number">24</span>]</span><br><span class="line"><span class="number">103f</span>e84:	f00001e0 	adrp	x0, <span class="number">107e000</span> &lt;hex_asc+<span class="number">0x427</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>���Կ������쳣������λ�ã�����mmc_deferred_probe�����У�</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">dm_mmc_deferred_probe</span><span class="params">(<span class="keyword">struct</span> udevice *dev)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">dm_mmc_ops</span> *<span class="title">ops</span> =</span> mmc_get_ops(dev);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;ops-&gt;deferred_probe:%p\n&quot;</span>, (<span class="type">void</span>*)ops-&gt;deferred_probe);</span><br><span class="line">	<span class="keyword">if</span> (ops-&gt;deferred_probe)</span><br><span class="line">		<span class="keyword">return</span> ops-&gt;deferred_probe(dev);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">mmc_deferred_probe</span><span class="params">(<span class="keyword">struct</span> mmc *mmc)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;_finc_:%s line:%d \n&quot;</span>, __func__, __LINE__);</span><br><span class="line">	<span class="keyword">return</span> dm_mmc_deferred_probe(mmc-&gt;dev);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>�������������мӴ�ӡ�������������ܼ򵥣�����dm_mmc_deferred_probe����һ����ops��һ������ָ��ķ��ʣ��ܴ��������������⡣<br>�����ӡ�󣬴����쳣�ֳ���ʵ�����ǣ�</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_finc_:mmc_deferred_probe line:<span class="number">172</span>                                              </span><br><span class="line">ops-&gt;deferred_probe:<span class="number">0000000000200000</span>                                            </span><br></pre></td></tr></table></figure>
+<p>��Ϊ�Աȣ��ҽ�gmac��dts������ĵ�ѹ������һ��ȥ�����ָ������������ٿ�����Ĵ�ӡ��deferred_probe��ֵΪ0��</p>
+<p>�쳣����£�deferred_probeָ��ĵ�ַ200000���Ѿ�������uboot���ӵ�ַ�ķ�Χ��</p>
+<p>ops��Ա��һ���ڸ���mmc�������У���static���壬����ȫ�ֶ��壬����Ӧ�ô���data�Ρ�<br>��uboot�����У�ȫ������deferred_probe:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">dm_mmc_ops</span> <span class="title">sdhci_ops</span> =</span> &#123;</span><br><span class="line">	.send_cmd	= sdhci_send_command,</span><br><span class="line">	.set_ios	= sdhci_set_ios,</span><br><span class="line">	.get_cd		= sdhci_get_cd,</span><br><span class="line">	.deferred_probe	= sdhci_deferred_probe,</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MMC_SUPPORTS_TUNING</span></span><br><span class="line">	.execute_tuning	= sdhci_execute_tuning,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>�������Ҳ�ͽ�Ϊ�����ˣ�data����ĳ�����򱻱��λ�ò����ڴ档</p>
+<p>���ֽ�ops�ĵ�ַ��ӡ���������Ϊ7ffd7588�����ַ����system.map�У������ַ���Ҳ����ģ�uboot��������ʱ���ض�λ<br>relocate�ɵ�global_data���µ�global_data�Ŀռ��ϣ������޸�relocate֮��ȫ�ֱ�����label��</p>
+<p>����֪ʶ�عˣ�<br>��ִ��һ��C���Գ���ʱ���˳���ӵ��Ψһ�ġ��ڴ�������–������ջ����ȫ��������������</p>
+<p>���У�ջ�����ɱ������Զ����䣬��ź������βΣ��ֲ������ȣ�����ִ�����ʱ�Զ��ͷš�</p>
+<p>����������Ա�ֶ������ͷţ�����malloc,free�Ⱥ����漰����</p>
+<p>ȫ���������ȫ�ֱ����ͣ�static����̬����������ϸ����һ�����������ַ�����������������Ҳ����ڴˡ��������ڳ���������ɲ���ϵͳ�ͷţ�</p>
+<p>���䣺ȫ�ֱ����;�̬�����Ĵ洢�Ƿ���һ��ģ���ʼ����ȫ�ֱ����;�̬������һ������ δ��ʼ����ȫ�ֱ�����δ��ʼ���ľ�̬���������ڵ���һ������</p>
+<p>����������ų���ִ�д����һ���ڴ����������Ƕ����ƵĴ��롢�ڴ�����ͨ������ֻ��, ĳЩ�ܹ�Ҳ���������Ϊ��д����ʵ���Ǵ�Ŵ����ܡ�����˵�����塢������ĵط���</p>
+<p>��ôuboot�������ڴ�ͼ��ζ�ӦC���ڴ������أ�ȫ������ι��ɣ�</p>
+<p>������&#x3D;start.o+*(.text)</p>
+<p>ȫ���� &#x3D; <em>(.rodata</em>)+<em>(.data)+</em>(.u_boot_cmd)+<em>(.rel</em>)+<em>(.dynsym)+</em>(.mmutable)+*(.bss)?</p>
+<p>����</p>
+<p>ȫ���� &#x3D;?<em>(.rodata</em>)+<em>(.data)+��+</em>(.bss)?</p>
+<p>һ��ʼ�ҵ�˼·���ǣ��ҵ�ops�ĵ�ַ���Լ��丽����ַ������Ӧ��relocateǰ�ĵ�ַ����Ϳ�����system.map�����ҵ���Щ��ַ��Ӧ�ķ��š�Ҳ��֪����˭�������ַ�������ˡ�</p>
+<p>�����Ҽ�ѧ��һ��relocate���̣�������Щ�����������Ի������������취��<br>����1��ͨ����������ֱ�Ӵ���watchpoint�������ڴ����޸�ops��deferred_probeʱͣ������<br>����2�����ڴ�����������pinctrl�Ե�ѹ�����ã����Ե���һ����븽����һ�ҿ��ɵĵط���</p>
+<p>����pinctrl�Ĵ���������ڸ������ԱȽ���Ϥ������consumer����ofģ��ĵ��ã��ײ����һ�����ᱻ�ص���</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> xxx_pins_param[ARRAY_SIZE(ts_tx5336_pins)];</span><br><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> xxxx_pins_value[ARRAY_SIZE(ts_tx5336_pins)];</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">xxxxx_pinconf_set</span><span class="params">(<span class="keyword">struct</span> udevice *dev, <span class="type">unsigned</span> pin_selector,</span></span><br><span class="line"><span class="params">			       <span class="type">unsigned</span> param, <span class="type">unsigned</span> argument)</span></span><br><span class="line">	xxx_pins_param[pin_selector] |= BIT(param);</span><br><span class="line">	<span class="keyword">if</span> (argument)</span><br><span class="line">		xxxx_pins_value[pin_selector] |= BIT(param);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		xxxx_pins_value[pin_selector] &amp;= ~BIT(param);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>�����������Ǿ�̬����ģ�������sizeֻ��8���ֽڡ���̬����ı���Ҳ�ᴦ��data������������ܿ��ܾ�������Խ������ˡ�</p>
+<p>������ʱ����pin_selector������gmac���Ǽ���pin��Ӧ��pin_selectorֵ��60�࣬�϶���Խ���ˡ�<br>�ҽ���������ĵ�ַ��ӡ�������Լ�������map�ļ��еĵ�ַ�����ջ�����һ������</p>
+<p>symb        reloc��     relocǰ<br>sdhci_ops   7ffd7588 - 106f780<br>pins_param  7ffd752c - 10b152c<br>value       7ffd7550 - 10b1550</p>
+<p>7ffd7550��7ffd7588֮��ľ���ֻ��0x38����56���ֽڡ�<br>��ʱ�Ľ�������ǽ�ts_tx5336_pins�������Ĵ�Сָ��ΪPIN_MAXֵ�ˣ����ҽ�xxxxx_pinconf_set�����ж�xxx_pins_param�Լ�xxxx_pins_value��������ĸ�ֵȡ�������ٴ�������uboot��ͨ�ˡ�</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/24/dma/dma_basic_knowledge/" rel="prev" title="DMA Basic Knowledge">
+                  <i class="fa fa-angle-left"></i> DMA Basic Knowledge
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
