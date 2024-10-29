@@ -20,16 +20,16 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="�������ϵ�ṹ - ���������ִ�������������">
+    <meta name="description" content="计算机体系结构 - 编译乱序和执行乱序相关问题">
 <meta property="og:type" content="article">
-<meta property="og:title" content="��������vsִ������">
+<meta property="og:title" content="编译乱序vs执行乱序">
 <meta property="og:url" content="https://kindresy.github.io/2024/10/29/architecture/out_of_order/index.html">
 <meta property="og:site_name" content="Coffe Pattern">
-<meta property="og:description" content="�������ϵ�ṹ - ���������ִ�������������">
+<meta property="og:description" content="计算机体系结构 - 编译乱序和执行乱序相关问题">
 <meta property="og:locale">
 <meta property="og:image" content="https://kindresy.github.io/stuff/BCD_MEM_barrier.png">
 <meta property="article:published_time" content="2024-10-29T02:15:16.000Z">
-<meta property="article:modified_time" content="2024-10-29T02:14:38.361Z">
+<meta property="article:modified_time" content="2024-10-29T02:17:18.470Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://kindresy.github.io/stuff/BCD_MEM_barrier.png">
@@ -39,10 +39,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/29/architecture/out_of_order/","path":"2024/10/29/architecture/out_of_order/","title":"��������vsִ������"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/29/architecture/out_of_order/","path":"2024/10/29/architecture/out_of_order/","title":"编译乱序vs执行乱序"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>��������vsִ������ | Coffe Pattern</title>
+<title>编译乱序vs执行乱序 | Coffe Pattern</title>
   
 
 
@@ -115,7 +115,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">1.</span> <span class="nav-text">����</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%CA%B2o%EF%BF%BDDZ%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%D6%B4%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">2.</span> <span class="nav-text">ʲô�Ǳ��������ִ������</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">2.1.</span> <span class="nav-text">��������</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%D6%B4%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD"><span class="nav-number">2.2.</span> <span class="nav-text">ִ������</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD1"><span class="nav-number">2.3.</span> <span class="nav-text">����1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD2"><span class="nav-number">2.4.</span> <span class="nav-text">����2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD3"><span class="nav-number">2.5.</span> <span class="nav-text">����3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD4"><span class="nav-number">2.6.</span> <span class="nav-text">����4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD5"><span class="nav-number">2.7.</span> <span class="nav-text">����5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARM-Arch%EF%BF%BD%EF%BF%BDStrongly-Order"><span class="nav-number">2.8.</span> <span class="nav-text">ARM Arch��Strongly Order</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BCM%EF%BF%BD%D6%B2%EF%BF%BD%EF%BF%BD%EF%B7%A2%EF%BF%BD%D6%B5%EF%BF%BD%D2%BB%EF%BF%BD%EF%BF%BD%CF%B8%EF%BF%BD%EF%BF%BD"><span class="nav-number">2.9.</span> <span class="nav-text">BCM�ֲ��﷢�ֵ�һ��ϸ��</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%96%E8%AF%91%E4%B9%B1%E5%BA%8F%E5%92%8C%E6%89%A7%E8%A1%8C%E4%B9%B1%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">什么是编译乱序和执行乱序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E4%B9%B1%E5%BA%8F"><span class="nav-number">2.1.</span> <span class="nav-text">编译乱序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E4%B9%B1%E5%BA%8F"><span class="nav-number">2.2.</span> <span class="nav-text">执行乱序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B1"><span class="nav-number">2.3.</span> <span class="nav-text">案例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B2"><span class="nav-number">2.4.</span> <span class="nav-text">案例2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B3"><span class="nav-number">2.5.</span> <span class="nav-text">案例3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B4"><span class="nav-number">2.6.</span> <span class="nav-text">案例4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B5"><span class="nav-number">2.7.</span> <span class="nav-text">案例5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARM-Arch%E7%9A%84Strongly-Order"><span class="nav-number">2.8.</span> <span class="nav-text">ARM Arch的Strongly Order</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BCM%E6%89%8B%E5%86%8C%E9%87%8C%E5%8F%91%E7%8E%B0%E7%9A%84%E4%B8%80%E7%82%B9%E7%BB%86%E8%8A%82"><span class="nav-number">2.9.</span> <span class="nav-text">BCM手册里发现的一点细节</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -174,12 +174,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="��������vsִ������ | Coffe Pattern">
-      <meta itemprop="description" content="�������ϵ�ṹ - ���������ִ�������������">
+      <meta itemprop="name" content="编译乱序vs执行乱序 | Coffe Pattern">
+      <meta itemprop="description" content="计算机体系结构 - 编译乱序和执行乱序相关问题">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          ��������vsִ������
+          编译乱序vs执行乱序
         </h1>
 
         <div class="post-meta-container">
@@ -191,7 +191,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2024-10-29 10:15:16 / Modified: 10:14:38" itemprop="dateCreated datePublished" datetime="2024-10-29T10:15:16+08:00">2024-10-29</time>
+      <time title="Created: 2024-10-29 10:15:16 / Modified: 10:17:18" itemprop="dateCreated datePublished" datetime="2024-10-29T10:15:16+08:00">2024-10-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -213,20 +213,20 @@
     </span>
 </div>
 
-            <div class="post-description">�������ϵ�ṹ - ���������ִ�������������</div>
+            <div class="post-description">计算机体系结构 - 编译乱序和执行乱序相关问题</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="����"><a href="#����" class="headerlink" title="����"></a>����</h2><p>����������һ��linux�ں˶�writel��readl��ʵ�֣��漰����dmb��imb��������ָ���ȥ��������Ƶ��˽�Ƚ�ģ�������Բ�����һЩ���ϣ���һ�¼�¼��</p>
+    <div class="post-body" itemprop="articleBody"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>今天留意了一下linux内核对writel和readl的实现，涉及到了dmb，imb这类屏障指令，过去对这类机制的了解比较模糊，所以查阅了一些资料，做一下记录。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">if</span> __LINUX_ARM_ARCH__ &gt;= 7</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> isb(option) __asm__ __volatile__ (<span class="string">&quot;isb &quot;</span> #option : : : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dsb(option) __asm__ __volatile__ (<span class="string">&quot;dsb &quot;</span> #option : : : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dmb(option) __asm__ __volatile__ (<span class="string">&quot;dmb &quot;</span> #option : : : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_THUMB2_KERNEL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CSDB	<span class="string">&quot;.inst.w 0xf3af8014&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CSDB	<span class="string">&quot;.inst	0xe320f014&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> csdb() __asm__ __volatile__(CSDB : : : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(CONFIG_CPU_XSC3) || __LINUX_ARM_ARCH__ == 6</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> isb(x) __asm__ __volatile__ (<span class="string">&quot;mcr p15, 0, %0, c7, c5, 4&quot;</span> \</span></span><br><span class="line"><span class="meta">				    : : <span class="string">&quot;r&quot;</span> (0) : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dsb(x) __asm__ __volatile__ (<span class="string">&quot;mcr p15, 0, %0, c7, c10, 4&quot;</span> \</span></span><br><span class="line"><span class="meta">				    : : <span class="string">&quot;r&quot;</span> (0) : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dmb(x) __asm__ __volatile__ (<span class="string">&quot;mcr p15, 0, %0, c7, c10, 5&quot;</span> \</span></span><br><span class="line"><span class="meta">				    : : <span class="string">&quot;r&quot;</span> (0) : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(CONFIG_CPU_FA526)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> isb(x) __asm__ __volatile__ (<span class="string">&quot;mcr p15, 0, %0, c7, c5, 4&quot;</span> \</span></span><br><span class="line"><span class="meta">				    : : <span class="string">&quot;r&quot;</span> (0) : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dsb(x) __asm__ __volatile__ (<span class="string">&quot;mcr p15, 0, %0, c7, c10, 4&quot;</span> \</span></span><br><span class="line"><span class="meta">				    : : <span class="string">&quot;r&quot;</span> (0) : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dmb(x) __asm__ __volatile__ (<span class="string">&quot;&quot;</span> : : : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> isb(x) __asm__ __volatile__ (<span class="string">&quot;&quot;</span> : : : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dsb(x) __asm__ __volatile__ (<span class="string">&quot;mcr p15, 0, %0, c7, c10, 4&quot;</span> \</span></span><br><span class="line"><span class="meta">				    : : <span class="string">&quot;r&quot;</span> (0) : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dmb(x) __asm__ __volatile__ (<span class="string">&quot;&quot;</span> : : : <span class="string">&quot;memory&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> mb()		__arm_heavy_mb()</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> rmb()		dsb()</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> wmb()		__arm_heavy_mb(st)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dma_rmb()	dmb(osh)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dma_wmb()	dmb(oshst)</span></span><br><span class="line"><span class="meta">#in</span></span><br><span class="line">clude &lt;<span class="keyword">asm</span>/barrier.h&gt;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __iormb()		rmb()</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __iowmb()		wmb()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> writeb_relaxed(v,c)	__raw_writeb(v,c)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> writew_relaxed(v,c)	__raw_writew((__force u16) cpu_to_le16(v),c)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> writel_relaxed(v,c)	__raw_writel((__force u32) cpu_to_le32(v),c)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> readb(c)		(&#123; u8  __v = readb_relaxed(c); __iormb(); __v; &#125;)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> readw(c)		(&#123; u16 __v = readw_relaxed(c); __iormb(); __v; &#125;)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> readl(c)		(&#123; u32 __v = readl_relaxed(c); __iormb(); __v; &#125;)</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="ʲo�DZ��������ִ������"><a href="#ʲo�DZ��������ִ������" class="headerlink" title="ʲô�Ǳ��������ִ������"></a>ʲô�Ǳ��������ִ������</h2><h3 id="��������"><a href="#��������" class="headerlink" title="��������"></a>��������</h3><p>�ִ������ܱ�������Ŀ�����Ż�ʱ���߱���ָ����������Ż������������������ԶԷô�ָ��������򣬼����߼��ϲ���Ҫ�ķô棬�Դ����������Cache�����ʺ�CPU��Load&#x2F;Store��Ԫ�Ĺ���Ч��<br>�򿪱����Ż��󣬿������ɵĻ���벢û���ϸ��մ�����߼�˳��������������</p>
-<h3 id="ִ������"><a href="#ִ������" class="headerlink" title="ִ������"></a>ִ������</h3><p>�ڴ�������ִ��ʱ�������ָ�������ִ���꣬���Ǵ������ġ�����ִ�У�Out-of-OrderExecution��?������<br>�߼���CPU���Ը����Լ��������֯���ԣ����ô�ָ����������ִ�С�������ַ�ķ��ʿ��ܻ���ִ�У���Ϊ�������������ʸߡ��еĻ������ô�ķ������������ǰ��һ���ô�ָ����Ϊ���治���У���ɳ���ʱ�Ĵ洢����ʱ������ķô�ָ�������ִ�У��Ա�ӻ�����ȡ������ˣ���ʹ�Ǵӻ���Ͽ�˳����ȷ��ָ���ִ�е�˳��Ҳ�ǲ���Ԥ֪�ġ�</p>
-<h3 id="����1"><a href="#����1" class="headerlink" title="����1"></a>����1</h3><p>�������һ���򵥵ĳ�����д������һ��foo�ṹ���󣬲������ĸ�����Ա��ʼ�����ٽ����foo����ĵ�ַ��ֵ��foo�ṹ��ָ��gp</p>
-<p>?    </p>
+<h2 id="什么是编译乱序和执行乱序"><a href="#什么是编译乱序和执行乱序" class="headerlink" title="什么是编译乱序和执行乱序"></a>什么是编译乱序和执行乱序</h2><h3 id="编译乱序"><a href="#编译乱序" class="headerlink" title="编译乱序"></a>编译乱序</h3><p>现代高性能编译器在目标码优化时都具备对指令进行乱序优化的能力，编译器可以对访存指令进行乱序，减少逻辑上不必要的访存，以此来尽量提高Cache命中率和CPU的Load&#x2F;Store单元的工作效率<br>打开编译优化后，看到生成的汇编码并没有严格按照代码的逻辑顺序，这是正常现象。</p>
+<h3 id="执行乱序"><a href="#执行乱序" class="headerlink" title="执行乱序"></a>执行乱序</h3><p>在处理器上执行时，后发射的指令可能先执行完，这是处理器的“乱序执行（Out-of-OrderExecution）​”策略<br>高级的CPU可以根据自己缓存的组织特性，将访存指令重新排序执行。连续地址的访问可能会先执行，因为这样缓存命中率高。有的还允许访存的非阻塞，即如果前面一条访存指令因为缓存不命中，造成长延时的存储访问时，后面的访存指令可以先执行，以便从缓存中取数。因此，即使是从汇编上看顺序正确的指令，其执行的顺序也是不可预知的。</p>
+<h3 id="案例1"><a href="#案例1" class="headerlink" title="案例1"></a>案例1</h3><p>下面假设一个简单的场景，写端申请一个foo结构对象，并对他的各个成员初始化，再将这个foo对象的地址赋值给foo结构体指针gp</p>
+<p>​    </p>
 <pre><code>struct foo &#123;
   int a;
   int b;
@@ -240,103 +240,103 @@ p-&gt;b = 2;
 p-&gt;c = 3;
 gp = p;
 </code></pre>
-<p>����������򵥴��������ܳ���Ľ��������Ԥ�ڣ�</p>
-<p>?    </p>
+<p>如果读端做简单处理，可能程序的结果不符合预期：</p>
+<p>​    </p>
 <pre><code>p = gp;
 if (p != NULL) &#123;
   do_something_with(p-&gt;a, p-&gt;b, p-&gt;c);
 &#125;
 </code></pre>
-<p>����<strong>��������</strong> ��<code>gp = p;</code>���ܱ����õ���p�ĸ�����Ա��ʼ��֮ǰ�����˼�鵽gp�Ѿ���ʼ��������do_something_with����ʱ���ݵ�����Ƕ��ϵ�����ֵ��<br>��Ա������򣬿���ʹ������linux�ں˵�writel��readl��ʵ�֣�����<strong>�ڴ�����</strong> ָ��</p>
-<p>?    </p>
+<p>由于<strong>编译乱序</strong> ，<code>gp = p;</code>可能被放置到对p的各个成员初始化之前，读端检查到gp已经初始化，进入do_something_with，此时传递的入参是堆上的垃圾值。<br>针对编译乱序，可以使用类似linux内核的writel和readl的实现，加入<strong>内存屏障</strong> 指令</p>
+<p>​    </p>
 <pre><code>#define barrier() __asm__ __volatile__(&quot;&quot;: : : &quot;memory&quot;)
 </code></pre>
-<p>barrier������c�����е�һ��դ�����������߼��ֳ����Σ�barrier֮ǰ�Ĵ����barrier֮��Ĵ����ھ��������������˳�����ҵ���Ҳ����˵��barrier֮���c�����Ӧ�Ļ�࣬�����ܵ�barrier֮ǰȥ����֮��Ȼ��</p>
-<p>���barrier������Ƕ�����ʵ�֣��ƻ���������Ϊ��memory��<br>��memory��֪ͨ���������˶���Ƕ����޸���memory�е����ݣ�asm֮ǰ��c������֮���c����鿴����memory�����ǲ�һ���ģ���memory�ķ��ʲ�������֮ǰ�Ļ��棬��Ҫ���¼��ء�</p>
-<p>�������ǿ���ͨ���ڴ����������ϱ���������ָ���������ŷţ�Ҳ���ܻ���Ϊ<strong>ִ������</strong> ���²������Ľ��������</p>
-<h3 id="����2"><a href="#����2" class="headerlink" title="����2"></a>����2</h3><p>����һ�����ӣ�ARM v6&#x2F;v7�������������ָ��˳������Ż���<br>?    </p>
-<pre><code>LDR r0�� [r1] ;
-STR r2�� [r3] ;
+<p>barrier就象是c代码中的一个栅栏，将代码逻辑分成两段，barrier之前的代码和barrier之后的代码在经过编译器编译后顺序不能乱掉。也就是说，barrier之后的c代码对应的汇编，不能跑到barrier之前去，反之亦然。</p>
+<p>这个barrier宏用内嵌汇编来实现，破坏描述部分为“memory”<br>“memory”通知编译器，此段内嵌汇编修改了memory中的内容，asm之前的c代码块和之后的c代码块看到的memory可能是不一样的，对memory的访问不能依赖之前的缓存，需要重新加载。</p>
+<p>即便我们可以通过内存屏障来保障编译器不对指令做乱序排放，也可能会因为<strong>执行乱序</strong> 导致不期望的结果发生。</p>
+<h3 id="案例2"><a href="#案例2" class="headerlink" title="案例2"></a>案例2</h3><p>举另一个例子，ARM v6&#x2F;v7处理器会对以下指令顺序进行优化：<br>​    </p>
+<pre><code>LDR r0， [r1] ;
+STR r2， [r3] ;
 </code></pre>
-<p>�����һ��LDRָ��»���δ���У���������ͻ�����У���<strong>��Ҫ�϶��ʱ�����ڲ������</strong> ���ϵ�ARM������������ARM926EJ-S���<br>�����������ɣ���ִ����һ��STRָ���<strong>ARM<br>v6&#x2F;v7��������ʶ�����һ��ָ�STR���Ҳ���Ҫ�ȴ���һ��ָ�LDR����ɣ�����������r0��ֵ��?��������ִ��STRָ������ǵȴ�LDRָ����ɡ�</strong></p>
-<p>���ڴ������ϵ�ṹ���ԣ�����ÿ��CPU��������ִ�У�������һ������ڵ��˵ĳ���ִ���ǲ��ɼ��ģ���Ϊ����CPU�����������㣨�����ָ��������ǰ��ָ���ִ�н������ʱ���ȴ������Գ���Ա���ܸо��������������̡��������������ȴ��Ĺ��̣���SMP��������������������ǲ��ɼ��ġ���������CPU0��ִ�У�</p>
+<p>假设第一条LDR指令导致缓存未命中，这样缓存就会填充行，并<strong>需要较多的时钟周期才能完成</strong> 。老的ARM处理器，比如ARM926EJ-S会等<br>待这个动作完成，再执行下一条STR指令。而<strong>ARM<br>v6&#x2F;v7处理器会识别出下一条指令（STR）且不需要等待第一条指令（LDR）完成（并不依赖于r0的值）​，即会先执行STR指令，而不是等待LDR指令完成。</strong></p>
+<p>对于大多数体系结构而言，尽管每个CPU都是乱序执行，但是这一乱序对于单核的程序执行是不可见的，因为单个CPU在碰到依赖点（后面的指令依赖于前面指令的执行结果）的时候会等待，所以程序员可能感觉不到这个乱序过程。但是这个依赖点等待的过程，在SMP处理器里面对于其他核是不可见的。比如若在CPU0上执行：</p>
 <pre><code>while (f == 0);
 print x;
 </code></pre>
-<p>��CPU1��ִ�У�</p>
+<p>在CPU1上执行：</p>
 <pre><code>x = 42;
 f = 1;
 </code></pre>
-<p>���ǲ�����ϵ���ΪCPU0�ϴ�ӡ��xһ������42����Ϊ<strong>CPU1�ϼ��㡰f&#x3D;1�������ڡ�x&#x3D;42�����棬ִ��ʱ��Ȼ�������ڡ�x&#x3D;42�����</strong><br>���������ʱ��CPU0�ϴ�ӡ��x��һ������42��</p>
-<p>������Ϊ��<strong>�����˼�һ���˵��ڴ���Ϊ������һ���˿ɼ�������</strong> ��������һЩ�ڴ����ϵ�ָ�Ʃ�磬ARM������������ָ�������</p>
-<p>DMB�������ڴ����ϣ�?����DMB֮�����ʽ�ڴ����ִ��ǰ����֤������DMBָ��֮ǰ���ڴ������ɣ�<br>DSB������ͬ�����ϣ�?���ȴ�������DSBָ��֮ǰ��ָ����ɣ�λ�ڴ�ָ��ǰ��������ʽ�ڴ���ʾ���ɣ�λ�ڴ�ָ��ǰ�����л��桢��תԤ���TLBά������ȫ����ɣ�?��<br>ISB��ָ��ͬ�����ϣ�?��Flush��ˮ�ߣ�ʹ������ISB֮��ִ�е�ָ��Ǵӻ�����ڴ��л�õġ�</p>
-<p>Linux�ں˵���������������Ȼ����߼�����Ҫ�õ�����ָ�����������ʱ����������ָ��ڽ���ʱ��Ҳ��Ҫ��������ָ�</p>
-<h3 id="����3"><a href="#����3" class="headerlink" title="����3"></a>����3</h3><p>mutex_lock<br>?    </p>
+<p>我们不能武断地认为CPU0上打印的x一定等于42，因为<strong>CPU1上即便“f&#x3D;1”编译在“x&#x3D;42”后面，执行时仍然可能先于“x&#x3D;42”完成</strong><br>，所以这个时候CPU0上打印的x不一定就是42。</p>
+<p>处理器为了<strong>解决多核间一个核的内存行为对另外一个核可见的问题</strong> ，引入了一些内存屏障的指令。譬如，ARM处理器的屏障指令包括：</p>
+<p>DMB（数据内存屏障）​：在DMB之后的显式内存访问执行前，保证所有在DMB指令之前的内存访问完成；<br>DSB（数据同步屏障）​：等待所有在DSB指令之前的指令完成（位于此指令前的所有显式内存访问均完成，位于此指令前的所有缓存、跳转预测和TLB维护操作全部完成）​；<br>ISB（指令同步屏障）​：Flush流水线，使得所有ISB之后执行的指令都是从缓存或内存中获得的。</p>
+<p>Linux内核的自旋锁、互斥体等互斥逻辑，需要用到上述指令：在请求获得锁时，调用屏障指令；在解锁时，也需要调用屏障指令。</p>
+<h3 id="案例3"><a href="#案例3" class="headerlink" title="案例3"></a>案例3</h3><p>mutex_lock<br>​    </p>
 <pre><code> 1LOCKED   EQU 1
  2UNLOCKED EQU 0
  3lock_mutex
- 4     ; �������Ƿ�����?
- 5     LDREX r1, [r0]         ; ����Ƿ�����
- 6     CMP r1, #LOCKED        ; ��&quot;locked&quot;�Ƚ�
- 7     WFEEQ                  ; �������Ѿ���������������
- 8     BEQ lock_mutex         ; �����ѣ����¼�黥�����Ƿ�����
- 9     ; ��������������
+ 4     ; 互斥量是否锁定?
+ 5     LDREX r1, [r0]         ; 检查是否锁定
+ 6     CMP r1, #LOCKED        ; 和&quot;locked&quot;比较
+ 7     WFEEQ                  ; 互斥量已经锁定，进入休眠
+ 8     BEQ lock_mutex         ; 被唤醒，重新检查互斥量是否锁定
+ 9     ; 尝试锁定互斥量
 10     MOV r1, #LOCKED
-11     STREX r2, r1, [r0]     ; ��������
-12     CMP r2, #0x0           ; ���STRָ���Ƿ����
-13     BNE lock_mutex         ; ���ʧ�ܣ�����
-14     DMB                    ; ���뱻��������Դǰ��Ҫ���룬��֤�������Ѿ�������
+11     STREX r2, r1, [r0]     ; 尝试锁定
+12     CMP r2, #0x0           ; 检查STR指令是否完成
+13     BNE lock_mutex         ; 如果失败，重试
+14     DMB                    ; 进入被保护的资源前需要隔离，保证互斥量已经被更新
 15     BX lr
 16
 17unlock_mutex
-18     DMB                    ; ��֤��Դ�ķ����Ѿ�����
-19     MOV r1, #UNLOCKED      ; ��������д&quot;unlocked&quot;
+18     DMB                    ; 保证资源的访问已经结束
+19     MOV r1, #UNLOCKED      ; 向锁定域写&quot;unlocked&quot;
 20     STR r1, [r0]
 21
-22     DSB                    ; ��֤��CPU����ǰ��ɻ�����״̬����
-23     SEV                    ; ������CPU�����¼��������κεȴ��¼���CPU
+22     DSB                    ; 保证在CPU唤醒前完成互斥量状态更新
+23     SEV                    ; 像其他CPU发送事件，唤醒任何等待事件的CPU
 24
 25     BX lr
 </code></pre>
-<h3 id="����4"><a href="#����4" class="headerlink" title="����4"></a>����4</h3><p>preempt_disable</p>
-<p>������һ�����ӣ�<br>?    </p>
-<pre><code>preempt_disable����
+<h3 id="案例4"><a href="#案例4" class="headerlink" title="案例4"></a>案例4</h3><p>preempt_disable</p>
+<p>再来看一个例子：<br>​    </p>
+<pre><code>preempt_disable（）
 
-�ٽ���
+临界区
 
 preempt_enable
 </code></pre>
-<p>��Щ������Դ����ͨ����ֹ������ռ�����б���������ٽ������뱻preempt_disable��preempt_enable��������������ʵ������֪����ν��preempt<br>enable��disable��ʵ���ǶԵ�ǰ���̵�struct thread_info�е�preempt_count���м�һ�ͼ�һ�Ĳ���������Ĵ������£�</p>
-<p>?    </p>
+<p>有些共享资源可以通过禁止任务抢占来进行保护，因此临界区代码被preempt_disable和preempt_enable给保护起来。其实，我们知道所谓的preempt<br>enable和disable其实就是对当前进程的struct thread_info中的preempt_count进行加一和减一的操作。具体的代码如下：</p>
+<p>​    </p>
 <pre><code>#define preempt_disable() \
 do &#123; \
     preempt_count_inc(); \
     barrier(); \
 &#125; while 
 </code></pre>
-<p>linux kernel�еĶ�������ǵ�����һ��������barrier����Ż����ϡ�barrier������c�����е�һ��դ�����������߼��ֳ����Σ�barrier֮ǰ�Ĵ����barrier֮��Ĵ����ھ��������������˳�����ҵ���Ҳ����˵��barrier֮���c�����Ӧ�Ļ�࣬�����ܵ�barrier֮ǰȥ����֮��Ȼ��֮������ô������Ϊ��������������У��������Ϊ��եȡCPU��performace���Ի��ָ��������ţ���ô�ٽ����Ĵ�����п���λ��preempt_count_inc֮�⣬�Ӷ��𲻵��������á�</p>
-<h3 id="����5"><a href="#����5" class="headerlink" title="����5"></a>����5</h3><p>������� �C DMA����������</p>
-<p>ǰ���ᵽÿ��CPU��������ִ�У����ǵ���CPU�������������ʱ���ȴ�������ִ������Ե��˲�һ���ɼ���</p>
-<p>���ǣ��������ڷ�������ļĴ���ʱ����Щ�Ĵ����ķ���˳����CPU���߼��Ϲ�����������ϵ�����Ǵ�������߼��Ƕ�������������Ҫ�̶��ļĴ�����д˳�����ʱ��Ҳ��Ҫʹ��CPU���ڴ�����ָ�</p>
-<p>��Linux�ں��У������˶�д����mb��?��?��������rmb��?��?��д����wmb��?��?���Լ������ڼĴ�����д��__iormb��?��?��__iowmb��?������������API����д�Ĵ�����readl_relaxed��?����readl��?��?��writel_relaxed��?����writel��?��API��������������������Ϸ��档</p>
-<p>��������ͨ��writel_relaxed��?��д��DMA�Ŀ�ʼ��ַ��������ַ����С֮������һ��Ҫ����writel��?��������DMA��</p>
+<p>linux kernel中的定义和我们的想像一样，除了barrier这个优化屏障。barrier就象是c代码中的一个栅栏，将代码逻辑分成两段，barrier之前的代码和barrier之后的代码在经过编译器编译后顺序不能乱掉。也就是说，barrier之后的c代码对应的汇编，不能跑到barrier之前去，反之亦然。之所以这么做是因为在我们这个场景中，如果编译为了榨取CPU的performace而对汇编指令进行重排，那么临界区的代码就有可能位于preempt_count_inc之外，从而起不到保护作用。</p>
+<h3 id="案例5"><a href="#案例5" class="headerlink" title="案例5"></a>案例5</h3><p>针对外设 – DMA配置与启动</p>
+<p>前面提到每个CPU都是乱序执行，但是单个CPU在碰到依赖点的时候会等待，所以执行乱序对单核不一定可见。</p>
+<p>但是，当程序在访问外设的寄存器时，这些寄存器的访问顺序在CPU的逻辑上构不成依赖关系，但是从外设的逻辑角度来讲，可能需要固定的寄存器读写顺序，这个时候，也需要使用CPU的内存屏障指令。</p>
+<p>在Linux内核中，定义了读写屏障mb（​）​、读屏障rmb（​）​、写屏障wmb（​）​、以及作用于寄存器读写的__iormb（​）​、__iowmb（​）这样的屏障API。读写寄存器的readl_relaxed（​）和readl（​）​、writel_relaxed（​）和writel（​）API的区别就体现在有无屏障方面。</p>
+<p>比如我们通过writel_relaxed（​）写完DMA的开始地址、结束地址，大小之后，我们一定要调用writel（​）来启动DMA。</p>
 <pre><code>writel_relaxed(DMA_SRC_REG, src_addr);
 writel_relaxed(DMA_DST_REG, dst_addr);
 writel_relaxed(DMA_SIZE_REG, size);
 writel (DMA_ENABLE, 1);
 </code></pre>
-<h3 id="ARM-Arch��Strongly-Order"><a href="#ARM-Arch��Strongly-Order" class="headerlink" title="ARM Arch��Strongly Order"></a>ARM Arch��Strongly Order</h3><p>����һ��uart��console write�ӿ�ʵ��demo��</p>
+<h3 id="ARM-Arch的Strongly-Order"><a href="#ARM-Arch的Strongly-Order" class="headerlink" title="ARM Arch的Strongly Order"></a>ARM Arch的Strongly Order</h3><p>举例一个uart的console write接口实现demo：</p>
 <pre><code>do &#123;
-    ��ȡTX FIFO״̬�Ĵ���
+    获取TX FIFO状态寄存器
     barrier();
-&#125; while (TX FIFOû��ready);
-дTX FIFO�Ĵ���;
+&#125; while (TX FIFO没有ready);
+写TX FIFO寄存器;
 </code></pre>
-<p>һ����˵ARM�ܹ��£�����Ӳ����IO��ַҲ��ӳ�䵽��һ���ڴ��ַ�ռ䣬�Ա��������ԣ�������֪����Щ��ַ�ռ�����������ġ���ˣ���������Ĵ��룬<strong>���û��barrier�Ļ�����ȡTX FIFO״̬�Ĵ�����ָ����ܺ�дTX FIFO�Ĵ���ָ�����������������������£������߼��Ͳ����ˣ���Ϊ���Ǳ���Ҫ��֤TX FIFO<br>ready������²���дTX FIFO�Ĵ�����</strong></p>
-<p>����multi core�����������Ĵ����߼�Ҳ��OK�ģ���Ϊ�ڵ���console write������ʱ��Ҫ��ȡһ��<strong>console semaphore</strong> ��ȷ����ֻ��һ��thread���룬��ˣ�console write�Ĵ��벻���ڶ��CPU�ϲ�����  </p>
-<p>��preempt count������һ�������ǿ�����ͬ�������⣬���CPU������ִ�У�out-of-order<br>excution�����أ�<strong>barrierֻ�Ǳ�֤compiler����Ļ��ָ���˳����OK�ģ�����ȷ��CPUִ��ʱ�������</strong><br>���������Ļش�����ARM architecture���ڴ����ģ�ͣ�<br>����program order��A1�C&gt;A2�������A1��A2���Ƕ�Device����Strongly-ordered��memory���з��ʵ�ָ���ARM��֤A1Ҳ������A2ִ�еġ���ˣ��������ĳ����£�ʹ��barrier�㹻�ˡ�</p>
-<p>����X86Ҳ�����Ƶģ���Ȼ��û�ж�IO space����memory<br>mapping�ķ�ʽ�����ǣ�X86�����в���IO�˿ڵ�ָ��Ǳ�˳ִ�еģ�����Ҫ����memory access order��</p>
-<h3 id="BCM�ֲ��﷢�ֵ�һ��ϸ��"><a href="#BCM�ֲ��﷢�ֵ�һ��ϸ��" class="headerlink" title="BCM�ֲ��﷢�ֵ�һ��ϸ��"></a>BCM�ֲ��﷢�ֵ�һ��ϸ��</h3><p>BCM���������ӳ���ڴ���ʵ��ڴ�����Ҫ���ǲ����е�֣�������˼��ͬһ����������ڴ����˳�������Ա�֤�����������;�л�����һ�������Ҫʹ��memory barrier�������ܹ�Ҳ���ƣ�<br><img src="/../../stuff/BCD_MEM_barrier.png" alt="���������ͼƬ����"><br>BCD_MEM_barrier.png</p>
+<p>一般来说ARM架构下，外设硬件的IO地址也被映射到了一段内存地址空间，对编译器而言，它并不知道这些地址空间是属于外设的。因此，对于上面的代码，<strong>如果没有barrier的话，获取TX FIFO状态寄存器的指令可能和写TX FIFO寄存器指令进行重新排序，在这种情况下，程序逻辑就不对了，因为我们必须要保证TX FIFO<br>ready的情况下才能写TX FIFO寄存器。</strong></p>
+<p>对于multi core的情况，上面的代码逻辑也是OK的，因为在调用console write函数的时候，要获取一个<strong>console semaphore</strong> ，确保了只有一个thread进入，因此，console write的代码不会在多个CPU上并发。  </p>
+<p>和preempt count的例子一样，我们可以问同样的问题，如果CPU是乱序执行（out-of-order<br>excution）的呢？<strong>barrier只是保证compiler输出的汇编指令的顺序是OK的，不能确保CPU执行时候的乱序。</strong><br>对这个问题的回答来自ARM architecture的内存访问模型：<br>对于program order是A1–&gt;A2的情况（A1和A2都是对Device或是Strongly-ordered的memory进行访问的指令），ARM保证A1也是先于A2执行的。因此，在这样的场景下，使用barrier足够了。</p>
+<p>对于X86也是类似的，虽然它没有对IO space采样memory<br>mapping的方式，但是，X86的所有操作IO端口的指令都是被顺执行的，不需要考虑memory access order。</p>
+<h3 id="BCM手册里发现的一点细节"><a href="#BCM手册里发现的一点细节" class="headerlink" title="BCM手册里发现的一点细节"></a>BCM手册里发现的一点细节</h3><p>BCM这个对外设映射内存访问的内存屏障要求是不是有点怪，他这意思是同一个外设里的内存访问顺序他可以保证，但是如果中途切换到另一个外设就要使用memory barrier，其他架构也类似？<br><img src="/../../stuff/BCD_MEM_barrier.png" alt="在这里插入图片描述"><br>BCD_MEM_barrier.png</p>
 
     </div>
 
