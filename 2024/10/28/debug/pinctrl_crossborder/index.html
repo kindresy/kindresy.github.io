@@ -28,7 +28,7 @@
 <meta property="og:description" content="uboot数组越界导致启动失败问题">
 <meta property="og:locale">
 <meta property="article:published_time" content="2024-10-28T00:15:16.000Z">
-<meta property="article:modified_time" content="2024-10-28T09:33:11.538Z">
+<meta property="article:modified_time" content="2024-10-28T10:26:17.643Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 
@@ -126,13 +126,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
   </nav>
@@ -189,7 +189,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2024-10-28 08:15:16 / Modified: 17:33:11" itemprop="dateCreated datePublished" datetime="2024-10-28T08:15:16+08:00">2024-10-28</time>
+      <time title="Created: 2024-10-28 08:15:16 / Modified: 18:26:17" itemprop="dateCreated datePublished" datetime="2024-10-28T08:15:16+08:00">2024-10-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -259,7 +259,7 @@
 <p>由于pinctrl的代码就是我在负责，所以比较熟悉，经过consumer或者of模块的调用，底层的这一函数会被回调：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> xxx_pins_param[ARRAY_SIZE(ts_tx5336_pins)];</span><br><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> xxxx_pins_value[ARRAY_SIZE(ts_tx5336_pins)];</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">xxxxx_pinconf_set</span><span class="params">(<span class="keyword">struct</span> udevice *dev, <span class="type">unsigned</span> pin_selector,</span></span><br><span class="line"><span class="params">			       <span class="type">unsigned</span> param, <span class="type">unsigned</span> argument)</span></span><br><span class="line">	xxx_pins_param[pin_selector] |= BIT(param);</span><br><span class="line">	<span class="keyword">if</span> (argument)</span><br><span class="line">		xxxx_pins_value[pin_selector] |= BIT(param);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		xxxx_pins_value[pin_selector] &amp;= ~BIT(param);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>这两个数组是静态定义的，且数组size只有8个字节。静态定义的变量也会处于data区，所以问题很可能就是它被越界访问了。</p>
-<p>在运行时，将pin_selector，发现gmac的那几个pin对应的pin_selector值是60多，肯定是越界了。<br>我将这俩数组的地址打印出来，以及它们在map文件中的地址，最终汇总了一个表格：</p>
+<p>在运行时，将pin_selector打印出来，发现gmac的那几个pin对应的pin_selector值是60多，肯定是越界了。<br>我将这俩数组的地址打印出来，以及它们在map文件中的地址，最终汇总了一个表格：</p>
 <p>symb        reloc后     reloc前<br>sdhci_ops   7ffd7588 - 106f780<br>pins_param  7ffd752c - 10b152c<br>value       7ffd7550 - 10b1550</p>
 <p>7ffd7550与7ffd7588之间的距离只有0x38，即56个字节。<br>临时的解决方法是将ts_tx5336_pins这个数组的大小指定为PIN_MAX值了，并且将xxxxx_pinconf_set函数中对xxx_pins_param以及xxxx_pins_value这俩数组的赋值取消掉。再次启动，uboot就通了。</p>
 
@@ -280,6 +280,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/10/28/uboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%A2%B3%E7%90%86/uboot1/" rel="next" title="">
+                   <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
