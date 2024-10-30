@@ -123,13 +123,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
   </nav>
@@ -146,6 +146,98 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/29/ddr/DDR_SDRAM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/10/29/ddr/DDR_SDRAM/" class="post-title-link" itemprop="url">DDR内存原理 - 1</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-10-29 17:03:57" itemprop="dateCreated datePublished" datetime="2024-10-29T17:03:57+08:00">2024-10-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-10-30 20:50:15" itemprop="dateModified" datetime="2024-10-30T20:50:15+08:00">2024-10-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ddr/" itemprop="url" rel="index"><span itemprop="name">ddr</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>DDR内存基础知识，概念，组成原理</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/10/29/ddr/DDR_SDRAM/">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -358,6 +450,13 @@
 
       <time title="Created: 2024-10-28 19:45:23" itemprop="dateCreated datePublished" datetime="2024-10-28T19:45:23+08:00">2024-10-28</time>
     </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-10-29 15:58:01" itemprop="dateModified" datetime="2024-10-29T15:58:01+08:00">2024-10-29</time>
+    </span>
 
   
 </div>
@@ -369,7 +468,8 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          
+          <h1 id="lowlevel-init-S"><a href="#lowlevel-init-S" class="headerlink" title="lowlevel_init.S"></a>lowlevel_init.S</h1><p>路径：uboot&#x2F;board&#x2F;samsung&#x2F;goni&#x2F;lowlevel_init.S</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* SPDX-License-Identifier: GPL-2.0+ */</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Memory Setup stuff - taken from blob memsetup.S</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Copyright (C) 2009 Samsung Electronics</span></span><br><span class="line"><span class="comment"> * Kyungmin Park &lt;kyungmin.park@samsung.com&gt;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;config.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/arch/cpu.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/arch/clock.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/arch/power.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Register usages:</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * r5 has zero always</span></span><br><span class="line"><span class="comment"> * r7 has S5PC100 GPIO base, 0xE0300000</span></span><br><span class="line"><span class="comment"> * r8 has real GPIO base, 0xE0300000, 0xE0200000 at S5PC100, S5PC110 repectively</span></span><br><span class="line"><span class="comment"> * r9 has Mobile DDR size, 1 means 1GiB, 2 means 2GiB and so on</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line">	.globl lowlevel_init</span><br><span class="line">lowlevel_init:</span><br><span class="line">	mov	r11, lr                     @本过程还会调用其他过程，防止lr被冲掉，r11不常用。</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* r5 has always zero */</span></span><br><span class="line">	mov	r5, #<span class="number">0</span></span><br><span class="line"></span><br><span class="line">	ldr	r7, =S5PC100_GPIO_BASE      @defined in cpu.h</span><br><span class="line">	ldr	r8, =S5PC100_GPIO_BASE</span><br><span class="line">	<span class="comment">/* Read CPU ID */</span></span><br><span class="line">	ldr	r2, =S5PC110_PRO_ID         @芯片id号地址，三星S5PV210地址为<span class="number">0xE000</span>_0000，值为C100 <span class="number">0x43110</span>xxx</span><br><span class="line">	ldr	r0, [r2]</span><br><span class="line">	mov	r1, #<span class="number">0x00010000</span></span><br><span class="line">	and	r0, r0, r1</span><br><span class="line">	cmp	r0, r5                      @判断id的bit16是否为<span class="number">0</span></span><br><span class="line">	beq	<span class="number">100f</span></span><br><span class="line">	ldr	r8, =S5PC110_GPIO_BASE      @defined in power.h</span><br><span class="line"><span class="number">100</span>:</span><br><span class="line">	<span class="comment">/* Turn on KEY_LED_ON [GPJ4(1)] XMSMWEN */</span></span><br><span class="line">	cmp	r7, r8</span><br><span class="line">	beq	skip_check_didle			@ Support C110 only</span><br><span class="line"></span><br><span class="line">	ldr	r0, =S5PC110_RST_STAT       @当前CPU是从哪一种状态复位的</span><br><span class="line">	ldr	r1, [r0]</span><br><span class="line">	and	r1, r1, #<span class="number">0x000D0000</span></span><br><span class="line">	cmp	r1, #(<span class="number">0x1</span> &lt;&lt; <span class="number">19</span>)			@ DEEPIDLE_WAKEUP</span><br><span class="line">	beq	didle_wakeup                @ 开机复位不会走这里，不是deepidle</span><br><span class="line">	cmp	r7, r8                      @ S5PC100_GPIO_BASE or S5PC110_GPIO_BASE ？</span><br><span class="line"></span><br><span class="line">skip_check_didle:</span><br><span class="line">	addeq	r0, r8, #<span class="number">0x280</span>				@ S5PC100_GPIO_J4   加上GPIO_J4的偏移</span><br><span class="line">	addne	r0, r8, #<span class="number">0x2C0</span>				@ S5PC110_GPIO_J4</span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x0</span>]				@ GPIO_CON_OFFSET       输出</span><br><span class="line">	bic	r1, r1, #(<span class="number">0xf</span> &lt;&lt; <span class="number">4</span>)			@ <span class="number">1</span> * <span class="number">4</span>-bit</span><br><span class="line">	orr	r1, r1, #(<span class="number">0x1</span> &lt;&lt; <span class="number">4</span>)</span><br><span class="line">	str	r1, [r0, #<span class="number">0x0</span>]				@ GPIO_CON_OFFSET</span><br><span class="line"></span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x4</span>]				@ GPIO_DAT_OFFSET       写data寄存器，点亮</span><br><span class="line">	bic	r1, r1, #(<span class="number">1</span> &lt;&lt; <span class="number">1</span>)</span><br><span class="line">	str	r1, [r0, #<span class="number">0x4</span>]				@ GPIO_DAT_OFFSET</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Don&#x27;t setup at s5pc100 */</span></span><br><span class="line">	beq	<span class="number">100f</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Initialize    Register Setting for EVT1</span></span><br><span class="line"><span class="comment">	 * Because we are setting EVT1 as the default value of EVT0,</span></span><br><span class="line"><span class="comment">	 * setting EVT0 as well does not make things worse.</span></span><br><span class="line"><span class="comment">	 * Thus, for the simplicity, we set for EVT0, too</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * The &quot;Async Registers&quot; are:</span></span><br><span class="line"><span class="comment">	 *	0xE0F0_0000</span></span><br><span class="line"><span class="comment">	 *	0xE1F0_0000</span></span><br><span class="line"><span class="comment">	 *	0xF180_0000</span></span><br><span class="line"><span class="comment">	 *	0xF190_0000</span></span><br><span class="line"><span class="comment">	 *	0xF1A0_0000</span></span><br><span class="line"><span class="comment">	 *	0xF1B0_0000</span></span><br><span class="line"><span class="comment">	 *	0xF1C0_0000</span></span><br><span class="line"><span class="comment">	 *	0xF1D0_0000</span></span><br><span class="line"><span class="comment">	 *	0xF1E0_0000</span></span><br><span class="line"><span class="comment">	 *	0xF1F0_0000</span></span><br><span class="line"><span class="comment">	 *	0xFAF0_0000</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	ldr     r0, =<span class="number">0xe0f00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xe1f00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1800000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1900000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1a00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1b00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1c00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1d00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1e00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xf1f00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	ldr     r0, =<span class="number">0xfaf00000</span></span><br><span class="line">	ldr     r1, [r0]</span><br><span class="line">	bic     r1, r1, #<span class="number">0x1</span></span><br><span class="line">	str     r1, [r0]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Diable ABB block to reduce sleep current at low temperature</span></span><br><span class="line"><span class="comment">	 * Note that it&#x27;s hidden register setup don&#x27;t modify it</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	ldr	r0, =<span class="number">0xE010C300</span>         @隐藏寄存器，三星封闭，OEM厂商知道，我们只需要依葫芦画瓢</span><br><span class="line">	ldr	r1, =<span class="number">0x00800000</span></span><br><span class="line">	str	r1, [r0]</span><br><span class="line"></span><br><span class="line"><span class="number">100</span>:</span><br><span class="line">	<span class="comment">/* IO retension release */</span></span><br><span class="line">	ldreq	r0, =S5PC100_OTHERS			@ <span class="number">0xE0108200</span>        一些状态在休眠方式的保持</span><br><span class="line">	ldrne	r0, =S5PC110_OTHERS			@ <span class="number">0xE010E000</span></span><br><span class="line">	ldr	r1, [r0]</span><br><span class="line">	ldreq	r2, =(<span class="number">1</span> &lt;&lt; <span class="number">31</span>)				@ IO_RET_REL</span><br><span class="line">	ldrne	r2, =((<span class="number">1</span> &lt;&lt; <span class="number">31</span>) | (<span class="number">1</span> &lt;&lt; <span class="number">30</span>) | (<span class="number">1</span> &lt;&lt; <span class="number">29</span>) | (<span class="number">1</span> &lt;&lt; <span class="number">28</span>))</span><br><span class="line">	orr	r1, r1, r2</span><br><span class="line">	<span class="comment">/* Do not release retention here for S5PC110 */</span></span><br><span class="line">	streq	r1, [r0]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Disable Watchdog */</span></span><br><span class="line">	ldreq	r0, =S5PC100_WATCHDOG_BASE		@ <span class="number">0xEA200000</span></span><br><span class="line">	ldrne	r0, =S5PC110_WATCHDOG_BASE		@ <span class="number">0xE2700000</span></span><br><span class="line">	str	r5, [r0]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* setting SRAM */</span></span><br><span class="line">	ldreq	r0, =S5PC100_SROMC_BASE         @ 对SRAM的配置，<span class="number">210</span>启动没有用到SRAM</span><br><span class="line">	ldrne	r0, =S5PC110_SROMC_BASE</span><br><span class="line">	ldr	r1, =<span class="number">0x9</span></span><br><span class="line">	str	r1, [r0]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* S5PC100 has 3 groups of interrupt sources */</span></span><br><span class="line">	ldreq	r0, =S5PC100_VIC0_BASE			@ <span class="number">0xE4000000</span></span><br><span class="line">	ldrne	r0, =S5PC110_VIC0_BASE			@ <span class="number">0xF2000000</span></span><br><span class="line">	add	r1, r0, #<span class="number">0x00100000</span></span><br><span class="line">	add	r2, r0, #<span class="number">0x00200000</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Disable all interrupts (VIC0, VIC1 and VIC2) */</span></span><br><span class="line">	mvn	r3, #<span class="number">0x0</span>                    @</span><br><span class="line">	str	r3, [r0, #<span class="number">0x14</span>]				@ INTENCLEAR</span><br><span class="line">	str	r3, [r1, #<span class="number">0x14</span>]				@ INTENCLEAR</span><br><span class="line">	str	r3, [r2, #<span class="number">0x14</span>]				@ INTENCLEAR</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set all interrupts as IRQ */</span></span><br><span class="line">	str	r5, [r0, #<span class="number">0xc</span>]				@ INTSELECT</span><br><span class="line">	str	r5, [r1, #<span class="number">0xc</span>]				@ INTSELECT</span><br><span class="line">	str	r5, [r2, #<span class="number">0xc</span>]				@ INTSELECT</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Pending Interrupt Clear */</span></span><br><span class="line">	str	r5, [r0, #<span class="number">0xf00</span>]			@ INTADDRESS</span><br><span class="line">	str	r5, [r1, #<span class="number">0xf00</span>]			@ INTADDRESS</span><br><span class="line">	str	r5, [r2, #<span class="number">0xf00</span>]			@ INTADDRESS</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* for UART */</span></span><br><span class="line">	bl	uart_asm_init</span><br><span class="line"></span><br><span class="line">	bl	internal_ram_init</span><br><span class="line"></span><br><span class="line">	cmp	r7, r8</span><br><span class="line">	<span class="comment">/* Clear wakeup status register */</span></span><br><span class="line">	ldreq	r0, =S5PC100_WAKEUP_STAT</span><br><span class="line">	ldrne	r0, =S5PC110_WAKEUP_STAT</span><br><span class="line">	ldr	r1, [r0]</span><br><span class="line">	str	r1, [r0]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* IO retension release */</span></span><br><span class="line">	ldreq	r0, =S5PC100_OTHERS			@ <span class="number">0xE0108200</span></span><br><span class="line">	ldrne	r0, =S5PC110_OTHERS			@ <span class="number">0xE010E000</span></span><br><span class="line">	ldr	r1, [r0]</span><br><span class="line">	ldreq	r2, =(<span class="number">1</span> &lt;&lt; <span class="number">31</span>)				@ IO_RET_REL</span><br><span class="line">	ldrne	r2, =((<span class="number">1</span> &lt;&lt; <span class="number">31</span>) | (<span class="number">1</span> &lt;&lt; <span class="number">30</span>) | (<span class="number">1</span> &lt;&lt; <span class="number">29</span>) | (<span class="number">1</span> &lt;&lt; <span class="number">28</span>))</span><br><span class="line">	orr	r1, r1, r2</span><br><span class="line">	str	r1, [r0]</span><br><span class="line"></span><br><span class="line">	b	<span class="number">1f</span></span><br><span class="line"></span><br><span class="line">didle_wakeup:</span><br><span class="line">	<span class="comment">/* Wait when APLL is locked */</span></span><br><span class="line">	ldr	r0, =<span class="number">0xE0100100</span>			@ S5PC110_APLL_CON</span><br><span class="line">lockloop:</span><br><span class="line">	ldr	r1, [r0]</span><br><span class="line">	and	r1, r1, #(<span class="number">1</span> &lt;&lt; <span class="number">29</span>)</span><br><span class="line">	cmp	r1, #(<span class="number">1</span> &lt;&lt; <span class="number">29</span>)</span><br><span class="line">	bne	lockloop</span><br><span class="line"></span><br><span class="line">	ldr	r0, =S5PC110_INFORM0</span><br><span class="line">	ldr	r1, [r0]</span><br><span class="line">	mov	pc, r1</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">	mov	lr, r11</span><br><span class="line">	mov	pc, lr</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * system_clock_init: Initialize core clock and bus clock.</span></span><br><span class="line"><span class="comment"> * void system_clock_init(void)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">system_clock_init:</span><br><span class="line">	ldr	r0, =S5PC110_CLOCK_BASE		@ <span class="number">0xE0100000</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Check S5PC100 */</span></span><br><span class="line">	cmp	r7, r8</span><br><span class="line">	bne	<span class="number">110f</span></span><br><span class="line"><span class="number">100</span>:</span><br><span class="line">	<span class="comment">/* Set Lock Time */</span></span><br><span class="line">	ldr	r1, =<span class="number">0xe10</span>			@ Locktime : <span class="number">0xe10</span> = <span class="number">3600</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x000</span>]		@ S5PC100_APLL_LOCK</span><br><span class="line">	str	r1, [r0, #<span class="number">0x004</span>]		@ S5PC100_MPLL_LOCK</span><br><span class="line">	str	r1, [r0, #<span class="number">0x008</span>]		@ S5PC100_EPLL_LOCK</span><br><span class="line">	str	r1, [r0, #<span class="number">0x00C</span>]		@ S5PC100_HPLL_LOCK</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* S5P_APLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x81bc0400</span>		@ SDIV <span class="number">0</span>, PDIV <span class="number">4</span>, MDIV <span class="number">444</span> (<span class="number">1333</span>MHz)</span><br><span class="line">	str	r1, [r0, #<span class="number">0x100</span>]</span><br><span class="line">	<span class="comment">/* S5P_MPLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x80590201</span>		@ SDIV <span class="number">1</span>, PDIV <span class="number">2</span>, MDIV <span class="number">89</span> (<span class="number">267</span>MHz)</span><br><span class="line">	str	r1, [r0, #<span class="number">0x104</span>]</span><br><span class="line">	<span class="comment">/* S5P_EPLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x80870303</span>		@ SDIV <span class="number">3</span>, PDIV <span class="number">3</span>, MDIV <span class="number">135</span> (<span class="number">67.5</span>MHz)</span><br><span class="line">	str	r1, [r0, #<span class="number">0x108</span>]</span><br><span class="line">	<span class="comment">/* S5P_HPLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x80600603</span>		@ SDIV <span class="number">3</span>, PDIV <span class="number">6</span>, MDIV <span class="number">96</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x10C</span>]</span><br><span class="line"></span><br><span class="line">	ldr     r1, [r0, #<span class="number">0x300</span>]</span><br><span class="line">	ldr     r2, =<span class="number">0x00003fff</span></span><br><span class="line">	bic     r1, r1, r2</span><br><span class="line">	ldr     r2, =<span class="number">0x00011301</span></span><br><span class="line"></span><br><span class="line">	orr	r1, r1, r2</span><br><span class="line">	str	r1, [r0, #<span class="number">0x300</span>]</span><br><span class="line">	ldr     r1, [r0, #<span class="number">0x304</span>]</span><br><span class="line">	ldr     r2, =<span class="number">0x00011110</span></span><br><span class="line">	orr     r1, r1, r2</span><br><span class="line">	str     r1, [r0, #<span class="number">0x304</span>]</span><br><span class="line">	ldr     r1, =<span class="number">0x00000001</span></span><br><span class="line">	str     r1, [r0, #<span class="number">0x308</span>]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set Source Clock */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x00001111</span>			@ A, M, E, HPLL Muxing</span><br><span class="line">	str	r1, [r0, #<span class="number">0x200</span>]		@ S5PC1XX_CLK_SRC0</span><br><span class="line"></span><br><span class="line">	b	<span class="number">200f</span></span><br><span class="line"><span class="number">110</span>:</span><br><span class="line">	ldr	r0, =<span class="number">0xE010C000</span>			@ S5PC110_PWR_CFG</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set OSC_FREQ value */</span></span><br><span class="line">	ldr	r1, =<span class="number">0xf</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x100</span>]		@ S5PC110_OSC_FREQ</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set MTC_STABLE value */</span></span><br><span class="line">	ldr	r1, =<span class="number">0xffffffff</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x110</span>]		@ S5PC110_MTC_STABLE</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set CLAMP_STABLE value */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x3ff03ff</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x114</span>]		@ S5PC110_CLAMP_STABLE</span><br><span class="line"></span><br><span class="line">	ldr	r0, =S5PC110_CLOCK_BASE		@ <span class="number">0xE0100000</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set Clock divider */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x14131330</span>			@ <span class="number">1</span>:<span class="number">1</span>:<span class="number">4</span>:<span class="number">4</span>, <span class="number">1</span>:<span class="number">4</span>:<span class="number">5</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x300</span>]</span><br><span class="line">	ldr	r1, =<span class="number">0x11110111</span>			@ UART[<span class="number">3210</span>]: MMC[<span class="number">3210</span>]</span><br><span class="line">	str	r1, [r0, #<span class="number">0x310</span>]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set Lock Time */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x2cf</span>			@ Locktime : <span class="number">30u</span>s</span><br><span class="line">	str	r1, [r0, #<span class="number">0x000</span>]		@ S5PC110_APLL_LOCK</span><br><span class="line">	ldr	r1, =<span class="number">0xe10</span>			@ Locktime : <span class="number">0xe10</span> = <span class="number">3600</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x008</span>]		@ S5PC110_MPLL_LOCK</span><br><span class="line">	str	r1, [r0, #<span class="number">0x010</span>]		@ S5PC110_EPLL_LOCK</span><br><span class="line">	str	r1, [r0, #<span class="number">0x020</span>]		@ S5PC110_VPLL_LOCK</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* S5PC110_APLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x80C80601</span>			@ <span class="number">800</span>MHz</span><br><span class="line">	str	r1, [r0, #<span class="number">0x100</span>]</span><br><span class="line">	<span class="comment">/* S5PC110_MPLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x829B0C01</span>			@ <span class="number">667</span>MHz</span><br><span class="line">	str	r1, [r0, #<span class="number">0x108</span>]</span><br><span class="line">	<span class="comment">/* S5PC110_EPLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x80600602</span>			@  <span class="number">96</span>MHz VSEL <span class="number">0</span> P <span class="number">6</span> M <span class="number">96</span> S <span class="number">2</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x110</span>]</span><br><span class="line">	<span class="comment">/* S5PC110_VPLL_CON */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x806C0603</span>			@  <span class="number">54</span>MHz</span><br><span class="line">	str	r1, [r0, #<span class="number">0x120</span>]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Set Source Clock */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x10001111</span>			@ A, M, E, VPLL Muxing</span><br><span class="line">	str	r1, [r0, #<span class="number">0x200</span>]		@ S5PC1XX_CLK_SRC0</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* OneDRAM(DMC0) clock setting */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x01000000</span>			@ ONEDRAM_SEL[<span class="number">25</span>:<span class="number">24</span>] <span class="number">1</span> SCLKMPLL</span><br><span class="line">	str	r1, [r0, #<span class="number">0x218</span>]		@ S5PC110_CLK_SRC6</span><br><span class="line">	ldr	r1, =<span class="number">0x30000000</span>			@ ONEDRAM_RATIO[<span class="number">31</span>:<span class="number">28</span>] <span class="number">3</span> + <span class="number">1</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x318</span>]		@ S5PC110_CLK_DIV6</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* XCLKOUT = XUSBXTI 24MHz */</span></span><br><span class="line">	add	r2, r0, #<span class="number">0xE000</span>			@ S5PC110_OTHERS</span><br><span class="line">	ldr     r1, [r2]</span><br><span class="line">	orr	r1, r1, #(<span class="number">0x3</span> &lt;&lt; <span class="number">8</span>)		@ CLKOUT[<span class="number">9</span>:<span class="number">8</span>] <span class="number">3</span> XUSBXTI</span><br><span class="line">	str	r1, [r2]</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* CLK_IP0 */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x8fefeeb</span>			@ DMC[<span class="number">1</span>:<span class="number">0</span>] PDMA0[<span class="number">3</span>] IMEM[<span class="number">5</span>]</span><br><span class="line">	str	r1, [r0, #<span class="number">0x460</span>]		@ S5PC110_CLK_IP0</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* CLK_IP1 */</span></span><br><span class="line">	ldr	r1, =<span class="number">0xe9fdf0f9</span>			@ FIMD[<span class="number">0</span>] USBOTG[<span class="number">16</span>]</span><br><span class="line">						@ NANDXL[<span class="number">24</span>]</span><br><span class="line">	str	r1, [r0, #<span class="number">0x464</span>]		@ S5PC110_CLK_IP1</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* CLK_IP2 */</span></span><br><span class="line">	ldr	r1, =<span class="number">0xf75f7fc</span>			@ CORESIGHT[<span class="number">8</span>] MODEM[<span class="number">9</span>]</span><br><span class="line">						@ HOSTIF[<span class="number">10</span>] HSMMC0[<span class="number">16</span>]</span><br><span class="line">						@ HSMMC2[<span class="number">18</span>] VIC[<span class="number">27</span>:<span class="number">24</span>]</span><br><span class="line">	str	r1, [r0, #<span class="number">0x468</span>]		@ S5PC110_CLK_IP2</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* CLK_IP3 */</span></span><br><span class="line">	ldr	r1, =<span class="number">0x8eff038c</span>			@ I2C[<span class="number">8</span>:<span class="number">6</span>]</span><br><span class="line">						@ SYSTIMER[<span class="number">16</span>] UART0[<span class="number">17</span>]</span><br><span class="line">						@ UART1[<span class="number">18</span>] UART2[<span class="number">19</span>]</span><br><span class="line">						@ UART3[<span class="number">20</span>] WDT[<span class="number">22</span>]</span><br><span class="line">						@ PWM[<span class="number">23</span>] GPIO[<span class="number">26</span>] SYSCON[<span class="number">27</span>]</span><br><span class="line">	str	r1, [r0, #<span class="number">0x46c</span>]		@ S5PC110_CLK_IP3</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* CLK_IP4 */</span></span><br><span class="line">	ldr	r1, =<span class="number">0xfffffff1</span>			@ CHIP_ID[<span class="number">0</span>] TZPC[<span class="number">8</span>:<span class="number">5</span>]</span><br><span class="line">	str	r1, [r0, #<span class="number">0x470</span>]		@ S5PC110_CLK_IP3</span><br><span class="line"></span><br><span class="line"><span class="number">200</span>:</span><br><span class="line">	<span class="comment">/* wait at least 200us to stablize all clock */</span></span><br><span class="line">	mov	r2, #<span class="number">0x10000</span></span><br><span class="line"><span class="number">1</span>:	subs	r2, r2, #<span class="number">1</span></span><br><span class="line">	bne	<span class="number">1b</span></span><br><span class="line"></span><br><span class="line">	mov	pc, lr</span><br><span class="line"></span><br><span class="line">internal_ram_init:</span><br><span class="line">	ldreq	r0, =<span class="number">0xE3800000</span></span><br><span class="line">	ldrne	r0, =<span class="number">0xF1500000</span></span><br><span class="line">	ldr	r1, =<span class="number">0x0</span></span><br><span class="line">	str	r1, [r0]</span><br><span class="line"></span><br><span class="line">	mov	pc, lr</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * uart_asm_init: Initialize UART&#x27;s pins</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">uart_asm_init:</span><br><span class="line">	<span class="comment">/* set GPIO to enable UART0-UART4 */</span></span><br><span class="line">	mov	r0, r8</span><br><span class="line">	ldr	r1, =<span class="number">0x22222222</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x0</span>]			@ S5PC100_GPIO_A0_OFFSET</span><br><span class="line">	ldr	r1, =<span class="number">0x00002222</span></span><br><span class="line">	str	r1, [r0, #<span class="number">0x20</span>]			@ S5PC100_GPIO_A1_OFFSET</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Check S5PC100 */</span></span><br><span class="line">	cmp	r7, r8</span><br><span class="line">	bne	<span class="number">110f</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* UART_SEL GPK0[5] at S5PC100 */</span></span><br><span class="line">	add	r0, r8, #<span class="number">0x2A0</span>			@ S5PC100_GPIO_K0_OFFSET</span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x0</span>]			@ S5PC1XX_GPIO_CON_OFFSET</span><br><span class="line">	bic	r1, r1, #(<span class="number">0xf</span> &lt;&lt; <span class="number">20</span>)		@ <span class="number">20</span> = <span class="number">5</span> * <span class="number">4</span>-bit</span><br><span class="line">	orr	r1, r1, #(<span class="number">0x1</span> &lt;&lt; <span class="number">20</span>)		@ Output</span><br><span class="line">	str	r1, [r0, #<span class="number">0x0</span>]			@ S5PC1XX_GPIO_CON_OFFSET</span><br><span class="line"></span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x8</span>]			@ S5PC1XX_GPIO_PULL_OFFSET</span><br><span class="line">	bic	r1, r1, #(<span class="number">0x3</span> &lt;&lt; <span class="number">10</span>)		@ <span class="number">10</span> = <span class="number">5</span> * <span class="number">2</span>-bit</span><br><span class="line">	orr	r1, r1, #(<span class="number">0x2</span> &lt;&lt; <span class="number">10</span>)		@ Pull-up enabled</span><br><span class="line">	str	r1, [r0, #<span class="number">0x8</span>]			@ S5PC1XX_GPIO_PULL_OFFSET</span><br><span class="line"></span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x4</span>]			@ S5PC1XX_GPIO_DAT_OFFSET</span><br><span class="line">	orr	r1, r1, #(<span class="number">1</span> &lt;&lt; <span class="number">5</span>)		@ <span class="number">5</span> = <span class="number">5</span> * <span class="number">1</span>-bit</span><br><span class="line">	str	r1, [r0, #<span class="number">0x4</span>]			@ S5PC1XX_GPIO_DAT_OFFSET</span><br><span class="line"></span><br><span class="line">	b	<span class="number">200f</span></span><br><span class="line"><span class="number">110</span>:</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Note that the following address</span></span><br><span class="line"><span class="comment">	 * 0xE020&#x27;0360 is reserved address at S5PC100</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="comment">/* UART_SEL MP0_5[7] at S5PC110 */</span></span><br><span class="line">	add	r0, r8, #<span class="number">0x360</span>			@ S5PC110_GPIO_MP0_5_OFFSET</span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x0</span>]			@ S5PC1XX_GPIO_CON_OFFSET</span><br><span class="line">	bic	r1, r1, #(<span class="number">0xf</span> &lt;&lt; <span class="number">28</span>)		@ <span class="number">28</span> = <span class="number">7</span> * <span class="number">4</span>-bit</span><br><span class="line">	orr	r1, r1, #(<span class="number">0x1</span> &lt;&lt; <span class="number">28</span>)		@ Output</span><br><span class="line">	str	r1, [r0, #<span class="number">0x0</span>]			@ S5PC1XX_GPIO_CON_OFFSET</span><br><span class="line"></span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x8</span>]			@ S5PC1XX_GPIO_PULL_OFFSET</span><br><span class="line">	bic	r1, r1, #(<span class="number">0x3</span> &lt;&lt; <span class="number">14</span>)		@ <span class="number">14</span> = <span class="number">7</span> * <span class="number">2</span>-bit</span><br><span class="line">	orr	r1, r1, #(<span class="number">0x2</span> &lt;&lt; <span class="number">14</span>)		@ Pull-up enabled</span><br><span class="line">	str	r1, [r0, #<span class="number">0x8</span>]			@ S5PC1XX_GPIO_PULL_OFFSET</span><br><span class="line"></span><br><span class="line">	ldr	r1, [r0, #<span class="number">0x4</span>]			@ S5PC1XX_GPIO_DAT_OFFSET</span><br><span class="line">	orr	r1, r1, #(<span class="number">1</span> &lt;&lt; <span class="number">7</span>)		@ <span class="number">7</span> = <span class="number">7</span> * <span class="number">1</span>-bit</span><br><span class="line">	str	r1, [r0, #<span class="number">0x4</span>]			@ S5PC1XX_GPIO_DAT_OFFSET</span><br><span class="line"><span class="number">200</span>:</span><br><span class="line">	mov	pc, lr</span><br><span class="line"></span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -573,92 +673,6 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/sdio/sdio_basic_knowlegde/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Luyuan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Coffe Pattern">
-      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Coffe Pattern">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/10/24/sdio/sdio_basic_knowlegde/" class="post-title-link" itemprop="url">SDIO eMMc相关知识总结</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2024-10-24 10:15:16 / Modified: 13:02:52" itemprop="dateCreated datePublished" datetime="2024-10-24T10:15:16+08:00">2024-10-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/sdio/" itemprop="url" rel="index"><span itemprop="name">sdio</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>sdio eMMc相关知识，包括接口，控制器，总线模型，速率模式，内核初始化过程，hs200模式，tuning方式。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/10/24/sdio/sdio_basic_knowlegde/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/life_record/Pour-over-coffee/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -721,6 +735,92 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2024/10/24/life_record/Pour-over-coffee/">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/sdio/sdio_basic_knowlegde/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/10/24/sdio/sdio_basic_knowlegde/" class="post-title-link" itemprop="url">SDIO eMMc相关知识总结</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-10-24 10:15:16 / Modified: 13:02:52" itemprop="dateCreated datePublished" datetime="2024-10-24T10:15:16+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sdio/" itemprop="url" rel="index"><span itemprop="name">sdio</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>sdio eMMc相关知识，包括接口，控制器，总线模型，速率模式，内核初始化过程，hs200模式，tuning方式。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/10/24/sdio/sdio_basic_knowlegde/">
                 Read more &raquo;
               </a>
             </div>
@@ -915,98 +1015,9 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/15/ccf/ccf_clk_cannot_assigned/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Luyuan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Coffe Pattern">
-      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Coffe Pattern">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/10/15/ccf/ccf_clk_cannot_assigned/" class="post-title-link" itemprop="url">CCF - CLK配置失败问题 - Flag误用</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2024-10-15 08:15:16" itemprop="dateCreated datePublished" datetime="2024-10-15T08:15:16+08:00">2024-10-15</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2024-10-24 13:01:09" itemprop="dateModified" datetime="2024-10-24T13:01:09+08:00">2024-10-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/ccf/" itemprop="url" rel="index"><span itemprop="name">ccf</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>ccf框架下误用clk结构对象的flag设置分频系数与寄存器的关系，导致assigned-clock-rates失败的问题</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/10/15/ccf/ccf_clk_cannot_assigned/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" title="Next page" aria-label="Next page" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
 
 </div>
   </main>
