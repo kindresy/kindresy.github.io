@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="微观的ddr memory device内部结构，动态的分析一个read&#x2F;write命令进入芯片以后，到数据返回，发生了哪些过程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDR内存原理 - 2">
+<meta property="og:url" content="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM2/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="微观的ddr memory device内部结构，动态的分析一个read&#x2F;write命令进入芯片以后，到数据返回，发生了哪些过程">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_four_stage.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/memory_array_one_bit.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/memory_array_demo.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/diff_struct_memory_bit.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/shuangjiao_mem_bit.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/twisted-line.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/Vcc_div2.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sense_circuit.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/voltage_sign_seq.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/twisted_write_1.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdram_seq_normal.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/ddr1_seq_clk.png">
+<meta property="article:published_time" content="2024-11-01T06:41:35.329Z">
+<meta property="article:modified_time" content="2024-11-01T13:16:19.016Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/ddr_four_stage.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM2/","path":"2024/11/01/ddr/DDR_SDRAM2/","title":"DDR内存原理 - 2"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DDR内存原理 - 2 | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E9%98%B6%E6%AE%B5%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">四阶段分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E9%98%B6%E6%AE%B5-%E5%91%BD%E4%BB%A4%E9%98%B6%E6%AE%B5-command-transport-and-decode"><span class="nav-number">1.1.</span> <span class="nav-text">一阶段 - 命令阶段 - command transport and decode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E9%98%B6%E6%AE%B5-bank%E5%BA%94%E7%94%A8-in-bank-data-movement"><span class="nav-number">1.2.</span> <span class="nav-text">二阶段 - bank应用 - in bank data movement</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E9%98%B6%E6%AE%B5-device%E5%BA%94%E7%94%A8-in-device-data-movement"><span class="nav-number">1.3.</span> <span class="nav-text">三阶段 - device应用 - in device data movement</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E9%98%B6%E6%AE%B5-%E6%95%B0%E6%8D%AE%E6%80%BB%E7%BA%BF-system-data-transport"><span class="nav-number">1.4.</span> <span class="nav-text">四阶段 - 数据总线 - system data transport</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Memory-Array%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">Memory Array内部结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8C%E7%BB%9E%E7%94%B5%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">双绞电路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%84%E9%98%B6%E6%AE%B5-%E7%94%B5%E5%B9%B3%E4%B8%8E%E6%97%B6%E5%BA%8F%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">4.</span> <span class="nav-text">各阶段 - 电平与时序的关系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A0%E5%85%A5CLK%E4%BF%A1%E5%8F%B7%E5%90%8E%E7%9A%84%E6%AD%A3%E5%BC%8F%E6%97%B6%E5%BA%8F%E5%9B%BE"><span class="nav-number">5.</span> <span class="nav-text">加入CLK信号后的正式时序图</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SDRAM"><span class="nav-number">5.1.</span> <span class="nav-text">SDRAM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDR1"><span class="nav-number">5.2.</span> <span class="nav-text">DDR1</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DDR内存原理 - 2 | Coffe Pattern">
+      <meta itemprop="description" content="微观的ddr memory device内部结构，动态的分析一个read/write命令进入芯片以后，到数据返回，发生了哪些过程">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DDR内存原理 - 2
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-11-01 14:41:35 / Modified: 21:16:19" itemprop="dateCreated datePublished" datetime="2024-11-01T14:41:35+08:00">2024-11-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ddr/" itemprop="url" rel="index"><span itemprop="name">ddr</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">微观的ddr memory device内部结构，动态的分析一个read/write命令进入芯片以后，到数据返回，发生了哪些过程</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="四阶段分析"><a href="#四阶段分析" class="headerlink" title="四阶段分析"></a>四阶段分析</h1><p>Top View：</p>
+<p><img src="/../../stuff/ddr_four_stage.png" alt="在这里插入图片描述"></p>
+<h2 id="一阶段-命令阶段-command-transport-and-decode"><a href="#一阶段-命令阶段-command-transport-and-decode" class="headerlink" title="一阶段 - 命令阶段 - command transport and decode"></a>一阶段 - 命令阶段 - command transport and decode</h2><p>在这个阶段，Host 端会通过 Command Bus 和 Address Bus 将具体的 Command 以及相应参数传递给 DRAM。DRAM 接收并解析 Command，接着驱动内部模块进行相应的操作。其中会根据将addr bus上的数据解码成对应的row address和通过bank control解码后得到对应的bank，其次对应的column也会解码得到对应的地址</p>
+<h2 id="二阶段-bank应用-in-bank-data-movement"><a href="#二阶段-bank应用-in-bank-data-movement" class="headerlink" title="二阶段 - bank应用 - in bank data movement"></a>二阶段 - bank应用 - in bank data movement</h2><p>在这个阶段，第一阶段发送需要读取的 Column 的地址给 DRAM。然后 DRAM 再将 Active Command 所选中的 Row 中，DRAM 就将 Memory Array 中的数据从 DRAM Cells 中读出到 Sense Amplifiers，或者将数据从 Sense Amplifiers 写入到 DRAM Cells。</p>
+<h2 id="三阶段-device应用-in-device-data-movement"><a href="#三阶段-device应用-in-device-data-movement" class="headerlink" title="三阶段 - device应用 - in device data movement"></a>三阶段 - device应用 - in device data movement</h2><p>这个阶段中，数据将通过 IO 电路缓存到 Read Latchs 或者通过 IO 电路和 Write Drivers 更新到 Sense Amplifiers。</p>
+<h2 id="四阶段-数据总线-system-data-transport"><a href="#四阶段-数据总线-system-data-transport" class="headerlink" title="四阶段 - 数据总线 - system data transport"></a>四阶段 - 数据总线 - system data transport</h2><p>在这个阶段，进行读数据操作时，SDRAM 会将数据输出到数据总线上，进行写数据操作时，则是 Host 端的 Controller 将数据输出到总线上。</p>
+<p>在上述的四个阶段中，每个阶段都会有一定的耗时，例如数据从 DRAM Cells 搬运到 Read Latchs 的操作需要一定的时间，因此在一个具体的操作需要按照一定时序进行。同时，由于内部的一些部件可能会被多个操作使用，例如读数据和写数据都需要用到部分 IO 电路，因此多个不同的操作通常不能同时进行，也需要遵守一定的时序。此外，某些操作会消耗很大的电流，为了满足 SDRAM 设计上的功耗指标，可能会限制某一些操作的执行频率。</p>
+<p>这四个阶段都有一个txxx类的命名，这都是在ddr init过程中要去配置的。2阶段和3阶段里参数比较多。</p>
+<h1 id="Memory-Array内部结构"><a href="#Memory-Array内部结构" class="headerlink" title="Memory Array内部结构"></a>Memory Array内部结构</h1><p>下图在前面的章节也见识过，它是一个bit的存储单元。</p>
+<p><img src="/../../stuff/memory_array_one_bit.png" alt="在这里插入图片描述"> </p>
+<p>下图则是由上图的存储单元，组成的一个阵列：</p>
+<p><img src="/../../stuff/memory_array_demo.png" alt="在这里插入图片描述"> </p>
+<p>由于电容信号，非常微弱，每一次将数据送往bitline线，还不足以将bitline的点位升高很多。<br>所以这个阵列需要一个预充电的动作(precharge)。precharge需要将bitline的电平设置为Vcc&#x2F;2<br>当wordline打开的时候，数据经过bitline下来，会将Vcc&#x2F;2抬高一丢丢，微弱上升到Vcc*2&#x2F;3或者更多（如果是写0就是微弱下降一丢丢），这才能让电容完全充满或者清空。</p>
+<p>bitline整根线也存在寄生电容，单一的bit存储单元使用的电容与其相比算是很小的了。小电容无法将大电容一次性充电到vcc。sanse电路可以感知到这个微弱的变化。</p>
+<p>上图中还存在多个sense amps，是因为这个阵列共有16K个行，其电容是非常大了，所以还需要将这16k的行分成若干个单元，比如说每64个row sense一下，这就造成每隔一段row就有一些sense存在。</p>
+<p>这种电路在早期位密度较低时适用，现在使用的则是下面的差分结构：</p>
+<p><img src="/../../stuff/diff_struct_memory_bit.png" alt="在这里插入图片描述"> </p>
+<p>同一根bitline，使用两根线表示（分别记为+&#x2F;-）。数据存储位被平均的放在这两根线上。在precharge阶段，这两根线都保持在Vcc&#x2F;2左右，一旦wordline选通，+bitline会上升到vcc，而-bitline下降到0，这样一来sense amps对电平变化的感知灵敏度就更高。将sense电路结构复杂度降低。</p>
+<p>两根超长的line，电容是非常大的，所以后期又出现了这种双绞电路：</p>
+<p><img src="/../../stuff/shuangjiao_mem_bit.png" alt="在这里插入图片描述"> </p>
+<p>下面着重分析双绞电路中其中一列的结构，工作原理，时序</p>
+<h1 id="双绞电路"><a href="#双绞电路" class="headerlink" title="双绞电路"></a>双绞电路</h1><p>这是双绞电路的一个抽象表示，实际电路会更加复杂：</p>
+<p><img src="/../../stuff/twisted-line.png" alt="在这里插入图片描述"> </p>
+<p>voltage eq. circuit就是预充电电路(precharge), 它的功能就是将bitline上的电平设置到Vcc&#x2F;2。它有一根EQ线，属于device内部的控制线。</p>
+<p>DMC向device发送precharge命令后，device内部的EQ控制线会被打开，三个场效应管都会导通。Vcc&#x2F;2的电压来自外部输入Vref，从而两条bitline上都有了Vcc&#x2F;2的预充电电压。</p>
+<p><img src="/../../stuff/Vcc_div2.png" alt="在这里插入图片描述"></p>
+<p>precharge结束后是数据读取阶段。wordlines选通，其上的电容释放出微弱电压。bitline上的电压略微上升一点点( &gt; Vcc&#x2F;2)。</p>
+<p>sensing circuit感知到电压的微弱上升，SAN(Vcc&#x2F;2) &#x3D;&#x3D; SAP(Vcc&#x2F;2)的平衡，红色标记下的两个场效应管导电性越来越好，其余两个越来越差，一段时间以后，bitline上升到Vref，bitline反则降到0。</p>
+<p><img src="/../../stuff/sense_circuit.png" alt="在这里插入图片描述"></p>
+<p>接下来就是I&#x2F;O阶段，就是将1&#x2F;0信号送出去，承担此任务的是右边的CSL，即column select line上的两个场效应管，将列选择线选通后，这两个场效应管就导通，那么1&#x2F;0信号也就输出。</p>
+<p>最后，是restore阶段，bitline上的高电平会反向对wordline上的电容进行充电，即数据回写。</p>
+<h1 id="各阶段-电平与时序的关系"><a href="#各阶段-电平与时序的关系" class="headerlink" title="各阶段 - 电平与时序的关系"></a>各阶段 - 电平与时序的关系</h1><p><img src="/../../stuff/voltage_sign_seq.png" alt="在这里插入图片描述"></p>
+<p>对上图的时序分析：</p>
+<p>0处的电平也就是一个memory array里某个电容的电平值。wordline一开始并未选中，但precharge电路不受影响，会给bitline充电到Vcc&#x2F;2。这是precharge阶段</p>
+<p>由于DMC的某个命令，wordline被选中，电平逐渐上升到Vcc。</p>
+<p>进入到阶段1，开始对bank进行访问。bitline被选中，开始对目标存储cell电容进行充电，bitline开始逐渐上升。这是access阶段</p>
+<p>bitline的微弱上升，导致sensing circuit的平衡被打破，SAP上的电压向上抬高，SAN的电压降低。这就是sense阶段</p>
+<p>access阶段和sense阶段被合称RCD阶段，tRCD也就表示这一阶段的是时间。</p>
+<p>SAP上的电压向上抬高，SAN的电压降低的同时，bitline也在慢慢升高，在第二阶段结束时，bitline维持在高电平。CSL被选通，也就是第三阶段CSL先逐步抬高。信号被输出。</p>
+<p>restore阶段，输出的高电平，反向充回存储cell。bitline回到Vcc&#x2F;2。</p>
+<p>术语解析：<br>RCD全称为Row to Column Delay. 这是指Row被打开，到Column被选中，之间的延迟。这是一个非常关键的参数。</p>
+<p>RAS全称为Row Access Strobe。指从row地址被解码后，wordline被选中，到整个数据输出，并且restore保存进去为止。</p>
+<p>RP全称为Row precharge</p>
+<p>向存储cell写1：<br><img src="/../../stuff/twisted_write_1.png" alt="在这里插入图片描述"></p>
+<p>写入时序与读取时序略有不同<br>wr全称为write recovery</p>
+<h1 id="加入CLK信号后的正式时序图"><a href="#加入CLK信号后的正式时序图" class="headerlink" title="加入CLK信号后的正式时序图"></a>加入CLK信号后的正式时序图</h1><h2 id="SDRAM"><a href="#SDRAM" class="headerlink" title="SDRAM"></a>SDRAM</h2><p><img src="/../../stuff/sdram_seq_normal.png" alt="在这里插入图片描述"></p>
+<p>CAS：column access strobe latency，也称为CL，column letency.</p>
+<p>burst len &#x3D; 4</p>
+<h2 id="DDR1"><a href="#DDR1" class="headerlink" title="DDR1"></a>DDR1</h2><p><img src="/../../stuff/ddr1_seq_clk.png" alt="在这里插入图片描述"></p>
+<p>与SDRAM的时序很相似，CLK双边沿都会采样。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/30/ddr/DDR_SDRAM1/" rel="prev" title="DDR内存原理 - 1">
+                  <i class="fa fa-angle-left"></i> DDR内存原理 - 1
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/11/01/ddr/DDR_SDRAM3/" rel="next" title="DDR内存原理 - 3">
+                  DDR内存原理 - 3 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

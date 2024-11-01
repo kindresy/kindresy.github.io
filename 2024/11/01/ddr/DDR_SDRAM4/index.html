@@ -20,28 +20,29 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="ARM&#x2F;Liunx Kernel&#x2F;OS&#x2F;Driver">
-<meta property="og:type" content="website">
-<meta property="og:title" content="categories">
-<meta property="og:url" content="https://kindresy.github.io/categories/index.html">
+    <meta name="description" content="DDR MRS和EMRS寄存器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDR内存原理 - 4">
+<meta property="og:url" content="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM4/index.html">
 <meta property="og:site_name" content="Coffe Pattern">
-<meta property="og:description" content="ARM&#x2F;Liunx Kernel&#x2F;OS&#x2F;Driver">
+<meta property="og:description" content="DDR MRS和EMRS寄存器">
 <meta property="og:locale">
-<meta property="article:published_time" content="2024-10-23T13:54:01.000Z">
-<meta property="article:modified_time" content="2024-10-23T13:55:16.801Z">
+<meta property="og:image" content="https://kindresy.github.io/stuff/DDR_MRS_EMRS.png">
+<meta property="article:published_time" content="2024-11-01T13:53:31.265Z">
+<meta property="article:modified_time" content="2024-11-01T13:57:17.429Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/DDR_MRS_EMRS.png">
 
 
-<link rel="canonical" href="https://kindresy.github.io/categories/">
+<link rel="canonical" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM4/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/categories/index.html","path":"categories/index.html","title":"categories"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM4/","path":"2024/11/01/ddr/DDR_SDRAM4/","title":"DDR内存原理 - 4"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>categories | Coffe Pattern
-</title>
+<title>DDR内存原理 - 4 | Coffe Pattern</title>
   
 
 
@@ -148,42 +149,106 @@
 
     </div>
 
-    <div class="main-inner page posts-expand">
+    <div class="main-inner post posts-expand">
 
 
-    
-    
-    
-    <div class="post-block" lang="zh-Hans"><header class="post-header">
+  
 
-<h1 class="post-title" itemprop="name headline">categories
-</h1>
 
-<div class="post-meta-container">
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DDR内存原理 - 4 | Coffe Pattern">
+      <meta itemprop="description" content="DDR MRS和EMRS寄存器">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DDR内存原理 - 4
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-11-01 21:53:31 / Modified: 21:57:17" itemprop="dateCreated datePublished" datetime="2024-11-01T21:53:31+08:00">2024-11-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ddr/" itemprop="url" rel="index"><span itemprop="name">ddr</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
 </div>
 
-</header>
+            <div class="post-description">DDR MRS和EMRS寄存器</div>
+        </div>
+      </header>
 
-      
-      
-      
-      <div class="post-body"><div class="category-all-page">
-  <div class="category-all-title">
-    8 categories in total
-  </div>
-  <div class="category-all">
-    <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/arch/">arch</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ccf/">ccf</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ddr/">ddr</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/debug/">debug</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/dma/">dma</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/init/">init</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-record/">life_record</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/sdio/">sdio</a><span class="category-list-count">3</span></li></ul>
-  </div>
-</div>
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>手册第五页</p>
+<p>模式寄存器中的数据控制着 DDR2 SDRAM的操作模式.它控制着 CAS 延迟, 突发长度, 突发顺序, 测试模式, DLL复位, WR等各种选项，支持着 DDR2&#x2F;SDRAM 的各种应用. 模式寄存器的默认值没有被定义, 所以上电之后必须按规定的时序规范来设定模式寄存器的值 . 通过将 CS, RAS, CAS, WE, BA0 ，BA1置低来发布模式寄存器设定命令, 操作数通过地址脚 A0 ~ A15同步送出. DDR2 SDRAM 在写模式寄存器之前，应该通过拉高CKE而完成了所有簇的预充电。模式寄存器设定命令的命令周期 (tMRD)必须满足完成对模式寄存器的写操作。在进行正常操作时，只要所有的簇都已经处于预充电完成状态，模式寄存器都可以使用同一命令重新设定. 模式寄存器不同的位表示不同的功能. A0 ~ A2 设定突发长度是4还是8。 突发长度的译码规则与DDR SDRAM相同. A3定义了突发地址顺序。A4 ~ A6定义了CAS延迟。. DDR2不支持半时钟延迟。 A7 设定测试模式. A8设定 DLL 复位。 对通常的 MRS操作，A7必须设定为低。A9 ~ A11定义了写恢复时间WR。</p>
+<p><img src="/../../stuff/DDR_MRS_EMRS.png" alt="在这里插入图片描述"></p>
 
-      </div>
-      
-      
-      
     </div>
 
     
     
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/11/01/ddr/DDR_SDRAM3/" rel="prev" title="DDR内存原理 - 3">
+                  <i class="fa fa-angle-left"></i> DDR内存原理 - 3
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
 
 
 </div>
