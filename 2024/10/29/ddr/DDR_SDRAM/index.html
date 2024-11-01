@@ -22,7 +22,7 @@
 
     <meta name="description" content="DDR内存基础知识，概念，组成原理">
 <meta property="og:type" content="article">
-<meta property="og:title" content="DDR内存原理 - 1">
+<meta property="og:title" content="DDR内存原理 - 0">
 <meta property="og:url" content="https://kindresy.github.io/2024/10/29/ddr/DDR_SDRAM/index.html">
 <meta property="og:site_name" content="Coffe Pattern">
 <meta property="og:description" content="DDR内存基础知识，概念，组成原理">
@@ -56,7 +56,7 @@
 <meta property="og:image" content="https://kindresy.github.io/stuff/v210_system.png">
 <meta property="og:image" content="https://kindresy.github.io/stuff/ddr_buy_id.png">
 <meta property="article:published_time" content="2024-10-29T09:03:57.313Z">
-<meta property="article:modified_time" content="2024-10-30T12:50:15.955Z">
+<meta property="article:modified_time" content="2024-10-30T13:31:17.594Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://kindresy.github.io/stuff/ddr_rate_table.png">
@@ -66,10 +66,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/29/ddr/DDR_SDRAM/","path":"2024/10/29/ddr/DDR_SDRAM/","title":"DDR内存原理 - 1"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/29/ddr/DDR_SDRAM/","path":"2024/10/29/ddr/DDR_SDRAM/","title":"DDR内存原理 - 0"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>DDR内存原理 - 1 | Coffe Pattern</title>
+<title>DDR内存原理 - 0 | Coffe Pattern</title>
   
 
 
@@ -142,7 +142,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DRAM-Dynamic-Random-Access-Memory"><span class="nav-number">1.</span> <span class="nav-text">DRAM (Dynamic Random Access Memory)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%84%E6%88%90%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">组成结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DRAM-%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84-%E4%B8%8E-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">DRAM 内部结构 与 工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">内部结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bank"><span class="nav-number">3.1.1.</span> <span class="nav-text">Bank</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Memory-Device"><span class="nav-number">3.1.2.</span> <span class="nav-text">Memory Device</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RANK"><span class="nav-number">3.1.3.</span> <span class="nav-text">RANK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#V210%E5%86%85%E5%AD%98%E5%8E%9F%E7%90%86%E5%9B%BE"><span class="nav-number">3.1.4.</span> <span class="nav-text">V210内存原理图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDRAM%E8%AF%BB%E5%86%99%E6%93%8D%E4%BD%9C%E7%9A%84%E6%97%B6%E5%BA%8F"><span class="nav-number">3.2.</span> <span class="nav-text">SDRAM读写操作的时序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8F%E8%A7%82%E7%9A%84"><span class="nav-number">3.2.1.</span> <span class="nav-text">宏观的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E8%A7%82%E7%9A%84"><span class="nav-number">3.2.2.</span> <span class="nav-text">微观的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DRAM%E6%97%B6%E5%BA%8F%E7%9A%84%E8%BF%9B%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">3.3.</span> <span class="nav-text">DRAM时序的进化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8EADRAM-%E5%88%B0-DDRx"><span class="nav-number">3.3.1.</span> <span class="nav-text">从ADRAM 到 DDRx</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ADRAM"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">ADRAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FPM"><span class="nav-number">3.3.1.2.</span> <span class="nav-text">FPM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EDO"><span class="nav-number">3.3.1.3.</span> <span class="nav-text">EDO</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BEDO"><span class="nav-number">3.3.2.</span> <span class="nav-text">BEDO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SDRAM"><span class="nav-number">3.3.3.</span> <span class="nav-text">SDRAM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DDR"><span class="nav-number">3.3.4.</span> <span class="nav-text">DDR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DLL-delay-lock-loop-%E5%BB%B6%E8%BF%9F%E7%8E%AF"><span class="nav-number">3.3.5.</span> <span class="nav-text">DLL delay lock loop 延迟环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V210-Memory-System"><span class="nav-number">3.4.</span> <span class="nav-text">V210 Memory System</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DRAM-Dynamic-Random-Access-Memory"><span class="nav-number">1.</span> <span class="nav-text">DRAM (Dynamic Random Access Memory)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%84%E6%88%90%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">组成结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DRAM-%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84-%E4%B8%8E-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">DRAM 内部结构 与 工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">内部结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bank"><span class="nav-number">3.1.1.</span> <span class="nav-text">Bank</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Memory-Device"><span class="nav-number">3.1.2.</span> <span class="nav-text">Memory Device</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RANK"><span class="nav-number">3.1.3.</span> <span class="nav-text">RANK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#V210%E5%86%85%E5%AD%98%E5%8E%9F%E7%90%86%E5%9B%BE"><span class="nav-number">3.1.4.</span> <span class="nav-text">V210内存原理图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDRAM%E8%AF%BB%E5%86%99%E6%93%8D%E4%BD%9C%E7%9A%84%E6%97%B6%E5%BA%8F"><span class="nav-number">3.2.</span> <span class="nav-text">SDRAM读写操作的时序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8F%E8%A7%82%E7%9A%84"><span class="nav-number">3.2.1.</span> <span class="nav-text">宏观的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E8%A7%82%E7%9A%84"><span class="nav-number">3.2.2.</span> <span class="nav-text">微观的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DRAM%E6%97%B6%E5%BA%8F%E7%9A%84%E8%BF%9B%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">3.3.</span> <span class="nav-text">DRAM时序的进化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8EADRAM-%E5%88%B0-DDRx"><span class="nav-number">3.3.1.</span> <span class="nav-text">从ADRAM 到 DDRx</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ADRAM"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">ADRAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FPM"><span class="nav-number">3.3.1.2.</span> <span class="nav-text">FPM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EDO"><span class="nav-number">3.3.1.3.</span> <span class="nav-text">EDO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BEDO"><span class="nav-number">3.3.1.4.</span> <span class="nav-text">BEDO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SDRAM"><span class="nav-number">3.3.1.5.</span> <span class="nav-text">SDRAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DDR"><span class="nav-number">3.3.1.6.</span> <span class="nav-text">DDR</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DLL-delay-lock-loop-%E5%BB%B6%E8%BF%9F%E7%8E%AF"><span class="nav-number">3.3.2.</span> <span class="nav-text">DLL delay lock loop 延迟环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V210-Memory-System"><span class="nav-number">3.4.</span> <span class="nav-text">V210 Memory System</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -155,13 +155,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
   </nav>
@@ -201,12 +201,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="DDR内存原理 - 1 | Coffe Pattern">
+      <meta itemprop="name" content="DDR内存原理 - 0 | Coffe Pattern">
       <meta itemprop="description" content="DDR内存基础知识，概念，组成原理">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          DDR内存原理 - 1
+          DDR内存原理 - 0
         </h1>
 
         <div class="post-meta-container">
@@ -224,7 +224,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2024-10-30 20:50:15" itemprop="dateModified" datetime="2024-10-30T20:50:15+08:00">2024-10-30</time>
+      <time title="Modified: 2024-10-30 21:31:17" itemprop="dateModified" datetime="2024-10-30T21:31:17+08:00">2024-10-30</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -304,7 +304,7 @@
 <p><img src="/../../stuff/ddr_micro_op_process.png" alt="DDR宏观的读写过程"></p>
 <p>一个异步DRAM的读取时序：</p>
 <p><img src="/../../stuff/read_timing_for_adram.png" alt="DDR宏观的读写过程"></p>
-<p>先给出row address, MC再给出一个RAS信号(RAS意味Row Address Strobe)来将row address锁存，MC再发送column address，MC再给出一个CAS信号(CAS意味 Column Address Strobe)来将column address锁存。芯片内部将行地址和列地址都收到以后，就会开始解码，然后选出数据，读出来放出data busses，也就对应则DQ线上的Valid Dataout。地址发送完毕后，RAS和CAS就会被拉高，直到下一个行地址列地址被发出。</p>
+<p>先给出row address, MC再给出一个RAS信号(RAS意味Row Address Strobe)来将row address锁存，MC再发送column address，MC再给出一个CAS信号(CAS意味 Column Address Strobe)来将column address锁存。芯片内部将行地址和列地址都收到以后，就会开始解码，然后选出数据，读出来放出data busses，也就对应则DQ线上的Valid Dataout。数据有效后，RAS和CAS就会被拉高，直到下一个行地址列地址被发出。</p>
 <p>V210的512M地址空间，换算为地址总线数量的话，需要2的29次方，29根地址线。</p>
 <p>但是看硬件原理图，我们只用了14根地址线，它实际使用了行列地址的复用。它可以表现的地址范围是 2^14 * 2^14 * 4(他用了四块memory device) &#x3D; 2^30 即 1Gb</p>
 <h2 id="DRAM时序的进化过程"><a href="#DRAM时序的进化过程" class="headerlink" title="DRAM时序的进化过程"></a>DRAM时序的进化过程</h2><p><img src="/../../stuff/22222.png" alt="DDR宏观的读写过程"></p>
@@ -317,12 +317,12 @@
 <p>Fast Page Mode 这里的page是ddr里的一个概念，是指同一row上的数据。<br><img src="/../../stuff/FPM_SEQ.png" alt="FPM_SEQ"></p>
 <h4 id="EDO"><a href="#EDO" class="headerlink" title="EDO"></a>EDO</h4><p>EDO在FPM的基础上，将行地址发送和数据输出分为两个模块去做，在数据vaild dataout时，将数据锁存，同时发送新的列地址。这个模式比FPM又快了近一倍左右。</p>
 <p><img src="/../../stuff/ed0_seq.png" alt="FPM_SEQ"></p>
-<h3 id="BEDO"><a href="#BEDO" class="headerlink" title="BEDO"></a>BEDO</h3><p>Burst EDO，在EDO模式上，省去了重复发送列地址以及对列地址解码这一过程，因为列地址总是自增的，MC内部维护一个计数器（这个时间比解码时间短很多）不断读取数据，直到新的地址被重新发出。</p>
+<h4 id="BEDO"><a href="#BEDO" class="headerlink" title="BEDO"></a>BEDO</h4><p>Burst EDO，在EDO模式上，省去了重复发送列地址以及对列地址解码这一过程，因为列地址总是自增的，MC内部维护一个计数器（这个时间比解码时间短很多）不断读取数据，直到新的地址被重新发出。</p>
 <p>BEDO是异步DRAM的最快的模式<br><img src="/../../stuff/beq0_seq.png" alt="FPM_SEQ"></p>
-<h3 id="SDRAM"><a href="#SDRAM" class="headerlink" title="SDRAM"></a>SDRAM</h3><p>异步方式下，如果CPU给的CAS的速度变快，而DQ上的数据返回根不上，就会出现问题。<br>异步给出CAS控制信号的延迟，也是不确定的，这就限制了内存速率的提升。</p>
+<h4 id="SDRAM"><a href="#SDRAM" class="headerlink" title="SDRAM"></a>SDRAM</h4><p>异步方式下，如果CPU给的CAS的速度变快，而DQ上的数据返回根不上，就会出现问题。<br>异步给出CAS控制信号的延迟，也是不确定的，这就限制了内存速率的提升。</p>
 <p>如果远距离传输，用异步比较好，如果就在板子上，用同步传输更好。<br>90年代末期，人们在MC和Memory device之间，加上了clk信号，用于做数据同步。每次row addr给出后，ras不用在拉低很长时间，只需要在Clock保持高电平时拉低，让Addr得以被稳定采集。CAS也一样，在Col addr发出时，无需拉低很长时间。<br>对于内存控制器来说，内存设备的行为就是完全由CLK线可控的。valid data也能由clk来做同步</p>
 <p><img src="/../../stuff/SDRAM_SEQ.png" alt="SDRAM_SEQ"></p>
-<h3 id="DDR"><a href="#DDR" class="headerlink" title="DDR"></a>DDR</h3><p>在SDRAM的基础上，将CLK的上升沿和下降沿，都用来采样数据，数据传输速率提升一倍。<br><img src="/../../stuff/DDR_SEQ.png" alt="DDR_SEQ"></p>
+<h4 id="DDR"><a href="#DDR" class="headerlink" title="DDR"></a>DDR</h4><p>在SDRAM的基础上，将CLK的上升沿和下降沿，都用来采样数据，数据传输速率提升一倍。<br><img src="/../../stuff/DDR_SEQ.png" alt="DDR_SEQ"></p>
 <p>注意下面的DQS，MC在数据采样的同时，会将DQS信号也toggle一下。</p>
 <p>sdram_vs_dram.png</p>
 <p>先看一下这张sdram_vs_dram的时序图对比：<br><img src="/../../stuff/sdram_vs_dram.png" alt="sdram_vs_dram"></p>
@@ -359,6 +359,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/10/30/ddr/DDR_SDRAM1/" rel="next" title="DDR内存原理 - 1">
+                  DDR内存原理 - 1 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
