@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="三星SPC110 Demo板的DDR初始化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDR初始化 - 0">
+<meta property="og:url" content="https://kindresy.github.io/2024/11/04/ddr/DDR_Code_Analy/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="三星SPC110 Demo板的DDR初始化">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_phy.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/DLL_config.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_with_dll.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/s5pv210_read_data_capture.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/extra_delay.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/PHY_DLL_REGISTER.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/dll_ctrl_reg.png">
+<meta property="article:published_time" content="2024-11-04T06:13:49.416Z">
+<meta property="article:modified_time" content="2024-11-04T13:22:07.398Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/ddr_phy.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/11/04/ddr/DDR_Code_Analy/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/11/04/ddr/DDR_Code_Analy/","path":"2024/11/04/ddr/DDR_Code_Analy/","title":"DDR初始化 - 0"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DDR初始化 - 0 | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">程序目录结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%A6%81"><span class="nav-number">2.</span> <span class="nav-text">概要</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#sdram-init-S-ddr%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.1.</span> <span class="nav-text">sdram_init.S ddr初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DDR%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">2.1.1.</span> <span class="nav-text">DDR的初始化过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96PHY-DLL"><span class="nav-number">2.1.2.</span> <span class="nav-text">初始化PHY DLL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#device%E7%AB%AFDLL"><span class="nav-number">2.1.3.</span> <span class="nav-text">device端DLL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMC%E7%AB%AFDLL"><span class="nav-number">2.1.4.</span> <span class="nav-text">DMC端DLL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AEDLL%EF%BC%9F"><span class="nav-number">2.1.5.</span> <span class="nav-text">如何配置DLL？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E4%BB%A5%E5%8F%8A%E6%B3%A8%E9%87%8A%EF%BC%9A"><span class="nav-number">2.1.6.</span> <span class="nav-text">代码以及注释：</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/11/04/ddr/DDR_Code_Analy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DDR初始化 - 0 | Coffe Pattern">
+      <meta itemprop="description" content="三星SPC110 Demo板的DDR初始化">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DDR初始化 - 0
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-11-04 14:13:49 / Modified: 21:22:07" itemprop="dateCreated datePublished" datetime="2024-11-04T14:13:49+08:00">2024-11-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ddr/" itemprop="url" rel="index"><span itemprop="name">ddr</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">三星SPC110 Demo板的DDR初始化</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>推荐链接：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_59161987/article/details/136760838">https://blog.csdn.net/m0_59161987/article/details/136760838</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/biaohc/p/6346949.html">https://www.cnblogs.com/biaohc/p/6346949.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://f.daixianiu.cn/csdn/8588266265617235.html">https://f.daixianiu.cn/csdn/8588266265617235.html</a></li>
+<li></li>
+</ol>
+<h1 id="程序目录结构"><a href="#程序目录结构" class="headerlink" title="程序目录结构"></a>程序目录结构</h1><p>程序源码文件包含：</p>
+<p>start.S：程序主函数</p>
+<p>sdram_init.S:初始化SDRAM的函数</p>
+<p>led_blink.c:led闪烁函数</p>
+<p>Makefile和link.lds</p>
+<h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><p>这段代码是三星出的demo程序，其中有些缺陷，要先看懂这块代码，然后按照前面文章的理解，手册上也给出了相关初始化的序列描述，在这些基础上我们对这个程序做修改，比如支持512M，1G的ddr配置等。</p>
+<h2 id="sdram-init-S-ddr初始化"><a href="#sdram-init-S-ddr初始化" class="headerlink" title="sdram_init.S ddr初始化"></a>sdram_init.S ddr初始化</h2><h3 id="DDR的初始化过程"><a href="#DDR的初始化过程" class="headerlink" title="DDR的初始化过程"></a>DDR的初始化过程</h3><p>S5PV210的用户手册里有对DDR初始化序列的描述：<br>   S5PV210有两个独立的DRAM控制器，一个最大支持512MB，一个最大支持1024MB，但两个控制器必须支持相同类型的内存。</p>
+<p>根据三星S5PV210文档可知，DDR2类型内存的初始化流程如下：</p>
+<pre><code>1、提供稳压电源给内存控制器和内存芯片，内存控制器必须保持CLE在低电平，此时就会提供稳压电源。注：当CKE引脚为低电平时，XDDR2SEL应该处于高电平（PCB上用上拉电阻实现）
+</code></pre>
+<p>    2、根据时钟频率正确配置PhyControl0.ctrl_start_point和PhyControl0.ctrl_inc的值。配置的PhyControl0.ctrl_dll_on值为’1’以打开PHY DLL。</p>
+<p>    3、数据选取脉DQS清除：依照时钟频率和内存的tAC参数正确设置PhyControl1.ctrl_shiftc和PhyControl1.ctrl_offsetcbit位的值。</p>
+<p>    4、设置PhyControl0.ctrl_start位的值为’1’</p>
+<p>    5、设置ConControl，同时关闭auto refresh自动刷新计数器</p>
+<p>    6、设置MemControl，同时关闭所有的power down（休眠模式）。</p>
+<p>    7、设置MemConfig0寄存器。如果有两组内存芯片(比如有8片DDR，这8片DDR是分别挂在Memory Port1和Memory Port2上)，再配置MemConfig1寄存器。</p>
+<p>    8、设置PrechConfig和PwrdnConfig寄存器</p>
+<p>    9、根据内存的tAC参数设置TimingAref,TimingRow, TimingData和TimingPower寄存器</p>
+<p>    10、如果需要QoS标准，配置QosControl0—15和QosConfig0-15寄存器</p>
+<p>    11、等待PhyStatus0.ctrl_locked位变为’1’。检查是否PHY DLL是否已锁</p>
+<p>    12、PHY DLL补偿在内存操作时由PVT(Process, Voltage and Temperature，处理器、电压和温度)变化引起的延迟量。但是，PHY DLL不能因某些可靠的内存操作而切断，除非是工作在低频率下。如果关闭PHY DLL，依照PhyStatus0.ctrl_lock_value[9:2]位的值正确配置PhyControl0.ctrl_force位的值来弥补延迟量(fix delay amount)。清除PhyControl0.ctrl_dll_on位的值来关闭PHY DLL。</p>
+<p>    13、上电后，确定最小值为200us的稳定时钟是否发出</p>
+<p>    14、使用DirectCmd寄存器发出一个NOP命令，保证CKE引脚为高电平</p>
+<p>    15、等最小400ns</p>
+<p>    16、使用DirectCmd寄存器发出一个PALL命令 </p>
+<p>    17、使用DirectCmd寄存器发出一个EMRS2命令，program操作参数 </p>
+<p>    18、使用DirectCmd寄存器发出一个EMRS3命令，program操作参数 </p>
+<p>    19、使用DirectCmd寄存器发出一个EMRS命令来使能内存DLLs </p>
+<p>    20、使用DirectCmd寄存器发出一个MRS命令，重启内存DLL </p>
+<p>    21、使用DirectCmd寄存器发出一个PALL命令 </p>
+<p>    22、使用DirectCmd寄存器发出两个Auto Refresh(自动刷新)命令 </p>
+<p>    23、使用DirectCmd寄存器发出一个MRS命令，program操作参数，不要重启内存DLL </p>
+<p>    24、等待最小200时钟周期 </p>
+<p>    25、使用DirectCmd寄存器发出一个EMRS命令给程序的运行参数。如果OCD校正(Off-Chip Driver，片外驱动调校)没有使用，改善一个EMRS命令去设置OCD校准的默认值。在此之后，发送一个EMRS指令去退出OCD校准模式，继续program操作参数 </p>
+<p>    26、如果有两组DDR芯片，重复14-25步配置chip1的内存，刚刚配置的是chip0，也就是第一组内存芯片 </p>
+<p>    27、配置ConControlto来打开自动刷新计数器 </p>
+<p>    28、如果需要power down(休眠)模式，配置MemControl寄存器。</p>
+<p>初始化过程需要28个小步骤，下面的代码，将28个小步骤划分为4个大部分：</p>
+<ol>
+<li>IO端口驱动强度设置</li>
+<li>初始化PHY DLL</li>
+<li>初始化DMC0</li>
+<li>初始化DDR2 DRAM</li>
+</ol>
+<h3 id="初始化PHY-DLL"><a href="#初始化PHY-DLL" class="headerlink" title="初始化PHY DLL"></a>初始化PHY DLL</h3><p>下图是控制器内部结构的topview，可以从中窥探一下DLL的位置和作用：</p>
+<p><img src="/../../stuff/ddr_phy.png" alt="在这里插入图片描述"></p>
+<p>上图解析：<br>64bit的AXI Channel的左边是CPU，右边就是DMC内部结构。控制命令和数据都是通过AXI总线来与DMC交互，可以看到数据和命令都有相应的缓存和fifo，这是因为CPU的速率非常高，控制器需要buffer将他们存起来。<br>Queue Arbiter是队列仲裁器，对已缓存的bank访问命令进行重排优化<br>AREF Cmd负责自刷新，每隔64MS发送自刷新命令。<br>CPU需要直接对DMC发布命令如MRS&#x2F;EMRS，上下电命令，DMC还有一条APB总线从CPU连接到Functional Register，将命令送入direct cmd<br>经过final arbiter对所有命令和数据进行仲裁<br>latency control是一个很重要的部件，用来控制前面章节解释的所有t延时参数，如CL,AL延时。输入来自timing &amp; configuration information</p>
+<p>命令和时间延迟都有了，那么进入phy interface的都是理想波形，需要在经过DLL的处理才能送到PCB上去。<br>对于低速总线来说，不需要DLL。高速总线上的时序经过PCB以及device自身的部件处理，会有较大的延迟，一般都需要对PCB上信号再经过一定的“变形”才能送到PHY<br>DLL就是负责对返回信号做“变形”（一般用在read场景）</p>
+<p>对physic部分的配置，也就是DLL配置，非常重要，决定了通信成败。DMC和Device都有DLL，但是功能和原理大相径庭。Device下的DLL比较简单，而DMC的DLL更加复杂所以需要详细配置。</p>
+<h3 id="device端DLL"><a href="#device端DLL" class="headerlink" title="device端DLL"></a>device端DLL</h3><p><img src="/../../stuff/DLL_config.png" alt="在这里插入图片描述"></p>
+<p>上图是不带DLL的时序模型，图中DQ是数据线，而DQS是数据锁存信号。可以看到CLK上升沿和DQS上升沿之间（理论上要在DQS上升沿发送，下降沿接收）有一个D参数，这是由于信号在PCB上传输，经过device处理，所造成的延时。</p>
+<p>图中还有一个AL延迟，这是由于数据线一共有很多根，在DQS采集时并不是所有数据线都已经稳定有效了，所以还需要一个AL延迟去做等待。</p>
+<p>实际总的时延是ideally, “these two edges would be aligned”那块的延迟。为了尽量消除这里的时延，需要用到DLL来做调整：</p>
+<p><img src="/../../stuff/ddr_with_dll.png" alt="在这里插入图片描述"><br>上图是加入DLL之后的时序，DQS被向后延迟，一个full时钟周期，直到与CLK同步，这样DQ可以大致地与CLK对齐。</p>
+<p>device的DLL比较简单，硬件自动帮我们做好了。我们只需要知道有这么个原理。</p>
+<h3 id="DMC端DLL"><a href="#DMC端DLL" class="headerlink" title="DMC端DLL"></a>DMC端DLL</h3><p>read情况下的DLL如何工作？</p>
+<p><img src="/../../stuff/s5pv210_read_data_capture.png" alt="在这里插入图片描述"></p>
+<p>我们要在DQ的1&#x2F;4处对数据进行采集，所以原来的DQS必须要经过90°的相位偏移。</p>
+<p>接收读取命令的存储设备在读取延迟（即CAS延迟）后将数据发送到控制器。清除DQS后，PHY使用PHY DLL将DQS相移90度。使用移位的DQS，PHY对读取数据进行采样，并将数据保存到位于PHY内部的读取数据输入FIFO中。然后，控制器在考虑读延迟和读取延迟的情况下，从PHY获取数据，然后将其发送到AXI读通道。</p>
+<p>一种RL之后的额外时序：<br>图中红框中的delay来自phy以及board级别的输入延迟。</p>
+<p><img src="/../../stuff/extra_delay.png" alt="在这里插入图片描述"></p>
+<p>rd_fetch 必须设置为2，兼容慢速device</p>
+<p>存在一个内部DLL，它允许它在读取延迟的确切数量之后发送数据。如果我们假设有最小的或没有板级&#x2F;PHY的输入延迟，如果采样负极性（Q1， Q3采样），由于数据被保存到PHY读取数据输入FIFO中，控制器以“读取延迟+1（读取）”周期将读取数据发送到AXI读取通道。读取周期是使用ConControl设置的。rd_fetch位域。</p>
+<p>write情况下的DLL如何工作？<br>DQS的输出应该延迟90°的相位偏移，由于device的内部模拟电路复杂度不能做很高，所以只能由DMC来设置DLL。</p>
+<h3 id="如何配置DLL？"><a href="#如何配置DLL？" class="headerlink" title="如何配置DLL？"></a>如何配置DLL？</h3><p>根据手册由：<br>“<br>根据时钟频率正确配置PhyControl0.ctrl_start_point和PhyControl0.ctrl_inc的值。配置的PhyControl0.ctrl_dll_on值为’1’以打开PHY DLL。<br>数据选取脉DQS清除：依照时钟频率和内存的tAC参数正确设置PhyControl1.ctrl_shiftc和PhyControl1.ctrl_offsetcbit位的值。<br>”</p>
+<p>实际是配置如下三个寄存器，以及其位域：<br><img src="/../../stuff/PHY_DLL_REGISTER.png" alt="在这里插入图片描述"> </p>
+<p><img src="/../../stuff/dll_ctrl_reg.png" alt="在这里插入图片描述"> </p>
+<p>PhyControl0:<br>ctrl_start是激活<br>ctrl_dll_on值为是总开关<br>ctrl_start_point是相位偏移起始点，手册建议0x10<br>ctrl_inc是每次相位偏移的size，手册建议0想0<br>因为DLL是模拟电路，不能像数字电路那样立即配置即生效。要经过反馈电路慢慢调节，所以需要配置inc和start_point.</p>
+<p>PhyControl1:<br>ctrl_shiftc:粗调，DQS Cleaing，手册要求配置0x110，即T&#x2F;2<br>ctrl_offsetc:细调，一般配置为0</p>
+<p>由于在DMC发送命令或数据，到memory device，再到memory device给出DMC反馈，这一路上是有各种延迟的，如I&#x2F;O延迟，Bonding延迟，PKG延迟，Board延迟。为了知晓这一路延迟花了多少时间，需要有一个DQS Cleaning电路。<br>存在一个经验值，认为CK和DQS&#x2F;DQ之间，有一个T&#x2F;2的延迟，手册推荐也是配置T&#x2F;2。</p>
+<h3 id="代码以及注释："><a href="#代码以及注释：" class="headerlink" title="代码以及注释："></a>代码以及注释：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;s5pv210.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// MemControlBL=4, 1Chip, DDR2 Type, dynamic self refresh, force precharge, dynamic power down off</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMC0_MEMCONTROL0x00202400</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// MemConfig0256MB config, 8 banks,Mapping Method[12:15]0:linear, 1:linterleaved, 2:Mixed</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMC0_MEMCONFIG_00x20F00313</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// MemConfig1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMC0_MEMCONFIG_10x00F00313</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">// TimingAref   7.8us*133MHz=1038(0x40E), 100MHz=780(0x30C), 20MHz=156(0x9C), 10MHz=78(0x4E) 200MHZ=0x618</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMC0_TIMINGA_REF        0x00000618</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// TimingRow    for @200MHz</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMC0_TIMING_ROW         0x2B34438A</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// TimingData   CL=3</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMC0_TIMING_DATA        0x24240000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// TimingPower</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMC0_TIMING_PWR         0x0BDC0343      </span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">.global sdram_init</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">sdram_init:</span><br><span class="line"></span><br><span class="line"><span class="comment">//IO端口驱动强度设置，对DMC所使用的IO端口进行驱动能力配置。</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">这个参数用来控制内存数据总线的信号强度，数值越高代表信号强度越高，增加信号强度可以提高超频的稳定性。</span></span><br><span class="line"><span class="comment">但是并非信号强度高就一定好。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 设置DMC0 Drive Strength (Setting 2X)</span></span><br><span class="line"></span><br><span class="line">ldrr0, =ELFIN_GPIO_BASE</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_0DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_1DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_2DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_3DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_4DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_5DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_6DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0000AAAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_7DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00002AAA</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #MP1_8DRV_SR_OFFSET]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 初始化PHY DLL, Device和DMC之间的DLL都要配置</span></span><br><span class="line"></span><br><span class="line">ldrr0, =APB_DMC_0_BASE</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 3: PhyControl0 DLL parameter setting, manual 0x00101000</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00101000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_PHYCONTROL0]</span><br><span class="line"></span><br><span class="line"><span class="comment">//PhyControl1 DLL parameter setting, LPDDR/LPDDR2 Case</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00000086</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_PHYCONTROL1]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//step 2: PhyControl0 DLL on</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00101002</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_PHYCONTROL0]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 4: PhyControl0 DLL start</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00101003</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_PHYCONTROL0]</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">find_lock_val:</span><br><span class="line"></span><br><span class="line"><span class="comment">//Loop until DLL is locked</span></span><br><span class="line"></span><br><span class="line">ldrr1, [r0, #DMC_PHYSTATUS]</span><br><span class="line"></span><br><span class="line">andr2, r1, #<span class="number">0x7</span></span><br><span class="line"></span><br><span class="line">cmpr2, #<span class="number">0x7</span></span><br><span class="line"></span><br><span class="line">bnefind_lock_val</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">//Force Value locking</span></span><br><span class="line"></span><br><span class="line">andr1, #<span class="number">0x3fc0</span></span><br><span class="line"></span><br><span class="line">movr2, r1, LSL #<span class="number">18</span></span><br><span class="line"></span><br><span class="line">orrr2, r2, #<span class="number">0x100000</span></span><br><span class="line"></span><br><span class="line">orrr2 ,r2, #<span class="number">0x1000</span></span><br><span class="line"></span><br><span class="line">orrr1, r2, #<span class="number">0x3</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_PHYCONTROL0]</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 初始化DMC0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//step 5: ConControl auto refresh off</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0FFF2010</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_CONCONTROL]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 6: MemControl BL=4, 1 chip, DDR2 type, dynamic self refresh, force precharge, dynamic power down off</span></span><br><span class="line"></span><br><span class="line">ldrr1, =DMC0_MEMCONTROL</span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_MEMCONTROL]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 7: MemConfig0 256MB config, 8 banks,Mapping Method[12:15]0:linear, 1:linterleaved, 2:Mixed</span></span><br><span class="line"></span><br><span class="line">ldrr1, =DMC0_MEMCONFIG_0</span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_MEMCONFIG0]</span><br><span class="line"></span><br><span class="line"><span class="comment">//MemConfig1</span></span><br><span class="line"></span><br><span class="line">ldrr1, =DMC0_MEMCONFIG_1</span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_MEMCONFIG1]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 8:PrechConfig</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0xFF000000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_PRECHCONFIG]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 9:TimingAref7.8us//133MHz=1038(0x40E), 100MHz=780(0x30C), 20MHz=156(0x9C), 10MHz=78(0x4E)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =DMC0_TIMINGA_REF</span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_TIMINGAREF]</span><br><span class="line"></span><br><span class="line"><span class="comment">//TimingRowfor //200MHz</span></span><br><span class="line"></span><br><span class="line">ldrr1, =DMC0_TIMING_ROW</span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_TIMINGROW]</span><br><span class="line"></span><br><span class="line"><span class="comment">//TimingDataCL=4</span></span><br><span class="line"></span><br><span class="line">ldrr1, =DMC0_TIMING_DATA</span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_TIMINGDATA]</span><br><span class="line"></span><br><span class="line"><span class="comment">//TimingPower</span></span><br><span class="line"></span><br><span class="line">ldrr1, =DMC0_TIMING_PWR</span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_TIMINGPOWER]</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">// 4. 初始化DDR2 DRAM  DIRECTCMD的配置，像device写命令</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip0 Deselect</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x07000000</span><span class="comment">//NOP</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 16:DirectCmdchip0 PALL</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x01000000</span><span class="comment">//</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 17:DirectCmdchip0 EMRS2</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00020000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 18:DirectCmdchip0 EMRS3</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00030000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 19:DirectCmdchip0 EMRS1 (MEM DLL on, DQS# disable)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00010400</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 20:DirectCmdchip0 MRS (MEM DLL reset) CL=4, BL=4</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00000542</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip0 PALL</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x01000000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip0 REFA</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x05000000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip0 REFA</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x05000000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip0 MRS (MEM DLL unreset)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00000442</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip0 EMRS1 (OCD default)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00010780</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip0 EMRS1 (OCD exit)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00010400</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 Deselect</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x07100000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 PALL</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x01100000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 EMRS2</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00120000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 EMRS3</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00130000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 EMRS1 (MEM DLL on, DQS# disable)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00110400</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 MRS (MEM DLL reset) CL=4, BL=4</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00100542</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 PALL</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x01100000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 REFA</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x05100000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 REFA</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x05100000</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 MRS (MEM DLL unreset)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00100442</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 EMRS1 (OCD default)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00110780</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//DirectCmdchip1 EMRS1 (OCD exit)</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00110400</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_DIRECTCMD]</span><br><span class="line"></span><br><span class="line"><span class="comment">//ConControlauto refresh on</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x0FF02030</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_CONCONTROL]</span><br><span class="line"></span><br><span class="line"><span class="comment">//PwrdnConfig</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0xFFFF00FF</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_PWRDNCONFIG]</span><br><span class="line"></span><br><span class="line"><span class="comment">//MemControlBL=4, 1 chip, DDR2 type, dynamic self refresh, force precharge, dynamic power down off</span></span><br><span class="line"></span><br><span class="line">ldrr1, =<span class="number">0x00202400</span></span><br><span class="line"></span><br><span class="line">strr1, [r0, #DMC_MEMCONTROL]</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">movpc, lr</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/11/01/ddr/DDR_SDRAM4/" rel="prev" title="DDR内存原理 - 4">
+                  <i class="fa fa-angle-left"></i> DDR内存原理 - 4
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/11/04/ddr/DDR_DQS/" rel="next" title="DDR - DQS">
+                  DDR - DQS <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

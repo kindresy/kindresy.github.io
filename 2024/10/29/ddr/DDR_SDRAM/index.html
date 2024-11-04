@@ -56,7 +56,7 @@
 <meta property="og:image" content="https://kindresy.github.io/stuff/v210_system.png">
 <meta property="og:image" content="https://kindresy.github.io/stuff/ddr_buy_id.png">
 <meta property="article:published_time" content="2024-10-29T09:03:57.313Z">
-<meta property="article:modified_time" content="2024-10-30T13:31:17.594Z">
+<meta property="article:modified_time" content="2024-11-04T12:04:32.595Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://kindresy.github.io/stuff/ddr_rate_table.png">
@@ -155,7 +155,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-count">17</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -224,7 +224,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2024-10-30 21:31:17" itemprop="dateModified" datetime="2024-10-30T21:31:17+08:00">2024-10-30</time>
+      <time title="Modified: 2024-11-04 20:04:32" itemprop="dateModified" datetime="2024-11-04T20:04:32+08:00">2024-11-04</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -272,7 +272,7 @@
 <p>假设，往bit line写入低电平，0<br>如果word line被选通，那么三极管导通，那么电容即便有电，也会放电，相当于写0.</p>
 <p>这里图中没有指明word line和bit line的宽度。我们假设都是256bit，2的8次方。行列地址的范围都是从0 ~ 0xff<br>给出一个地址0x01FE，0x01选中row decoder上的一条，0xfe选中columns decoder上的一条，可以定位到memory array上一个storage cell。<br>数据总是从bit line上被感知，从而缓存到buffer，也总是从bit line上被写入。data in&#x2F;out buffers其实也只有一个bit的大小。</p>
 <p><img src="/../../stuff/DDR_WORK_MECH.png" alt="在这里插入图片描述"></p>
-<p>上面这张图，一次只能读写一个bit，下面来一次进化：<br>叠加多个data buffers，sense Amps,Memory array，但是行列解码器没有叠加，都只有一份。可以同时输入输出多个bit的内容，由于有多个data buffers，所以可以同时缓存多个bit。<br>由于只有一份Column Decoder和Row Decoder，在每个memory array上，选中的cell位置都是一样的。</p>
+<p>上面这张图，一次只能读写一个bit，下面来一次进化：<br>叠加多个data buffers，sense Amps,Memory array，可以同时输入输出多个bit的内容，由于有多个data buffers，所以可以同时缓存多个bit。<br>由于只有一份Column Decoder和Row Decoder，在每个memory array上，选中的cell位置都是一样的。</p>
 <p><img src="/../../stuff/multi_mem_array.png" alt="在这里插入图片描述"></p>
 <h3 id="Bank"><a href="#Bank" class="headerlink" title="Bank"></a>Bank</h3><p>我们将上图中，这种x2 DRAM&#x2F;x4 DRAM&#x2F;x8 DRAM的这种若干个array叠加的单元，叫做一个Bank</p>
 <h3 id="Memory-Device"><a href="#Memory-Device" class="headerlink" title="Memory Device"></a>Memory Device</h3><p><img src="/../../stuff/ddr_top_viem.png" alt="在这里插入图片描述"></p>
@@ -290,9 +290,10 @@
 <p><img src="/../../stuff/v210_one_dimms.png" alt="在这里插入图片描述"></p>
 <p>它有一个由四个memory device组成的rank。由于v210的memory device，由8个banks组成，可以同时输出8bit数据。所以这里一个rank，可以同时输出32bit。可以看到MC到每个memory device的数据线是分离的，而地址线和控制线是共用的，即MC给出一个地址，会同时输出到是个memory device中。给出一个片选，这四块芯片也都会同时被选中。</p>
 <h3 id="V210内存原理图"><a href="#V210内存原理图" class="headerlink" title="V210内存原理图"></a>V210内存原理图</h3><p>v210一共有四块下图这样的内存芯片，其中：<br>ADDR0 ~ ADDR13是地址线，四块芯片共用<br>Xm1BA0 Xm1BA1 Xm1CSn1&#x2F;BA2是控制线，这是四颗总线公用的，它们用来选择使用各个memory device里的哪个bank，三根线有2^3&#x3D;8种选择，对应8个bank。</p>
-<p>Xm1DQSn0 Xm1DQS0是每个芯片独立的，暂时不清楚是做什么用的(TODO:<br>    现在知道了，用于DDR模式，MC在数据有效时toggle DQS，DQS通知Memory device可以锁存数据。<br>)</p>
+<p>Xm1DQSn0 Xm1DQS0是每个芯片独立的，是数据选通信号，MC在数据有效时toggle DQS，DQS通知Memory device可以锁存数据。(为什么需要DQS：<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41155581/article/details/127122067">https://blog.csdn.net/weixin_41155581/article/details/127122067</a>)</p>
 <p>nCK和CK是时钟信号，这是一组差分信号。</p>
-<p>nRAS&#x2F;nCAS，nCS&#x2F;CKE&#x2F;nWE都是行列地址的strobe信号。他们都是公用的</p>
+<p>nRAS：行地址选择；<br>nCAS：列地址选择；<br>nCS：片选；<br>CKE：命令有效时钟；<br>nWE：写信号；</p>
+<p>都是行列地址的strobe信号。他们都是公用的</p>
 <p>DATA0 ~ DATA7是数据线，这是每个芯片独立的。V210每颗芯片有8条data线，4颗芯片形成一个rank，总共32条data线。即，同时可以读写32bit数据。</p>
 <p>这也证实了上面说的，每个device的data线是独立的，控制线和地址线是公用的。</p>
 <p><img src="/../../stuff/v210_ddr_sch.png" alt="在这里插入图片描述"></p>
