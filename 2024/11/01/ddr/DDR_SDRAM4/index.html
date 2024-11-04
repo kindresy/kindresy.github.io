@@ -20,16 +20,23 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="DDR MRS和EMRS寄存器">
+    <meta name="description" content="DDR MRS和EMRS寄存器，时序模型，刷新指令，时间参数解释表格">
 <meta property="og:type" content="article">
 <meta property="og:title" content="DDR内存原理 - 4">
 <meta property="og:url" content="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM4/index.html">
 <meta property="og:site_name" content="Coffe Pattern">
-<meta property="og:description" content="DDR MRS和EMRS寄存器">
+<meta property="og:description" content="DDR MRS和EMRS寄存器，时序模型，刷新指令，时间参数解释表格">
 <meta property="og:locale">
 <meta property="og:image" content="https://kindresy.github.io/stuff/DDR_MRS_EMRS.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/EMRS_BITFIELD.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/posted_cas.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/detail_seq_read.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_refresh.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/refresh_time_table.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/rrd_faw.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/arg_explain_table.png">
 <meta property="article:published_time" content="2024-11-01T13:53:31.265Z">
-<meta property="article:modified_time" content="2024-11-01T13:57:17.429Z">
+<meta property="article:modified_time" content="2024-11-04T05:52:53.249Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://kindresy.github.io/stuff/DDR_MRS_EMRS.png">
@@ -102,7 +109,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           Table of Contents
@@ -115,6 +122,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MRS%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">MRS配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EMRS%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">EMRS配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Post-CAS"><span class="nav-number">3.</span> <span class="nav-text">Post CAS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">时序模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%86%99"><span class="nav-number">4.1.</span> <span class="nav-text">读写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%B7%E6%96%B0"><span class="nav-number">4.2.</span> <span class="nav-text">刷新</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A9%BA%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4-NOP"><span class="nav-number">5.</span> <span class="nav-text">空操作指令  NOP</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8B%E7%94%B5%E6%8C%87%E4%BB%A4"><span class="nav-number">6.</span> <span class="nav-text">下电指令</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RRD%E5%92%8CFAW"><span class="nav-number">7.</span> <span class="nav-text">RRD和FAW</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%A7%A3%E9%87%8A%E8%A1%A8%E6%A0%BC"><span class="nav-number">8.</span> <span class="nav-text">参数解释表格</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -174,7 +182,7 @@
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
       <meta itemprop="name" content="DDR内存原理 - 4 | Coffe Pattern">
-      <meta itemprop="description" content="DDR MRS和EMRS寄存器">
+      <meta itemprop="description" content="DDR MRS和EMRS寄存器，时序模型，刷新指令，时间参数解释表格">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -188,9 +196,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2024-11-01 21:53:31 / Modified: 21:57:17" itemprop="dateCreated datePublished" datetime="2024-11-01T21:53:31+08:00">2024-11-01</time>
+      <time title="Created: 2024-11-01 21:53:31" itemprop="dateCreated datePublished" datetime="2024-11-01T21:53:31+08:00">2024-11-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-11-04 13:52:53" itemprop="dateModified" datetime="2024-11-04T13:52:53+08:00">2024-11-04</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -212,16 +226,57 @@
     </span>
 </div>
 
-            <div class="post-description">DDR MRS和EMRS寄存器</div>
+            <div class="post-description">DDR MRS和EMRS寄存器，时序模型，刷新指令，时间参数解释表格</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>手册第五页</p>
-<p>模式寄存器中的数据控制着 DDR2 SDRAM的操作模式.它控制着 CAS 延迟, 突发长度, 突发顺序, 测试模式, DLL复位, WR等各种选项，支持着 DDR2&#x2F;SDRAM 的各种应用. 模式寄存器的默认值没有被定义, 所以上电之后必须按规定的时序规范来设定模式寄存器的值 . 通过将 CS, RAS, CAS, WE, BA0 ，BA1置低来发布模式寄存器设定命令, 操作数通过地址脚 A0 ~ A15同步送出. DDR2 SDRAM 在写模式寄存器之前，应该通过拉高CKE而完成了所有簇的预充电。模式寄存器设定命令的命令周期 (tMRD)必须满足完成对模式寄存器的写操作。在进行正常操作时，只要所有的簇都已经处于预充电完成状态，模式寄存器都可以使用同一命令重新设定. 模式寄存器不同的位表示不同的功能. A0 ~ A2 设定突发长度是4还是8。 突发长度的译码规则与DDR SDRAM相同. A3定义了突发地址顺序。A4 ~ A6定义了CAS延迟。. DDR2不支持半时钟延迟。 A7 设定测试模式. A8设定 DLL 复位。 对通常的 MRS操作，A7必须设定为低。A9 ~ A11定义了写恢复时间WR。</p>
+    <div class="post-body" itemprop="articleBody"><h1 id="MRS配置"><a href="#MRS配置" class="headerlink" title="MRS配置"></a>MRS配置</h1><p>以下内容在 DDR2 手册第五页</p>
+<p>模式寄存器中的数据控制着 DDR2 SDRAM的操作模式.它控制着 CAS 延迟, 突发长度, 突发顺序, 测试模式, DLL复位, WR等各种选项，支持着 DDR2&#x2F;SDRAM 的各种应用. 模式寄存器的默认值没有被定义, 所以上电之后必须按规定的时序规范来设定模式寄存器的值 . 通过将 CS, RAS, CAS, WE, BA0 ，BA1置低来发布模式寄存器设定命令, 操作数通过地址脚 A0 ~ A15同步送出. DDR2 SDRAM 在写模式寄存器之前，应该通过拉高CKE而完成了所有簇的预充电。模式寄存器设定命令的命令周期 (tMRD)必须满足完成对模式寄存器的写操作。在进行正常操作时，只要所有的簇都已经处于预充电完成状态，模式寄存器都可以使用同一命令重新设定. 模式寄存器不同的位表示不同的功能. </p>
+<ol>
+<li>A0 ~ A2 设定突发长度是4还是8。 突发长度的译码规则与DDR SDRAM相同. </li>
+<li>A3定义了突发地址顺序。访问内容在Bank中的分布。顺序模式会将连续地址访问同一个bank中，交错模式会将连续地址分部到每个bank中。现在使用顺序模式比较常见</li>
+<li><strong>A4 ~ A6</strong>定义了<strong>CAS延迟</strong>。DDR2不支持半时钟延迟。 (Column Access Strobe，发布列地址到总线上开始输出数据之间的延迟)。tcas在控制器和device都可以配置，K4T1G164QE文档中指示CAS Latency可以配置：3，4，5，6。单位是时钟周期。device端就是通过MRS寄存器写A4-A6。两端必须配置相等的值，如果错开的话读写绝对会失败。</li>
+<li>A7 设定测试模式. </li>
+<li>A8设定 DLL 复位。 对通常的 MRS操作，A7必须设定为低。</li>
+<li>A9 ~ A11定义了写恢复时间WR。（write recovery, 从数据写入到真正写入到电容里，到precharge之前）。随着ddr频率升高，写周期时间逐渐延长，DDR2-800时可以配置为6个时钟周期。因为ddr的升级仅仅时带宽的升级，需要等待更多的时钟周期。</li>
+<li>BA1 BA0：控制写入MRS还是EMRS</li>
+</ol>
 <p><img src="/../../stuff/DDR_MRS_EMRS.png" alt="在这里插入图片描述"></p>
+<p>如何构造MRS寄存器值，并且发送到设备端呢？DMC为我们设计好了：<br>只需要往DMC的一个寄存器里写入命令和数据，也即 Memory Direct Command Register：<br>MDCR可以参考S5PV210_VserManual</p>
+<h1 id="EMRS配置"><a href="#EMRS配置" class="headerlink" title="EMRS配置"></a>EMRS配置</h1><p>位域解析：</p>
+<ol>
+<li>A0：DLL使能，DLL是delay latency loop，延迟环。</li>
+<li>A1是输出驱动能力配置，一般选0，满驱动能力</li>
+<li>A3 - A5是配置AL，也就是额外的延迟。这也是个比较重要的参数。tal + tcas(cl) &#x3D; trl&#x2F;twl。延迟发布列地址到数据实际发布之间的时间，这个参数是为了兼容慢速设备，附加AL延迟。</li>
+<li>多rank时，高速情况下，各rank上的阻抗是不一样的，RTT参数用于配置每个rank上的终端电阻。S5PV210只有一条rank，可以不配置。</li>
+<li>OCD校准，一般不用</li>
+<li>A10 A11：用于使能DM&#x2F;RDQS。DM：Data Mask，S5VP210的DM和RDQS是公用的。使用这个A10 A11组合来选择作为哪一个使用。一般都配置为DM。也可以配置DQS和DQS反是否都使能。（DDR2 SDRAM 管脚时序或者是单端的或者是差分的，这一点由扩展模式寄存器的EMRS的 “激活 DQS” 模式位来决定。）</li>
+<li>A12：用于测试，一般都是0。</li>
+</ol>
+<p><img src="/../../stuff/EMRS_BITFIELD.png" alt="在这里插入图片描述"></p>
+<h1 id="Post-CAS"><a href="#Post-CAS" class="headerlink" title="Post CAS"></a>Post CAS</h1><p>K4的芯片是支持Posted CAS的</p>
+<p>登记 CAS 操作命令可以使DDR2 SDRAM的数据线有效的保持足够的带宽 。在此操作中, <strong>DDR2 SDRAM 允许在&#x2F;RAS簇激活命令之后立即发布一个CAS读或者写命令</strong>(或者是在RAS-CAS 延迟时间tRCD周期内的任意时间)。在真正在芯片内部发布之前，命令要被锁定一个附加延迟时间 (AL)。 读延迟(RL)等于AL和CAS 延迟（CL）的和。因此如果用户选择在tRCD最小值之前发布读或者写命令的话，AL(大于0)一定要先写进EMR(1)。**写延迟 (WL) 始终都被定义成 RL - 1(读延迟 -1)**，这里读延迟被定义为附加延迟和CAS延迟的和(RL&#x3D;AL+CL)。</p>
+<p><img src="/../../stuff/posted_cas.png" alt="在这里插入图片描述"></p>
+<h1 id="时序模型"><a href="#时序模型" class="headerlink" title="时序模型"></a>时序模型</h1><h2 id="读写"><a href="#读写" class="headerlink" title="读写"></a>读写</h2><p><img src="/../../stuff/detail_seq_read.png" alt="在这里插入图片描述"></p>
+<p>RC: Row Cycle<br>Post CAS可以让col read指令紧跟着row acc指令发布，同样的prec指令也可以提前。<br>RCD: Row to Column command delay<br>RAS: Row Access Strobe<br>RP: ROW precharge<br>RL: t_al + t_cl</p>
+<p>手册19页开始有几种读写，读写连续等模式下的时序图，需要重点掌握。</p>
+<h2 id="刷新"><a href="#刷新" class="headerlink" title="刷新"></a>刷新</h2><p>refresh是定期打开wordline进行充电，一般来说每个bit的充电时间间隔是64ms。refresh之后还需要一次precharge，使bitline恢复Vcc&#x2F;2</p>
+<p><img src="/../../stuff/ddr_refresh.png" alt="在这里插入图片描述"></p>
+<p>这里的RC:Row Cycle，是指打开wordline对所有bank访问，到对所有bank进行预充电，之间的时间延迟。</p>
+<p>两次RC加上一些杂时间，等于<strong>RFC</strong>时间，即refresh cycle time，每完成一次行刷新所需时间。<br>(由于一个bank内可能有很多行，所以DMC会一次刷新两个行，减少指令次数。)</p>
+<p>RFI: average periodic refresh interval 平均周期刷新间隔。</p>
+<p>1Gbits &#x3D; 8(banks) x 16k(row) x 8k(col)</p>
+<p>每次刷新两行，需要发布refresh指令次数：<br>    16k &#x2F; 2 &#x3D; 8k</p>
+<p>自刷新时间表格：<br><img src="/../../stuff/refresh_time_table.png" alt="在这里插入图片描述"></p>
+<p>一次RFC约为 64ms:<br>    平均自刷新时间RFI &#x3D; 64ms &#x2F; 8k &#x3D; 7.8us</p>
+<h1 id="空操作指令-NOP"><a href="#空操作指令-NOP" class="headerlink" title="空操作指令  NOP"></a>空操作指令  NOP</h1><p>空操作指令主要应用于当DDR2SDRAM处于空闲或等待的状态时。空操作指令的目的是为了防止DDR2 SDRAM在运行期间执行任何不需要的指令。<br>必须在CS,RAS,CAS,且时钟处于上升沿时，才能执行无操作指令。一个空操作指令将不会终止之前的exe文件切割操作，如一个读写周期。</p>
+<h1 id="下电指令"><a href="#下电指令" class="headerlink" title="下电指令"></a>下电指令</h1><p>手册32页</p>
+<p>CKE为低时（随NOP或DESELET指令），同时进入下电模式。当执行模式寄存器或扩展寄存器指令，或读写超作时，CKE不能为低。其他超作时，如行激<br>活，预冲电，自充或者自刷新，CKE可以为低；但是直到这些操作结束后，才能施加下电IDD spec。详细情况在时序图中显示。<br>进入下电模式后，DLL应处于锁定状态。否则在退出下电模式时DLL应该被重启。只要DRAM控制器与DRAM规范兼容，DRAM设计保证所有AC，DC时序和电<br>压要求以及正确的DLL操作伴随CKE精确操作。下图显示两个CKE应用</p>
+<h1 id="RRD和FAW"><a href="#RRD和FAW" class="headerlink" title="RRD和FAW"></a>RRD和FAW</h1><p>一个device，含有多个bank，可以再bank0在precharge时同时打开另一个bank，利用precharge时间。<br>由于打开wordline时非常耗电，所以一般只能同时打开4个bank。比如210是8k个col，一次wordline打开，8kbit全部选通，电流相对而言会非常大。<br><img src="/../../stuff/rrd_faw.png" alt="在这里插入图片描述"></p>
+<h1 id="参数解释表格"><a href="#参数解释表格" class="headerlink" title="参数解释表格"></a>参数解释表格</h1><p><img src="/../../stuff/arg_explain_table.png" alt="在这里插入图片描述"></p>
 
     </div>
 
