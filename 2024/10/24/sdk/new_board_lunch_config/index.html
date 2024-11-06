@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="新增SDK Lunch配置文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Add SDK Lunch Config">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/24/sdk/new_board_lunch_config/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="新增SDK Lunch配置文件">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/stuff/build_chip_config.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/env_board.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/chip_env.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/lunch_result.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/mkimage_genimage.png">
+<meta property="article:published_time" content="2024-10-24T02:15:16.000Z">
+<meta property="article:modified_time" content="2024-11-06T13:55:17.749Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/build_chip_config.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/10/24/sdk/new_board_lunch_config/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/24/sdk/new_board_lunch_config/","path":"2024/10/24/sdk/new_board_lunch_config/","title":"Add SDK Lunch Config"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Add SDK Lunch Config | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9Elunch%E9%85%8D%E7%BD%AE%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">如何新增lunch配置？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%A1%AE%E5%AE%9A%E6%96%B0%E5%A2%9E%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E6%9D%A5%E6%BA%90%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">如何确定新增配置文件的来源？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.</span> <span class="nav-text">实际操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AE%E8%AE%A4%E9%85%8D%E7%BD%AE%E6%9D%A5%E6%BA%90"><span class="nav-number">2.2.1.</span> <span class="nav-text">确认配置来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E5%8A%A8build%E7%9B%AE%E5%BD%95"><span class="nav-number">2.2.2.</span> <span class="nav-text">改动build目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#add-lunch-combo-sh-env-chip-sh-%E5%92%8C-board-env-evb-v1p0-debug-64-sh%E6%89%A7%E8%A1%8C%E9%80%BB%E8%BE%91-%E6%89%A7%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">add_lunch_combo.sh, env_chip.sh 和 board&#x2F;env_evb_v1p0_debug_64.sh执行逻辑 执行逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#genimage-sh%E6%89%A7%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">genimage.sh执行逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E5%8A%A8build%E7%9B%AE%E5%BD%95%E7%9A%84%E8%AF%A6%E7%BB%86%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">改动build目录的详细操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E5%8A%A8uboot%E7%9B%AE%E5%BD%95"><span class="nav-number">2.2.3.</span> <span class="nav-text">改动uboot目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E5%8A%A8uboot%E7%9B%AE%E5%BD%95%E7%9A%84%E8%AF%A6%E7%BB%86%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">改动uboot目录的详细操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E5%8A%A8kernel%E7%9B%AE%E5%BD%95%E7%9A%84%E8%AF%A6%E7%BB%86%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">改动kernel目录的详细操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5lunch%E6%B7%BB%E5%8A%A0%E6%98%AF%E5%90%A6%E6%88%90%E5%8A%9F"><span class="nav-number">2.2.4.</span> <span class="nav-text">检查lunch添加是否成功</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/sdk/new_board_lunch_config/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Add SDK Lunch Config | Coffe Pattern">
+      <meta itemprop="description" content="新增SDK Lunch配置文件">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Add SDK Lunch Config
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-10-24 10:15:16" itemprop="dateCreated datePublished" datetime="2024-10-24T10:15:16+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-11-06 21:55:17" itemprop="dateModified" datetime="2024-11-06T21:55:17+08:00">2024-11-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sdk/" itemprop="url" rel="index"><span itemprop="name">sdk</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">新增SDK Lunch配置文件</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><p>在Post-Sillicon的后期，常常有这样的需求：在我们已有SDK的构建体系和源码上，针对一个新的设备，创建其对应的环境变量以及板级配置，并且使当前的编译体系能够通过source -&gt; lunch切换到这个新设备的环境变量，通过运行build.sh编译出该设备的相关固件。</p>
+<p>这个过程涉及到多个目录的修改，主要有：</p>
+<ul>
+<li>build</li>
+<li>uboot</li>
+<li>kernel</li>
+<li>prebuilts</li>
+</ul>
+<p>（我们这里不讨论对app和lib的支持）。</p>
+<p>其中build目录提供了source -&gt; lunch这个过程的支持，用于切换环境变量，我们需要添加一些脚本文件导出对应单板的编译配置，build.sh执行编译过程中将会使用这些编译配置来决定编译uboot下哪一套dts，哪一个defconfig，以及使用prebuilts下哪一个ddr初始化固件，哪一套rootfs。</p>
+<p>uboot和kernel目录主要需要加入新设备的设备树配置，默认编译配置defconfig。相比kernel，uboot的配置文件还要新建its文件和uboot环境变量头文件。its文件主要用于指导mkimage工具对kernel,fdt,ramdisk等镜像进行打包，uboot环境变量头文件用于存储uboot命令行下的启动命令，分区表，传递给内核的boot参数等关键信息。</p>
+<p>prebuilts目录主要需要加入正确的ddr初始化固件。</p>
+<h1 id="如何新增lunch配置？"><a href="#如何新增lunch配置？" class="headerlink" title="如何新增lunch配置？"></a>如何新增lunch配置？</h1><h2 id="如何确定新增配置文件的来源？"><a href="#如何确定新增配置文件的来源？" class="headerlink" title="如何确定新增配置文件的来源？"></a>如何确定新增配置文件的来源？</h2><p>一个设备的硬件信息主要由两部分决定：</p>
+<ol>
+<li>CPU型号: 目前已流片的为tx5215cv200 tx5215dv200 tx5215dv300 tx5239dv200 tx5336av200等</li>
+<li>单板类型：evb 88pin的单板，evb 132 pin的单板，ipc 枪机单板，ptz 云台球机单板，其他客户的单板<br>针对客户适配自己的板类型，一般都是变更单板类型，cpu型号直接用目前已实现的就行。</li>
+</ol>
+<p>新增lunch的单板类型，在硬件上与过去哪一个单板类似，<strong>可以咨询硬件部门</strong>，后续新增文件就可以从对应单板上拷贝。</p>
+<h2 id="实际操作"><a href="#实际操作" class="headerlink" title="实际操作"></a>实际操作</h2><p>下面以tx5112dv00_aov单板为说明介绍如何新增lunch号</p>
+<h3 id="确认配置来源"><a href="#确认配置来源" class="headerlink" title="确认配置来源"></a>确认配置来源</h3><p>和硬件部门确认，tx5112dv300_aov单板的硬件，与tx5112cv300_evb类似，所以下面的配置文件皆复制于tx5112cv300_evb相关的配置</p>
+<h3 id="改动build目录"><a href="#改动build目录" class="headerlink" title="改动build目录"></a>改动build目录</h3><p>1、进入build&#x2F;device目录，该目录下的所有目录都以芯片型号命名，各自存储了对应CPU的环境变量信息，每个目录下的结构也都类似，如tx5112cv300&#x2F;下有一个board目录，以及一些.sh脚本。</p>
+<p>board目录下存储了以tx5112cv300这颗芯片制作的所有单板的环境变量文件。如 env_aio_v1p0_debug_32.sh是aio板的环境变量文件，env_evb132_v1p0_debug_32.sh是qfn132封装的evb板的环境变量文件…</p>
+<p>与board目录同目录下的sh文件有:</p>
+<ol>
+<li>add_lunch_combo.sh </li>
+<li>env_chip.sh </li>
+<li>export_driver.sh </li>
+<li>genimage.sh </li>
+<li>S11load_ko</li>
+</ol>
+<p>先来了解以下以上脚本的运作逻辑:</p>
+<h4 id="add-lunch-combo-sh-env-chip-sh-和-board-env-evb-v1p0-debug-64-sh执行逻辑-执行逻辑"><a href="#add-lunch-combo-sh-env-chip-sh-和-board-env-evb-v1p0-debug-64-sh执行逻辑-执行逻辑" class="headerlink" title="add_lunch_combo.sh, env_chip.sh 和 board&#x2F;env_evb_v1p0_debug_64.sh执行逻辑 执行逻辑"></a>add_lunch_combo.sh, env_chip.sh 和 board&#x2F;env_evb_v1p0_debug_64.sh执行逻辑 执行逻辑</h4><p>在build目录下执行source envsetup.sh命令时，将会有以下调用：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">envsetup.sh</span><br><span class="line">    TARGET_BUILD_DIR=<span class="variable">$&#123;TARGET_TOP_DIR&#125;</span>/build</span><br><span class="line">    find_chip_lunch</span><br><span class="line">        <span class="built_in">cd</span> <span class="variable">$&#123;TARGET_BUILD_DIR&#125;</span>/device</span><br><span class="line">        <span class="keyword">for</span> chip_fold <span class="keyword">in</span> $(<span class="built_in">ls</span>)</span><br><span class="line">            <span class="built_in">local</span> add_lunch=<span class="variable">$&#123;chip_fold&#125;</span>/add_lunch_combo.sh</span><br><span class="line"></span><br><span class="line">            <span class="built_in">source</span> <span class="variable">$&#123;add_lunch&#125;</span></span><br><span class="line"></span><br><span class="line">add_lunch_combo.sh</span><br><span class="line">    add_lunch_combo 713.tsingmicro_tx5112cv300_evb132_v1p0_debug_32</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>首先将TARGET_BUILD_DIR变量复制为当前SDK的build目录，调用find_chip_lunch函数，进入device目录，遍历当前目录下所有的chip_fold目录，执行source add_lunch_combo.sh脚本</p>
+<p>add_lunch_combo将参数”713.tsingmicro_tx5112cv300_evb132_v1p0_debug_32”将”713”拆出来, 在envsetup.sh下维护了一个数组LUNCH_MENU_CHOICES, “713”作为数组索引, “713.tsingmicro_tx5112cv300_evb132_v1p0_debug_32”作为元素值，存储到LUNCH_MENU_CHOICES。</p>
+<p>在执行lunch 713时，会调用envsetup.sh脚本下的lunch函数,这个函数很长，但是大概的作用是用传入的713参数作为索引，拿到LUNCH_MENU_CHOICES对应索引上的字符串，将这个字符串中的各个字段解析到环境变量中：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">TARGET_VENTOR=<span class="variable">$&#123;vendor&#125;</span></span><br><span class="line">TARGET_CHIP=<span class="variable">$&#123;chip&#125;</span></span><br><span class="line">TARGET_BOARD=<span class="variable">$&#123;board&#125;</span></span><br><span class="line">TARGET_VER=<span class="variable">$&#123;ver&#125;</span></span><br><span class="line">TARGET_MODE=<span class="variable">$&#123;mode&#125;</span></span><br><span class="line">TARGET_BITS=<span class="variable">$&#123;bit&#125;</span></span><br></pre></td></tr></table></figure>
+<p>“713.tsingmicro_tx5112cv300_evb132_v1p0_debug_32”必须满足格式”{LUNCH_NUM}:{TARGET_VENTOR}<em>{TARGET_CHIP}</em>{TARGET_BOARD}<em>{TARGET_VER}</em>{TARGET_MODE}_{TARGET_BITS}”，如果格式不对，在lunch时解析会报错。</p>
+<p>解析出TARGET_XXX这类环境变量之后，lunch函数开始source 芯片环境变量文件和板级环境变量文件：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># source chip env</span></span><br><span class="line"><span class="built_in">local</span> chip_env=<span class="variable">$&#123;TARGET_BUILD_DIR&#125;</span>/device/<span class="variable">$&#123;chip&#125;</span>/env_chip.sh</span><br><span class="line"><span class="keyword">if</span> [ -f <span class="variable">$&#123;chip_env&#125;</span> ] ; <span class="keyword">then</span></span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;source <span class="variable">$&#123;chip_env&#125;</span>&quot;</span></span><br><span class="line">	<span class="built_in">source</span> <span class="variable">$&#123;chip_env&#125;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;?????chip env config file not exist: <span class="variable">$&#123;chip_env&#125;</span>.?????&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># source board env</span></span><br><span class="line"><span class="built_in">local</span> board_env=<span class="variable">$&#123;TARGET_BUILD_DIR&#125;</span>/device/<span class="variable">$&#123;chip&#125;</span>/board/</span><br><span class="line">board_env=<span class="variable">$&#123;board_env&#125;</span>env_<span class="variable">$&#123;board&#125;</span>_<span class="variable">$&#123;ver&#125;</span>_<span class="variable">$&#123;mode&#125;</span>_<span class="variable">$&#123;bit&#125;</span>.sh</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$board_env</span></span><br><span class="line"><span class="keyword">if</span> [ -f <span class="variable">$&#123;board_env&#125;</span> ] ; <span class="keyword">then</span></span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;source <span class="variable">$&#123;board_env&#125;</span>&quot;</span></span><br><span class="line">	<span class="built_in">source</span> <span class="variable">$&#123;board_env&#125;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;?????board env config file not exist: <span class="variable">$&#123;board_env&#125;</span>.?????&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<p>chip_env和board_env两个变量都是由解析出的环境变量拼凑成的路径，在lunch 713时对应env_chip.sh和board&#x2F;env_evb_v1p0_debug_64.sh这两个脚本，所以在填写执行add_lunch_combo.sh脚本时，必须严格按照格式：<br>“{LUNCH_NUM}:{TARGET_VENTOR}<em>{TARGET_CHIP}</em>{TARGET_BOARD}<em>{TARGET_VER}</em>{TARGET_MODE}_{TARGET_BITS}”<br>填写，否则chip_env和board_env脚本无法被成功调用。</p>
+<p>env_chip.sh主要导出一些和芯片相关的环境变量，如TARGET_ARCH和TARGET_CPU_TYPE，并定义交叉编译工具链解压函数compiler_glibc或compiler_uclibc</p>
+<p>board&#x2F;env_evb_v1p0_debug_64.sh脚本主要导出一些板级配置的环境变量，如TARGET_UBOOT_DEFCONFIG和TARGET_KERNEL_DEFCONFIG，指定了build.sh执行时即将编译哪个uboot配置文件，哪个kernel配置文件。后续对uboot和kernel新增配置文件时，命名必须和这里填写的字符串相同。board&#x2F;env_evb_v1p0_debug_64.sh还负责调用compiler_glibc或compiler_uclibc</p>
+<h4 id="genimage-sh执行逻辑"><a href="#genimage-sh执行逻辑" class="headerlink" title="genimage.sh执行逻辑"></a>genimage.sh执行逻辑</h4><p>ginmiamge.sh下定义了fip, kernel, rootfs的编译和打包函数，比如gen_fip_bin。在执行build.sh -t fip时有如下调用关系：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">build.sh -t uboot</span><br><span class="line">    build</span><br><span class="line">        build_uboot</span><br><span class="line">            <span class="built_in">cd</span> <span class="variable">$&#123;TARGET_UBOOT_DIR&#125;</span>  </span><br><span class="line">            make <span class="variable">$&#123;TARGET_UBOOT_DEFCONFIG&#125;</span></span><br><span class="line">            make all -j8</span><br><span class="line">            <span class="built_in">cd</span> <span class="variable">$&#123;TARGET_BUILD_DIR&#125;</span>/tools/atf/</span><br><span class="line">            gen_fip_bin</span><br><span class="line">                <span class="built_in">cd</span> <span class="variable">$&#123;TARGET_BUILD_DIR&#125;</span>/tools/atf/</span><br><span class="line">                make</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="改动build目录的详细操作"><a href="#改动build目录的详细操作" class="headerlink" title="改动build目录的详细操作"></a>改动build目录的详细操作</h4><p>有了上面对各个脚本的执行逻辑的讲解作为铺垫，可以开始下面的实操过程。</p>
+<ol start="0">
+<li>模仿build&#x2F;device下任意一个chip目录新建对应的tx5112dv300目录，结果如下：</li>
+</ol>
+<p><img src="/../../stuff/build_chip_config.png" alt="在这里插入图片描述"></p>
+<ol>
+<li>build\device\tx5112dv300\board路径下面添加env_aov_v1p0_debug_32.sh<br>env_aov_v1p0_debug_32.sh里的内容，可以从env_evb132_v1p0_debug_32.sh里拷贝，需要修改图中框住的几个变量：</li>
+</ol>
+<p><img src="/../../stuff/env_board.png" alt="在这里插入图片描述"></p>
+<p>TARGET_UBOOT_DEFCONFIG应该与后续uboot里添加defconfig时使用的文件名一致<br>TARGET_KERNEL_DEFCONFIG应该与后续kernel里添加defconfig时使用的文件名一致<br>TARGET_KERNEL_RAMDISK_DEFCONFIG应该与后续kernel里添加ramdisk启动的defconfig时使用的文件名一致<br>TARGET_DTB应该与后续uboot和kernel里添加dts文件时使用的文件名一致<br>TARGET_FIT_ITS应该与后续uboot里添加its文件时使用的文件名一致<br>TARGET_FIT_ITB决定了最终build.sh编译完后生成的itb文件的名字，一般与TARGET_FIT_ITS文件名一致<br>TARGET_FIT_ITB_RAMDISK应该与后续kernel里添加ramdisk启动的its时使用的文件名一致</p>
+<p>TARGET_LOADER_2指向了prebuilts下，存储二级load的固件路径，由于我们新增的tx5112dv300_aov板使用的ddr和tx5112cv300_evb132板一致，所以可以直接指向tx5112cv300_evb132的路径。</p>
+<p>如果有定制二级load的需要，如快起需求，或者硬件上修改了DDR的SIZE等其他情况，才需要修改这里的TARGET_LOADER_2并修改prebuilts下的路径</p>
+<p>进入prebuilts目录下的tsbin目录，(在develop分支下)可以发现有DDR2&#x2F;, DDR3&#x2F;, DDR4&#x2F;三个目录，这三个目录结构是类似的，如DDR2：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── tx51xx</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_emmc_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_emmc.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_fast_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_fast.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_nand_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_nand.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_qspi_51MHz.bin</span><br><span class="line">│   └── preboot.bin -&gt; ../../DDR3/tx52xx/preboot.bin</span><br><span class="line">└── tx52xx</span><br><span class="line">    ├── ddr2_1333_1CSx16_32Mbx16_1200MHz.bin</span><br><span class="line">    ├── ddr2_1333_1CSx16_32Mbx16.bin</span><br><span class="line">    ├── ddr2_1333_1CSx16_32Mbx16_nand_1200MHz.bin</span><br><span class="line">    ├── ddr2_1333_1CSx16_32Mbx16_nand.bin</span><br><span class="line">    └── preboot.bin -&gt; ../../DDR3/tx52xx/preboot.bin</span><br></pre></td></tr></table></figure>
+<p>DDR2: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── tx51xx</span><br><span class="line">│   ├── ddr3_2133_1CSx16_64Mbx16.bin</span><br><span class="line">│   ├── ddr3_2133_1CSx16_64Mbx16_fast.bin</span><br><span class="line">│   ├── ddr3_2133_1CSx16_64Mbx16_nand.bin</span><br><span class="line">│   └── preboot.bin -&gt; ../tx52xx/preboot.bin</span><br><span class="line">└── tx52xx</span><br><span class="line">    ├── ddr3_2133_1CSx16_64Mbx16.bin</span><br><span class="line">    ├── ddr3_2133_1CSx16_64Mbx16_emmc_boot.bin</span><br><span class="line">    ├── ddr3_2133_1CSx16_64Mbx16_fast.bin</span><br><span class="line">    ├── ddr3_2133_1CSx16_64Mbx16_nand.bin</span><br><span class="line">    ├── ddr3_2133_1CSx16_64Mbx16_qspi_51MHz.bin</span><br><span class="line">    └── preboot.bin</span><br></pre></td></tr></table></figure>
+
+<p>如DDR4:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">├── tx5336</span><br><span class="line">│   ├── evb</span><br><span class="line">│   │   ├── bl31.bin</span><br><span class="line">│   │   ├── ddr4_1600_1CSx16_512Mbx16.bin</span><br><span class="line">│   │   ├── ddr4_1600_1CSx32_512Mbx16.bin</span><br><span class="line">│   │   ├── ddr4_1866_1CSx32_512Mbx16.bin</span><br><span class="line">│   │   ├── ddr4_2133_1CSx32_512Mbx16.bin</span><br><span class="line">│   │   ├── ddr4_2400_1CSx32_512Mbx16.bin</span><br><span class="line">│   │   ├── ddr4_2400_1CSx32_512Mbx16_shensuan.bin</span><br><span class="line">│   │   ├── ddr4_2666_1CSx32_512Mbx16.bin</span><br><span class="line">│   │   ├── ddr4_3200_1CSx32_512Mbx16.bin</span><br><span class="line">│   │   ├── ddr4_3200_1CSx32_512Mbx16_shensuan.bin</span><br><span class="line">│   │   ├── ddr4_3200_1CSx32_512Mbx16_shensuan_cpu_1100MHz.bin</span><br><span class="line">│   │   └── ddr4_3200_1CSx32_512Mbx16_shensuan_cpu_1200MHz.bin</span><br><span class="line">│   ├── evbs</span><br><span class="line">│   │   ├── bl31.bin</span><br><span class="line">│   │   └── ddr4_3200_1CSx32_512Mbx16_evbs.bin</span><br><span class="line">│   └── ipc-f</span><br><span class="line">│       ├── bl31.bin</span><br><span class="line">│       └── ddr4_3200_1CSx32_512Mbx16_ipcf.bin</span><br><span class="line">├── tx5368av200_box</span><br><span class="line">│   ├── bl31.bin</span><br><span class="line">│   ├── bl31_eye_plotting.bin</span><br><span class="line">│   ├── ddr4_1600_2CSx32_512Mbx16.bin</span><br><span class="line">│   ├── ddr4_2133_1CSx32_1Gbx16.bin</span><br><span class="line">│   ├── ddr4_2133_1CSx32_512Mbx16.bin</span><br><span class="line">│   ├── ddr4_2133_2CSx32_512Mbx16.bin</span><br><span class="line">│   ├── ddr4_2400_1CSx32_512Mbx16.bin</span><br><span class="line">│   ├── ddr4_2400_2CSx32_512Mbx16.bin</span><br><span class="line">│   ├── ddr4_2666_1CSx32_512Mbx16.bin</span><br><span class="line">│   └── ddr4_2666_2CSx32_512Mbx16.bin</span><br><span class="line">└── tx5368av200_ipc</span><br><span class="line">    ├── bl31.bin</span><br><span class="line">    ├── ddr4_1600_2CSx32_512Mbx16.bin</span><br><span class="line">    ├── ddr4_2133_1CSx32_512Mbx16.bin</span><br><span class="line">    ├── ddr4_2133_2CSx32_512Mbx16.bin</span><br><span class="line">    ├── ddr4_2400_1CSx32_512Mbx16.bin</span><br><span class="line">    └── ddr4_2400_2CSx32_512Mbx16.bin</span><br></pre></td></tr></table></figure>
+<p>这三个目录，分别对应不同DDR型号（DDR2&#x2F;DDR3&#x2F;DDR4），首先得看要新增lunch的单板上使用的ddr，属于哪个型号，这一点可以询问硬件部门。<br>比如我这里的tx5112dv300使用的是ddr2的，频率为2133，所以我先进入DDR2，进入tx51xx，看到可以选择的bin文件有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_emmc_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_emmc.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_fast_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_fast.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_nand_1200MHz.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_nand.bin</span><br><span class="line">│   ├── ddr2_1333_1CSx16_32Mbx16_qspi_51MHz.bin</span><br><span class="line">│   └── preboot.bin -&gt; ../../DDR3/tx52xx/preboot.bin</span><br></pre></td></tr></table></figure>
+<p>由于我没有特殊需求，所以选择ddr2_1333_1CSx16_32Mbx16.bin这个并文件，将其拷贝到新建的prebuilts&#x2F;tsbin&#x2F;tx5112dv300&#x2F;里去，并将TARGET_LOADER_2指向这个新文件。<br>如果我有其他需求，如快起，那么可以选择ddr2_1333_1CSx16_32Mbx16_fast.bin</p>
+<p>dv系列的芯片使用的ddr是128MB TARGET_LOADER_2 选择ddr3_2133.bin<br>cv系列的芯片使用的ddr是64MB  TARGET_LOADER_2 选择ddr2_1333.bin</p>
+<p>由于从硬件部门得知，tx5112dv300和tx5112cv300类似，所以这里选择ddr2_1333.bin没问题。</p>
+<ol>
+<li>build\device\路径下新增add_lunch_combo.sh，该文件下加入一行”add_lunch_combo 750.tsingmicro_tx5112dv300_aov_v1p0_debug_32”</li>
+<li>build\device\路径下新增env_chip.sh，该文件里的内容可以从tx5112cv300目录下对应env_chip.sh拷贝</li>
+</ol>
+<p>env_chip.sh下需要修改修改图中框住的几个变量：<br><img src="/../../stuff/chip_env.png" alt="在这里插入图片描述"></p>
+<p>TARGET_ARCH保存芯片架构, 一般我们可选”arm”和”arm64”。<br>TARGET_CPU_TYPE保存芯片类型，当前我们使用的芯片类型有”cortex-a7”, “cortex-a53”等<br>TARGET_CHIPSERIES保存芯片系列命名<br>TARGET_CHIPNAME保存芯片名</p>
+<p>上述参数，可以通过查询《chiplist.xls》获取</p>
+<ol start="4">
+<li>build\device\路径下新增genimage.sh，该文件里的内容可以从tx5112cv300目录下对应genimage.sh拷贝</li>
+</ol>
+<p>genimage.sh可以直接拷贝，不需要做修改</p>
+<p>至此，build目录修改完毕，为了检验加入配置是否生效，回到build根目录，执行source -&gt; lunch，观察：<br><img src="/../../stuff/lunch_result.png" alt="在这里插入图片描述"><br>成功获取解析到了新增的配置，输入750后，观察环境变量的输出：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">Which would you like?  750</span><br><span class="line">selection:750.tsingmicro_tx5112dv300_aov_v1p0_debug_32</span><br><span class="line">selection:tsingmicro_tx5112dv300_aov_v1p0_debug_32</span><br><span class="line">lunch:tsingmicro_tx5112dv300_aov_v1p0_debug_32</span><br><span class="line"><span class="built_in">source</span> /mnt/captain/luyuan/workspace/sdk_57B/build/device/tx5112dv300/env_chip.sh</span><br><span class="line">/mnt/captain/luyuan/workspace/sdk_57B/build/device/tx5112dv300/board/env_aov_v1p0_debug_32.sh</span><br><span class="line"><span class="built_in">source</span> /mnt/captain/luyuan/workspace/sdk_57B/build/device/tx5112dv300/board/env_aov_v1p0_debug_32.sh</span><br><span class="line">=====uncompress gcc-ts-10.3-2023.10-x86_64-arm-none-linux-uclibcgnueabihf.tar.xz,please <span class="built_in">wait</span>=====</span><br><span class="line">CROSS_COMPILE:/mnt/captain/luyuan/workspace/sdk_57B/prebuilts/host/gcc/gcc-ts-10.3-2023.10-x86_64-arm-none-linux-uclibcgnueabihf/bin/arm-ts-linux-uclibcgnueabihf-</span><br><span class="line">Debug Mode</span><br><span class="line">32-bit</span><br><span class="line">=========================================</span><br><span class="line">TARGET_VENTOR=tsingmicro</span><br><span class="line">TARGET_CHIPSERIES=TX5112DX</span><br><span class="line">TARGET_CHIPNAME=tx5112dv300</span><br><span class="line">TARGET_CHIP=tx5112dv300</span><br><span class="line">TARGET_BOARD=aov</span><br><span class="line">TARGET_VER=v1p0</span><br><span class="line">TARGET_MODE=debug</span><br><span class="line">TARGET_BITS=32</span><br><span class="line">DEBUG=y</span><br><span class="line"></span><br><span class="line">TARGET_ARCH=arm</span><br><span class="line">TARGET_CPU_TYPE=cortex-a7</span><br><span class="line"></span><br><span class="line">CROSS_COMPILE=/mnt/captain/luyuan/workspace/sdk_57B/prebuilts/host/gcc/gcc-ts-10.3-2023.10-x86_64-arm-none-linux-uclibcgnueabihf/bin/arm-ts-linux-uclibcgnueabihf-</span><br><span class="line">TARGET_UBOOT_DEFCONFIG=ts_tx5112dv300_aov_defconfig</span><br><span class="line">TARGET_KERNEL_DEFCONFIG=ts_tx51xx_aov_8mflash_defconfig</span><br><span class="line">TARGET_DTB=ts-tx5112dv300-aov.dtb</span><br><span class="line">TARGET_FIT_ITS=ts-tx5112dv300-aov.its</span><br><span class="line">TARGET_FIT_ITB=ts-tx5112dv300-aov.itb</span><br><span class="line">TARGET_LOADER_2=/mnt/captain/luyuan/workspace/sdk_57B/prebuilts/tsbin/tx5112cv300/ddr2_1333_qspi_51MHz.bin</span><br><span class="line">TARGET_LOADER_2_NAND=</span><br><span class="line">TARGET_LOADER_3=</span><br><span class="line">TARGET_LIBC=uclibc</span><br><span class="line">TARGET_ROOTFS_CUSTOM=</span><br><span class="line">LUNCH_SEL=750.tsingmicro_tx5112dv300_aov_v1p0_debug_32</span><br><span class="line">TARGET_IMAGE_TYPE=sflash</span><br><span class="line">TARGET_LIBS_TYPE=shared</span><br><span class="line">TARGET_MPP_PRELOAD=<span class="built_in">disable</span></span><br><span class="line">TARGET_SDK_ISP_DRV_PACK=FALSE</span><br><span class="line">TARGET_ROOTFS_TYPE=</span><br><span class="line">TARGET_KERNEL_TYPE=compressed</span><br><span class="line">TARGET_KERNEL_DRV_EXPORT=<span class="built_in">disable</span></span><br><span class="line">TARGET_KERNEL_SYSFS=<span class="built_in">enable</span></span><br><span class="line">TARGET_INSTALL_MOD_PATH=</span><br><span class="line">==============BOOT MODE==================</span><br><span class="line">TARGET_SDK_BOOT_MODE=</span><br><span class="line">TARGET_KERNEL_RELEASE=</span><br><span class="line">TARGET_NET_TYPE=</span><br><span class="line">TARGET_FAST_APP=</span><br><span class="line">TARGET_FAST_APP_PARA=</span><br><span class="line">TARGET_TEST_MODE=</span><br><span class="line">TARGET_DYNAMIC_DEV_FILE=</span><br><span class="line">TARGET_SYSTEM_PARTITION=</span><br><span class="line">TARGET_SYSTEM_PART_PATH=</span><br><span class="line">=========================================</span><br></pre></td></tr></table></figure>
+<p>检查输出的环境变量是否与刚才配置的一致。</p>
+<h3 id="改动uboot目录"><a href="#改动uboot目录" class="headerlink" title="改动uboot目录"></a>改动uboot目录</h3><p>在”改动build目录”一章中我们已经指明了uboot下的编译会依赖哪些配置文件:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">TARGET_UBOOT_DEFCONFIG应该与后续uboot里添加defconfig时使用的文件名一致</span><br><span class="line">TARGET_DTB应该与后续uboot里添加dts文件时使用的文件名一致</span><br><span class="line">TARGET_FIT_ITB_RAMDISK应该与后续kernel里添加ramdisk启动的its时使用的文件名一致</span><br><span class="line">TARGET_FIT_ITS应该与后续uboot里添加its文件时使用的文件名一致</span><br><span class="line"></span><br><span class="line">export TARGET_UBOOT_DEFCONFIG=&quot;ts_tx5112dv300_aov_defconfig&quot;</span><br><span class="line">export TARGET_DTB=&quot;ts-tx5112dv300-aov.dtb&quot;</span><br><span class="line">export TARGET_FIT_ITS=&quot;ts-tx5112dv300-aov.its&quot;</span><br><span class="line">export TARGET_FIT_ITB=&quot;ts-tx5112dv300-aov.itb&quot;</span><br><span class="line">export TARGET_FIT_ITB_RAMDISK=&quot;ts-tx5112dv300-aov-ramdisk.itb&quot;</span><br></pre></td></tr></table></figure>
+<p>下面我们逐一加入这几个文件，并讲解每个文件中要修改哪些部分。</p>
+<h4 id="改动uboot目录的详细操作"><a href="#改动uboot目录的详细操作" class="headerlink" title="改动uboot目录的详细操作"></a>改动uboot目录的详细操作</h4><ol>
+<li><p>在uboot\configs目录下，加入ts_tx5112dv300_aov_defconfig默认编译配置文件<br>这个文件可以从ts_tx5112cv300_evb132_defconfig拷贝过来，主要修改这两行配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CONFIG_SYS_CONFIG_NAME=&quot;ts_tx5112dv300_aov&quot;</span><br><span class="line">CONFIG_DEFAULT_DEVICE_TREE=&quot;ts-tx5112dv300-aov&quot;</span><br></pre></td></tr></table></figure>
+<p>CONFIG_SYS_CONFIG_NAME指示了uboot将使用哪一个环境变量头文件，CONFIG_DEFAULT_DEVICE_TREE应该与TARGET_DTB相同。<br>CONFIG_DEFAULT_DEVICE_TREE指示了uboot将编译哪一个设备树文件</p>
+</li>
+<li><p>uboot\arch\arm\dts添加单板设备树配置文件</p>
+</li>
+</ol>
+<p>因为第一步中，将CONFIG_DEFAULT_DEVICE_TREE&#x3D;”ts-tx5112dv300-aov”，所以这里加入ts-tx5112dv300-aov.dts </p>
+<p>ts-tx5112dv300-aov.dts 可以直接从ts-tx5112cv300-evb132.dts拷贝，需要修改如下几个地方：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">/dts-v1/;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ts_tx5112.dtsi&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ts_tx51xx_evb132.dtsi&quot;</span>    <span class="comment">//--&gt; ts_tx51xx_aov.dtsi</span></span></span><br><span class="line"></span><br><span class="line">/ &#123;</span><br><span class="line">	model = <span class="string">&quot;Tsingmicro TX5112DV300&quot;</span>;       <span class="comment">//修改此处为对应的芯片型号</span></span><br><span class="line">	compatible = <span class="string">&quot;ts,tx5112cv300-aov&quot;</span>;      <span class="comment">//修改此处为对应的板级信号</span></span><br><span class="line"></span><br><span class="line">	aliases &#123;</span><br><span class="line">		gpio0 = &amp;gpio0;</span><br><span class="line">		mmc0 = &amp;sdhci0;</span><br><span class="line">		sd0 = &amp;sdhci1;</span><br><span class="line">		serial0 = &amp;uart0;</span><br><span class="line">		spi0 = &amp;qspi;</span><br><span class="line">	&#125;;</span><br><span class="line">	memory@<span class="number">0</span> &#123;</span><br><span class="line">		device_type = <span class="string">&quot;memory&quot;</span>;</span><br><span class="line">		reg = &lt;<span class="number">0x0</span> <span class="number">0x04000000</span>&gt;;             <span class="comment">//此处根据ddr大小修改，这里是64M，因为是CV芯片</span></span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>该文件所要修改的地方是将之前includets_tx51xx_evb132.dtsi改为ts_tx51xx_aov.dtsi, 将文件ts_tx51xx_evb132.dtsi里的内容，拷贝到新建的ts_tx51xx_aov.dtsi文件中。</p>
+<p>文件”ts_tx51xx_evb132.dtsi”也include了一些文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#include &quot;ts_tx5112.dtsi&quot;</span><br><span class="line">#include &quot;ts-tx5112-clk.dtsi&quot;</span><br><span class="line">#include &quot;ts-tx5112-reset.dtsi&quot;</span><br><span class="line">#include &quot;ts-tx51xx-evb132-pinctrl.dtsi&quot; --&gt; ts-tx51xx-aov-pinctrl.dtsi</span><br><span class="line">#include &lt;dt-bindings/input/input.h&gt;</span><br><span class="line">#include &lt;dt-bindings/gpio/gpio.h&gt;</span><br><span class="line">#include &lt;dt-bindings/phy/phy.h&gt;</span><br></pre></td></tr></table></figure>
+<p>同样的，要修改的是”ts-tx51xx-evb132-pinctrl.dtsi”，将其改为”ts-tx51xx-aov-pinctrl.dtsi”，并实际新建ts-tx51xx-aov-pinctrl.dtsi文件，将ts-tx51xx-evb132-pinctrl.dtsi中的内容复制过来。</p>
+<ol start="3">
+<li>uboot&#x2F;include&#x2F;configs&#x2F;目录下，加入ts_tx5112dv300_aov.h环境变量头文件<br>该文件可以从ts_tx5112cv300_evb132.h拷贝过来，主要修改以下部分：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#define CONFIG_EXTRA_ENV_SETTINGS					\</span><br><span class="line">		&quot;boardname=TS-TX5112DV300-AOV\0&quot; \              修改此处，单板名</span><br><span class="line">		&quot;fip_name=fip_tx5112dv300_aov.bin\0&quot; \           修改此处，最终编译出的fip二进制文件名</span><br><span class="line">		&quot;kernel_name=ts-tx5112dv300-aov.itb\0&quot;  \          修改此处，必须要与TARGET_FIT_ITB相同</span><br><span class="line">		&quot;kernel_ramfs_name=ts-tx5112dv300-aov-ramdisk.itb\0&quot; \  修改此处，必须要与TARGET_FIT_ITB_RAMDISK相同</span><br><span class="line">		&quot;fdt_high=0xffffffff\0&quot; \</span><br><span class="line">		&quot;ini_name=update.ini\0&quot; \</span><br><span class="line">		&quot;emmc_image_name=emmc.img.gz\0&quot; \</span><br></pre></td></tr></table></figure>
+<p>其他部分一般不需要修改</p>
+<ol>
+<li>uboot\fit 中添加打包脚本文件fit&#x2F;ts-tx5112dv300-aov.its里面涉及设备树和内核的打包。</li>
+</ol>
+<p>如果build命令的genimage.sh中，mkimage相关行没有被注释，这意味着将使用到fit格式打包，必须考虑修改s-tx5112dv300-aov.its这个文件,<br>经过核实我build目录下新增的genimage.sh中，没有使用到mkimage进行打包，观察下图264行：</p>
+<p><img src="/../../stuff/mkimage_genimage.png" alt="在这里插入图片描述"></p>
+<p>如果遇到mkimage没有被注释的情况，参考如下注释中对its文件的修改</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">/dts-v1/;</span><br><span class="line"></span><br><span class="line">/ &#123;</span><br><span class="line">	description = &quot;Simple image with Linux kernel and FDT blob&quot;;</span><br><span class="line">	#address-cells = &lt;1&gt;;</span><br><span class="line"></span><br><span class="line">	images &#123;</span><br><span class="line">		kernel &#123;</span><br><span class="line">			description = &quot;Tsingmicro Linux kernel&quot;;</span><br><span class="line">			data = /incbin/(&quot;./zImage&quot;);</span><br><span class="line">			type = &quot;kernel&quot;;</span><br><span class="line">			arch = &quot;arm&quot;;</span><br><span class="line">			os = &quot;linux&quot;;</span><br><span class="line">			compression = &quot;none&quot;;</span><br><span class="line">			load = &lt;0x01008000&gt;;</span><br><span class="line">			entry = &lt;0x01008000&gt;;</span><br><span class="line">/*			hash-1 &#123;</span><br><span class="line">				algo = &quot;crc32&quot;;</span><br><span class="line">			&#125;;</span><br><span class="line">*/</span><br><span class="line">		&#125;;</span><br><span class="line">		tx5112cv300-evb132 &#123;    --&gt; tx5112dv300-aov</span><br><span class="line">			description = &quot;Flattened Device Tree blob&quot;;</span><br><span class="line">			data = /incbin/(&quot;./ts-tx5112cv300-evb132.dtb&quot;); --&gt; ts-tx5112tx5112dv300-aov.dtb, 必须与TARGET_DTB一致</span><br><span class="line">			type = &quot;flat_dt&quot;;</span><br><span class="line">			arch = &quot;arm&quot;;           --&gt; 按芯片实际架构修改，arm或者arm64</span><br><span class="line">			compression = &quot;none&quot;;   </span><br><span class="line">			load = &lt;0x01000000&gt;;</span><br><span class="line">/*</span><br><span class="line">			hash-1 &#123;</span><br><span class="line">				algo = &quot;crc32&quot;;</span><br><span class="line">			&#125;;</span><br><span class="line">*/</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	configurations &#123;</span><br><span class="line">		default = &quot;fdt0&quot;;</span><br><span class="line">		fdt0 &#123;</span><br><span class="line">			description = &quot;Boot Linux kernel with FDT blob&quot;;</span><br><span class="line">			kernel = &quot;kernel&quot;;</span><br><span class="line">			fdt = &quot;tx5112cv300-evb&quot;;        --&gt; tx5112dv300-aov</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>至此，uboot修改完毕，执行git status: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">luyuan@qudong-MS-7B97:~/workspace/sdk_57B/uboot$ git status</span><br><span class="line">On branch add_lunch_for_aov</span><br><span class="line">Untracked files:</span><br><span class="line">  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)</span><br><span class="line">        arch/arm/dts/ts-tx5112dv300-aov.dts</span><br><span class="line">        arch/arm/dts/ts-tx51xx-aov-pinctrl.dtsi</span><br><span class="line">        arch/arm/dts/ts_tx51xx_aov.dtsi</span><br><span class="line">        configs/ts_tx5112dv300_aov_defconfig</span><br><span class="line">        fit/ts-tx5112dv300-aov.its</span><br><span class="line">        include/configs/ts_tx5112dv300_aov.h</span><br></pre></td></tr></table></figure>
+
+<h4 id="改动kernel目录的详细操作"><a href="#改动kernel目录的详细操作" class="headerlink" title="改动kernel目录的详细操作"></a>改动kernel目录的详细操作</h4><p>在”改动build目录”一章中我们已经指明了uboot下的编译会依赖哪些配置文件:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">TARGET_KERNEL_DEFCONFIG应该与后续kernel里添加defconfig时使用的文件名一致</span><br><span class="line">TARGET_DTB应该与后续uboot和kernel里添加dts文件时使用的文件名一致</span><br><span class="line">TARGET_FIT_ITB_RAMDISK应该与后续kernel里添加ramdisk启动的its时使用的文件名一致</span><br><span class="line"></span><br><span class="line">export TARGET_KERNEL_DEFCONFIG=&quot;ts_tx51xx_aov_8mflash_defconfig&quot;</span><br><span class="line">export TARGET_DTB=&quot;ts-tx5112dv300-aov.dtb&quot;</span><br><span class="line">export TARGET_FIT_ITS=&quot;ts-tx5112dv300-aov.its&quot;</span><br><span class="line">export TARGET_FIT_ITB=&quot;ts-tx5112dv300-aov.itb&quot;</span><br><span class="line">export TARGET_FIT_ITB_RAMDISK=&quot;ts-tx5112dv300-aov-ramdisk.itb&quot;</span><br></pre></td></tr></table></figure>
+
+<p>下面我们逐一加入这几个文件，并讲解每个文件中要修改哪些部分。</p>
+<ol>
+<li><p>kernel\arch\arm\configs中添加单板默认编译配置文件ts_tx51xx_aov_8mflash_defconfig<br>该文件名要与TARGET_KERNEL_DEFCONFIG一致</p>
+</li>
+<li><p>进入dts目录，加入dts配置文件ts-tx5112dv300-aov.dts，ts-tx51xx-aov.dtsi，ts-tx51xx-aov-pinctrl.dtsi<br>ts-tx5112dv300-aov.dts名字应该与TARGET_DTB一致，里面内容的修改方法同uboot下对dts的处理方法。</p>
+</li>
+</ol>
+<p>如果芯片是arm32架构，dts目录选择kernel\arch\arm\boot\dts<br>如果芯片是arm64架构，dts目录选择kernel\arch\arm64\boot\dts</p>
+<p>至此，kernel就修改完毕，执行git status：<br>luyuan@qudong-MS-7B97:~&#x2F;workspace&#x2F;sdk_57B&#x2F;kernel$ git status<br>On branch add_lunch_for_aov<br>Untracked files:<br>  (use “git add <file>…” to include in what will be committed)<br>        arch&#x2F;arm&#x2F;boot&#x2F;dts&#x2F;tsingmicro&#x2F;ts-tx5112dv300-aov.dts<br>        arch&#x2F;arm&#x2F;boot&#x2F;dts&#x2F;tsingmicro&#x2F;ts-tx51xx-aov-pinctrl.dtsi<br>        arch&#x2F;arm&#x2F;boot&#x2F;dts&#x2F;tsingmicro&#x2F;ts-tx51xx-aov.dtsi<br>        arch&#x2F;arm&#x2F;configs&#x2F;ts_tx51xx_aov_8mflash_defconfig</p>
+<h3 id="检查lunch添加是否成功"><a href="#检查lunch添加是否成功" class="headerlink" title="检查lunch添加是否成功"></a>检查lunch添加是否成功</h3><p>衡量lunch添加是否成功，可以进入build目录，执行sh build.sh ，观察编译结果，如果uboot和kernel都没有编译错误，可以烧录到板子上看启动是否成功。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/24/sdio/sdio_dwc_mshc_vol_switch/" rel="prev" title="SDIO MSHC 电压切换">
+                  <i class="fa fa-angle-left"></i> SDIO MSHC 电压切换
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/10/24/life_record/Pour-over-coffee/" rel="next" title="A kind of Pour-over-coffee">
+                  A kind of Pour-over-coffee <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
