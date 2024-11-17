@@ -20,30 +20,30 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="DDR2操作的有限状态机以及指令真值表">
+    <meta name="description" content="A kind of AOV Solution For MIPI-Soc-MCU">
 <meta property="og:type" content="article">
-<meta property="og:title" content="DDR内存原理 - 3">
-<meta property="og:url" content="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/index.html">
+<meta property="og:title" content="A kind of AOV Solution">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/29/aov/aov-solution/index.html">
 <meta property="og:site_name" content="Coffe Pattern">
-<meta property="og:description" content="DDR2操作的有限状态机以及指令真值表">
+<meta property="og:description" content="A kind of AOV Solution For MIPI-Soc-MCU">
 <meta property="og:locale">
-<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_finite_state_mechnine.png">
-<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_ins_table.png">
-<meta property="article:published_time" content="2024-11-01T12:43:43.704Z">
-<meta property="article:modified_time" content="2024-11-01T13:53:44.417Z">
+<meta property="og:image" content="https://kindresy.github.io/stuff/pin_state_table.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/boot_state_transfer.png">
+<meta property="article:published_time" content="2024-10-29T02:15:16.000Z">
+<meta property="article:modified_time" content="2024-11-13T14:09:54.734Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kindresy.github.io/stuff/ddr_finite_state_mechnine.png">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/pin_state_table.png">
 
 
-<link rel="canonical" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/">
+<link rel="canonical" href="https://kindresy.github.io/2024/10/29/aov/aov-solution/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/","path":"2024/11/01/ddr/DDR_SDRAM3/","title":"DDR内存原理 - 3"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/29/aov/aov-solution/","path":"2024/10/29/aov/aov-solution/","title":"A kind of AOV Solution"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>DDR内存原理 - 3 | Coffe Pattern</title>
+<title>A kind of AOV Solution | Coffe Pattern</title>
   
 
 
@@ -116,7 +116,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#V210-K4%E8%8A%AF%E7%89%87-%E6%97%B6%E5%BA%8F-%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">V210 K4芯片 时序-配置过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2%E5%9B%BE"><span class="nav-number">2.</span> <span class="nav-text">状态转换图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E7%9C%9F%E5%80%BC%E8%A1%A8"><span class="nav-number">3.</span> <span class="nav-text">指令真值表</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">2.</span> <span class="nav-text">术语</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mode"><span class="nav-number">2.1.</span> <span class="nav-text">Mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Interactive"><span class="nav-number">2.2.</span> <span class="nav-text">Interactive</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E8%84%9A%E5%AE%9A%E4%B9%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">引脚定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E8%84%9A%E7%8A%B6%E6%80%81%E8%A1%A8"><span class="nav-number">2.2.2.</span> <span class="nav-text">引脚状态表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB%E5%9B%BE"><span class="nav-number">2.3.</span> <span class="nav-text">启动状态转移图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E7%8A%B6%E6%80%81%E8%A1%A8"><span class="nav-number">2.4.</span> <span class="nav-text">典型状态表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E7%AD%96%E7%95%A5"><span class="nav-number">2.5.</span> <span class="nav-text">启动策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%8C%BA%E5%AE%9A%E4%B9%89"><span class="nav-number">2.5.1.</span> <span class="nav-text">分区定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8C%85-%E7%83%A7%E5%BD%95-%E5%AD%98%E5%82%A8-%E8%A7%A3%E5%8C%85"><span class="nav-number">2.5.2.</span> <span class="nav-text">打包 - 烧录 - 存储 - 解包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E7%AD%96%E7%95%A5-1"><span class="nav-number">2.5.3.</span> <span class="nav-text">启动策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%A1%88%E4%BE%8B"><span class="nav-number">2.5.4.</span> <span class="nav-text">测试案例</span></a></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -162,7 +162,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/29/aov/aov-solution/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -175,12 +175,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="DDR内存原理 - 3 | Coffe Pattern">
-      <meta itemprop="description" content="DDR2操作的有限状态机以及指令真值表">
+      <meta itemprop="name" content="A kind of AOV Solution | Coffe Pattern">
+      <meta itemprop="description" content="A kind of AOV Solution For MIPI-Soc-MCU">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          DDR内存原理 - 3
+          A kind of AOV Solution
         </h1>
 
         <div class="post-meta-container">
@@ -190,9 +190,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2024-11-01 20:43:43 / Modified: 21:53:44" itemprop="dateCreated datePublished" datetime="2024-11-01T20:43:43+08:00">2024-11-01</time>
+      <time title="Created: 2024-10-29 10:15:16" itemprop="dateCreated datePublished" datetime="2024-10-29T10:15:16+08:00">2024-10-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-11-13 22:09:54" itemprop="dateModified" datetime="2024-11-13T22:09:54+08:00">2024-11-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -200,7 +206,7 @@
       </span>
       <span class="post-meta-item-text">In</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/ddr/" itemprop="url" rel="index"><span itemprop="name">ddr</span></a>
+          <a href="/categories/aov/" itemprop="url" rel="index"><span itemprop="name">aov</span></a>
         </span>
     </span>
 
@@ -214,32 +220,31 @@
     </span>
 </div>
 
-            <div class="post-description">DDR2操作的有限状态机以及指令真值表</div>
+            <div class="post-description">A kind of AOV Solution For MIPI-Soc-MCU</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="V210-K4芯片-时序-配置过程"><a href="#V210-K4芯片-时序-配置过程" class="headerlink" title="V210 K4芯片 时序-配置过程"></a>V210 K4芯片 时序-配置过程</h1><p>参考资料：</p>
-<ol>
-<li>三星 DDR2 SDRAM 操作时序规范</li>
-<li>三星V210芯片手册</li>
-</ol>
-<p>github链接：<br><a target="_blank" rel="noopener" href="https://github.com/zzzhao9426/DDR2-/blob/main/DDR2%E6%93%8D%E4%BD%9C%E6%97%B6%E5%BA%8F%E8%A7%84%E8%8C%83(%E4%B8%89%E6%98%9F).pdf">https://github.com/zzzhao9426/DDR2-/blob/main/DDR2%E6%93%8D%E4%BD%9C%E6%97%B6%E5%BA%8F%E8%A7%84%E8%8C%83(%E4%B8%89%E6%98%9F).pdf</a></p>
-<h1 id="状态转换图"><a href="#状态转换图" class="headerlink" title="状态转换图"></a>状态转换图</h1><p>操作状态的变迁</p>
-<p><img src="/../../stuff/ddr_finite_state_mechnine.png" alt="在这里插入图片描述"></p>
-<p>状态入口为初始化，然后是idle状态，由于ddr漏电特性，所以每过一段时间都要自我刷新，也就是idle状态右边的ref(refresh，对所有位存储cell读取并重写一遍)指向的刷新状态。<br>idle状态向下，是通过ACT命令设置到激活状态，这里更细致的说，应该是激活一个ROW，选通某一个bank里的某一行。</p>
-<p>三星文档里将bank翻译为“簇”</p>
-<p>簇激活后，向右下，DMC发送read指令，数据通过总线送出，可以自循环，读出多个字节。</p>
-<p>read状态结束后，经过precharge，到预充电状态，然后自动回到idle状态。</p>
-<p>簇激活后，向做下是write，过程也是类似的。</p>
-<p>簇激活后，可以发送RDA指令，进入自动预充电状态，然后返回到idle。</p>
-<p>idle状态的右上方向的SRF状态区别于REF，区别在于，如果DMC不发送终止命令，SRF不会结束自我循环刷新状态，一般用于DMC已经掉电了，就可以让device进行自我刷新，也就是retention。</p>
-<p>idle状态的左方，设置MRS&#x2F;EMRS。整个device里面，有若干寄存器是为了保存配置用的。<br>ddr有多种时序模式，那么就需要一些寄存器保存这类配置。最典型的是：burst_length 这类信息需要通过MRS&#x2F;EMRS（extend MRS）配置。</p>
-<h1 id="指令真值表"><a href="#指令真值表" class="headerlink" title="指令真值表"></a>指令真值表</h1><p>手册第37页，所有状态机图里的指令都在这里面：<br><img src="/../../stuff/ddr_ins_table.png" alt="在这里插入图片描述"></p>
-<p>DMC发布cmd，是通过各条设置控制线联合完成的，device来译码这些控制线的信息<br>上图真值表也就是指明了每条指令，对应的控制线状态。</p>
-
+    <div class="post-body" itemprop="articleBody"><h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><p>所谓AOV，即Always on Video，顾名思义是视频一直在线（视频不间断），有点类似网络连接里的心跳机制。在一定时间段里（比如30秒），摄像机抓拍一次图片（1fps），分析图像里是否有特定目标（比如车，人），如果有，摄像机即切换到正常工作模式（全帧率录像，实时视频流等），如果没有则继续低功耗待机模式。</p>
+<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><h2 id="Mode"><a href="#Mode" class="headerlink" title="Mode"></a>Mode</h2><p>normal mode：外部事件唤醒   外部事件包括 reset 按键、 4G 唤醒事件等，<br>aov mode：（定时唤醒）<br>power down mode: 掉电模式<br>sleep mode: 睡眠模式<br>low-charge mode: 低电量模式</p>
+<p>什么是掉电模式：<br>    掉电状态下，SoC下电，耗电最少。mipi数据送到ddr里，ddr处于retension状态。<br>什么是睡眠模式：<br>    睡眠模式是系统里的概念，比如给linux内核可以进入低功耗的睡眠模式。</p>
+<p>SoC依据状态来决定进入哪个mode</p>
+<h2 id="Interactive"><a href="#Interactive" class="headerlink" title="Interactive"></a>Interactive</h2><h3 id="引脚定义"><a href="#引脚定义" class="headerlink" title="引脚定义"></a>引脚定义</h3><p>SoC与MCU之间，使用四根GPIO来切换与控制自身或者对方的工作模式：</p>
+<p>sleep pin：输出， 告知 MCU方 SoC芯片准备睡眠或请求断电；</p>
+<p>mode pin：输入， 用以区分是 normal mode 还是 aov mode </p>
+<p>wakeup pin： 输出，小系统 检查到有人或编码图片保存计数满时设置此管脚，以通知 MCU方 SoC即将 将进入大系统</p>
+<p>power on：输入，用于 MCU 给 SoC 上下电</p>
+<p>uart：输入输出， mode pin 指示有事件触发进入大系统，而在大系统下，SoC可以通过 uart 与 MCU 通信获取具体事件进行处理等；</p>
+<p>usb：输入输出， SoC 在大 SYS 下与 4G 芯片通信；</p>
+<p>power button： 输入，整板上下电。 可能存在隐患，用户随意开关，可能在业务读写 flash 或 sd 的过程中下电，导致 flash 读写分区异常或 sd 文件系统异常。</p>
+<h3 id="引脚状态表"><a href="#引脚状态表" class="headerlink" title="引脚状态表"></a>引脚状态表</h3><p><img src="/../../stuff/pin_state_table.png" alt="image-20241018154127124"></p>
+<h2 id="启动状态转移图"><a href="#启动状态转移图" class="headerlink" title="启动状态转移图"></a>启动状态转移图</h2><p><img src="/../../stuff/boot_state_transfer.png" alt="image-20241018154127124"></p>
+<p>注意，第一次使用power button上电时，必须让mode pin处于normal mode。因为首次开机必须进入一次大系统，进行相关的初始化配置以及注册。后续开机可以由MCU控制这个引脚来决定SoC进入何状态。</p>
+<h2 id="典型状态表"><a href="#典型状态表" class="headerlink" title="典型状态表"></a>典型状态表</h2><p>暂略过</p>
+<h2 id="启动策略"><a href="#启动策略" class="headerlink" title="启动策略"></a>启动策略</h2><p>启动策略定义了固件格式，分区，如何打包，如何烧录，存储介质，如何解包。</p>
+<h3 id="分区定义"><a href="#分区定义" class="headerlink" title="分区定义"></a>分区定义</h3><h3 id="打包-烧录-存储-解包"><a href="#打包-烧录-存储-解包" class="headerlink" title="打包 - 烧录 - 存储 - 解包"></a>打包 - 烧录 - 存储 - 解包</h3><h3 id="启动策略-1"><a href="#启动策略-1" class="headerlink" title="启动策略"></a>启动策略</h3><h3 id="测试案例"><a href="#测试案例" class="headerlink" title="测试案例"></a>测试案例</h3>
     </div>
 
     
@@ -252,13 +257,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/11/01/ddr/DDR_SDRAM2/" rel="prev" title="DDR内存原理 - 2">
-                  <i class="fa fa-angle-left"></i> DDR内存原理 - 2
+                <a href="/2024/10/29/architecture/out_of_order/" rel="prev" title="编译乱序vs执行乱序">
+                  <i class="fa fa-angle-left"></i> 编译乱序vs执行乱序
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2024/11/01/ddr/DDR_SDRAM4/" rel="next" title="DDR内存原理 - 4">
-                  DDR内存原理 - 4 <i class="fa fa-angle-right"></i>
+                <a href="/2024/10/29/ddr/DDR_SDRAM/" rel="next" title="DDR内存原理 - 0">
+                  DDR内存原理 - 0 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
