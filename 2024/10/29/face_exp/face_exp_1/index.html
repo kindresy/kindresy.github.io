@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="A kind of AOV Solution For MIPI-Soc-MCU">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A kind of AOV Solution">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/29/face_exp/face_exp_1/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="A kind of AOV Solution For MIPI-Soc-MCU">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/stuff/device_bus_driver.png">
+<meta property="article:published_time" content="2024-10-29T02:15:16.000Z">
+<meta property="article:modified_time" content="2024-11-17T11:59:32.924Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/device_bus_driver.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/10/29/face_exp/face_exp_1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/29/face_exp/face_exp_1/","path":"2024/10/29/face_exp/face_exp_1/","title":"A kind of AOV Solution"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>A kind of AOV Solution | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#face1"><span class="nav-number">1.</span> <span class="nav-text">face1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D%E4%B8%8Blinux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6"><span class="nav-number">1.1.</span> <span class="nav-text">介绍下linux设备驱动框架</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">关键接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">注册</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#device-%E5%92%8C-driver-%E7%BB%91%E5%AE%9A"><span class="nav-number">1.1.0.3.</span> <span class="nav-text">device 和 driver 绑定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#linux%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E9%9C%80%E8%A6%81%E5%81%9A%E5%93%AA%E4%BA%9B%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.1.0.4.</span> <span class="nav-text">linux驱动开发需要做哪些工作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D%E4%B8%8Buboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.0.5.</span> <span class="nav-text">介绍下uboot启动流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D%E4%B8%8Buboot%E7%A7%BB%E6%A4%8D%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.1.0.6.</span> <span class="nav-text">介绍下uboot移植的基本步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#uboot%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E9%9C%80%E8%A6%81%E5%81%9A%E5%93%AA%E4%BA%9B%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.1.0.7.</span> <span class="nav-text">uboot驱动开发需要做哪些工作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#linux%E4%B8%AD%E6%96%AD%E7%94%A8%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%E7%9A%84%E9%94%81"><span class="nav-number">1.1.0.8.</span> <span class="nav-text">linux中断用什么类型的锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#linux%E7%A7%BB%E6%A4%8D%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.1.0.9.</span> <span class="nav-text">linux移植的基本步骤</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/29/face_exp/face_exp_1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="A kind of AOV Solution | Coffe Pattern">
+      <meta itemprop="description" content="A kind of AOV Solution For MIPI-Soc-MCU">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          A kind of AOV Solution
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-10-29 10:15:16" itemprop="dateCreated datePublished" datetime="2024-10-29T10:15:16+08:00">2024-10-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-11-17 19:59:32" itemprop="dateModified" datetime="2024-11-17T19:59:32+08:00">2024-11-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/aov/" itemprop="url" rel="index"><span itemprop="name">aov</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">A kind of AOV Solution For MIPI-Soc-MCU</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="face1"><a href="#face1" class="headerlink" title="face1"></a>face1</h1><p>1.介绍下linux设备驱动框架<br>2.linux驱动开发需要做哪些工作<br>3.介绍下uboot启动流程<br>4.介绍下uboot移植的基本步骤<br>5.uboot驱动开发需要做哪些工作<br>6.I2C&#x2F;SPI通信原理<br>7.linux中断用什么类型的锁<br>8.linux移植的基本步骤</p>
+<h2 id="介绍下linux设备驱动框架"><a href="#介绍下linux设备驱动框架" class="headerlink" title="介绍下linux设备驱动框架"></a>介绍下linux设备驱动框架</h2><p>linux的外围设备驱动，都是通过bus + driver + device来管理的。外设都是通过总线来与CPU通讯，比如CPU — i2c host – i2c bus – i2c client 设备。<br>kernel实现各种总线的规范以及设备管理(设备检测，驱动绑定等)，驱动程序只需要注册自己的驱动，实现对设备的读写控制接口即可。</p>
+<p>这一类驱动通常是2个层次：总线子系统 + 驱动模块</p>
+<h4 id="关键接口"><a href="#关键接口" class="headerlink" title="关键接口"></a>关键接口</h4><p>linux内核会提供三个关键接口：</p>
+<ol>
+<li><p>bus_register:<br> kernel里面的各<strong>bus子系统</strong>（如：serio, usb, pci, …）会使用该函数来<strong>注册</strong>自己。</p>
+</li>
+<li><p>driver_register<br> <strong>驱动模块</strong>使用它来向总线系统<strong>注册</strong>自己，这样驱动模块只需要关注相应driver接口的实现。通常，bus子系统会对 driver_register来进行封装，如：<br> serio 提供serio_register_driver()<br> usb 提供usb_register_driver()<br> pci提供 pci_register_driver()</p>
+</li>
+<li><p>register_device<br> 各总线除了管理driver外，还管理device，通常会提供一支API来<strong>添加设备</strong>，如： input_register_device, serio_add_port.实现上都是通过一个链表对设备进行管理，通常是在初始化或者probe的时候， 添加设备。</p>
+<p> 设备(device)指的是具体实现总线协议的物理设备，如对serio总线而言，i8042就是它的一个设备，而该总线连接的设备(鼠标，键盘)则是一个serio driver。</p>
+</li>
+</ol>
+<h4 id="注册"><a href="#注册" class="headerlink" title="注册"></a>注册</h4><p>bus.c 和 driver.c 分别对 bus,driver和device进行管理，提供注册bus, driver和查找 device 功能</p>
+<p>bus_register(*bus)函数生成两个list,klist_devices和klist_drivers，分别用于保存设备和驱动</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">INIT_LIST_HEAD(&amp;priv-&gt;interfaces);</span><br><span class="line">klist_init(&amp;priv-&gt;klist_devices, klist_devices_get, klist_devices_put);</span><br><span class="line">klist_init(&amp;priv-&gt;klist_drivers, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">* priv是 <span class="class"><span class="keyword">struct</span> <span class="title">subsys_private</span>定义在 <span class="title">driver</span>/<span class="title">base</span>/<span class="title">base</span>.<span class="title">h</span></span></span><br></pre></td></tr></table></figure>
+
+<p>driver_register(*drv)实际上就是调用 bus_add_driver(*drv) 把 drv 添加到 klist_drivers:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">klist_add_tail(&amp;priv-&gt;knode_bus, &amp;bus-&gt;p-&gt;klist_drivers);</span><br></pre></td></tr></table></figure>
+
+<p>device_register(*dev)实际上就是调用bus_add_device(*dev) 把dev添加到klist_devices:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">klist_add_tail(&amp;dev-&gt;p-&gt;knode_bus, &amp;bus-&gt;p-&gt;klist_devices);</span><br></pre></td></tr></table></figure>
+
+<p>以 hid_bus_type为例，执行 bus_register(&amp;hid_bus_type) 后， hid_bus_type-&gt;p-&gt;klist_devices 和 hid_bus_type-&gt;p-&gt;klist_klist_drivers 这两个list 会被初始化，为后面的 driver和 device 注册做准备，driver数据结构如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">hid_driver</span> <span class="title">tpkbd_driver</span> =</span> &#123;</span><br><span class="line">    .name = <span class="string">&quot;lenovo_tpkbd&quot;</span>,</span><br><span class="line">    .id_table = tpkbd_devices,</span><br><span class="line">    .input_mapping = tpkbd_input_mapping,</span><br><span class="line">    .probe = tpkbd_probe,</span><br><span class="line">    .remove = tpkbd_remove,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>注册driver时,它先经过 __hid_register_driver(&amp;tpkbd_driver),设置一些基本参数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hdrv-&gt;driver.bus = &amp;hid_bus_type;</span><br><span class="line">.....    </span><br><span class="line">driver_register(&amp;hdrv-&gt;driver);</span><br></pre></td></tr></table></figure>
+
+<p>设置’driver.bus’字段后，driver和bus的对应关系就建立起来了。<br>然后，经过 driver_register 后, hid_bus_type-&gt;p-&gt;list_drivers保存了tpkbd_driver.</p>
+<p>Q: driver模块是不知道 hid_driver 这个数据结构的，它如何能把它的指针放到list里面呢？</p>
+<p>答案是”不能”， list_drivers 是不能保存 hid_driver 指针的。driver模块提供了一个接口: ‘struct device_driver’ , hid_driver 这个结构里面需要包含该结构。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">hid_driver</span> &#123;</span></span><br><span class="line">        <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">hid_device_id</span> *<span class="title">id_table</span>;</span></span><br><span class="line">          <span class="comment">/* private: */</span>  </span><br><span class="line">           <span class="class"><span class="keyword">struct</span> <span class="title">device_driver</span> <span class="title">driver</span>;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注册的时候，取的是 driver 字段的地址，也就是 hid_driver.driver 的指针， driver_register(&amp;hdrv-&gt;driver); 当从 driver模块 callback 到 hid-core模块的时候， 如</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">hid_bus_match</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="keyword">struct</span> device_driver *drv)</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">hid_driver</span> *<span class="title">hdrv</span> =</span> container_of(drv, <span class="keyword">struct</span> hid_driver, driver);</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">hid_device</span> *<span class="title">hdev</span> =</span> container_of(dev, <span class="keyword">struct</span> hid_device, dev);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> hid_match_device(hdev, hdrv) != <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用 container_of 就把 hid_driver.driver 的指针转换成了hid_driver 的指针－－这个方法类似 OO编程里面使用基类指针指向派生类对象。Linux普通使用这个方法，来构建框架。</p>
+<h4 id="device-和-driver-绑定"><a href="#device-和-driver-绑定" class="headerlink" title="device 和 driver 绑定"></a>device 和 driver 绑定</h4><p>当增加新device的时候，bus 会轮循它的驱动列表来找到一个匹配的驱动，它们是通过device id和 driver的id_table来进行 ”匹配”的，主要是在 driver_match_device()[drivers&#x2F;base&#x2F;base.h] 通过 bus-&gt;match() 这个callback来让驱动判断是否支持该设备，一旦匹配成功，device的driver字段会被设置成相应的driver指针 :</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">really_probe()</span><br><span class="line">&#123;</span><br><span class="line">    dev-&gt;driver = drv;</span><br><span class="line">    <span class="keyword">if</span> (dev-&gt;bus-&gt;probe) &#123;</span><br><span class="line">        ret = dev-&gt;bus-&gt;probe(dev);</span><br><span class="line">        ...</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (drv-&gt;probe) &#123;</span><br><span class="line">        ret = drv-&gt;probe(dev);</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后 callback 该 driver 的 probe 或者 connect 函数，进行一些初始化操作。</p>
+<p>同理，当增加新的driver时，bus也会执行相同的动作，为驱动查找设备。因此，绑定发生在两个阶段：</p>
+<p>1: 驱动找设备，发生在driver向bus系统注册自己时候，函数调用链是：</p>
+<p>driver_register –&gt; bus_add_driver –&gt; driver_attach() [dd.c] －－ 将轮循device链表，查找匹配的device。<br>2: 设备查找驱动，发生在设备增加到总线的的时候，函数调用链是：</p>
+<p>device_add –&gt; bus_probe_device –&gt; device_initial_probe –&gt; device_attach －－ 将轮循driver链表，查找匹配的driver。</p>
+<p>匹配成功后，系统继续调用 driver_probe_device() 来 callback ‘drv-&gt;probe(dev)’ 或者 ‘bus-&gt;probe(dev) –&gt;drv-&gt;connect()，在probe或者connect函数里面，驱动开始实际的初始化操作。因此，probe() 或者 connect() 是真正的驱动’入口’。</p>
+<p>对驱动开发者而言，最基本是两个步骤：</p>
+<ol>
+<li>定义device id table.</li>
+<li>probe()或connect()开始具体的初始化工作。</li>
+</ol>
+<p><img src="/../../stuff/device_bus_driver.png" alt="image-20241018154127124"></p>
+<h4 id="linux驱动开发需要做哪些工作"><a href="#linux驱动开发需要做哪些工作" class="headerlink" title="linux驱动开发需要做哪些工作"></a>linux驱动开发需要做哪些工作</h4><p>写驱动，同时要输出驱动设计文档，使用文档(包括dts怎么配置)。写完驱动一般会提供一个sample程序，示例如何使用接口。<br>有些并不是重头开始写的驱动，一般是看懂代码流程，做维护工作。或者在已有代码基础上加入新功能，或者是优化旧的驱动架构。</p>
+<p>驱动一大部分是debug的活儿，写新feature的机会不多，适配device设备的活挺多，我即使是在原厂，和host打交道更多，但一般也会适配较多的从机设备，给客户一套推荐的从机设备集合。</p>
+<h4 id="介绍下uboot启动流程"><a href="#介绍下uboot启动流程" class="headerlink" title="介绍下uboot启动流程"></a>介绍下uboot启动流程</h4><h4 id="介绍下uboot移植的基本步骤"><a href="#介绍下uboot移植的基本步骤" class="headerlink" title="介绍下uboot移植的基本步骤"></a>介绍下uboot移植的基本步骤</h4><p>U-Boot（Universal Bootloader）是一个开源的引导加载程序，常用于嵌入式系统中，用于引导操作系统的启动。U-Boot的移植是将U-Boot引导加载程序适配到特定的硬件平台上的过程。下面将详细讲解U-Boot的移植过程。</p>
+<p>了解目标平台和硬件架构：<br>首先，需要详细了解目标硬件平台的体系结构、处理器类型、内存布局、外设和引导方式等硬件特性。这些信息对于移植U-Boot非常重要，因为U-Boot需要与硬件平台进行交互和初始化。</p>
+<p>获取U-Boot源代码：<br>从U-Boot官方网站（<a target="_blank" rel="noopener" href="https://www.denx.de/wiki/U-Boot/WebHome%EF%BC%89%E6%88%96Git%E4%BB%93%E5%BA%93%E8%8E%B7%E5%8F%96%E6%9C%80%E6%96%B0%E7%9A%84U-Boot%E6%BA%90%E4%BB%A3%E7%A0%81%E3%80%82%E9%80%89%E6%8B%A9%E4%B8%8B%E8%BD%BD%E7%A8%B3%E5%AE%9A%E7%89%88%E6%9C%AC%E6%88%96%E5%BC%80%E5%8F%91%E7%89%88%E6%9C%AC%E3%80%82">https://www.denx.de/wiki/U-Boot/WebHome）或Git仓库获取最新的U-Boot源代码。选择下载稳定版本或开发版本。</a></p>
+<p>配置U-Boot：<br>进入U-Boot源代码目录，在终端中运行make <board_name>_defconfig命令，其中<board_name>是目标硬件平台的名称。这将生成适用于目标平台的初始配置文件。</p>
+<p>编辑U-Boot配置：<br>使用文本编辑器打开生成的配置文件，通常位于configs&#x2F;<board_name>_defconfig。根据目标硬件平台的需求，修改配置选项，如处理器类型、内存布局、外设等。</p>
+<p>编译U-Boot：<br>在终端中运行make命令，编译U-Boot。编译过程可能需要一些时间，具体时间取决于硬件平台和源代码的大小。</p>
+<p>配置引导方式：<br>根据目标平台的引导方式，修改U-Boot的引导设置。这可能涉及选择启动设备（如SD卡、NAND Flash、eMMC等）、设置启动命令和环境变量等。</p>
+<p>添加设备驱动程序：<br>根据目标平台的需求，添加和配置设备驱动程序。这些驱动程序包括存储设备、网络接口、显示控制器等。根据硬件平台和操作系统需求，选择合适的驱动程序并进行配置。</p>
+<p>以下是一些常见的U-Boot移植任务：</p>
+<p>配置引导方式：根据目标平台的引导方式，设置U-Boot的引导选项。这可能包括选择启动设备（如SD卡、NAND Flash、eMMC等），设置引导分区，配置引导加载程序的位置和大小等。</p>
+<p>配置环境变量：U-Boot使用环境变量来存储配置和参数。根据硬件平台的需求，配置环境变量，如网络设置、内存大小、启动命令等。</p>
+<p>配置设备驱动程序：根据目标硬件平台的外设和硬件特性，添加和配置相应的设备驱动程序。这可能包括存储设备（如MMC、NAND Flash、SPI Flash等）、网络接口（如Ethernet、Wi-Fi等）、显示控制器等。</p>
+<p>配置启动脚本：编写启动脚本，定义U-Boot的启动流程和加载操作系统的方式。这包括设置启动命令、指定内核镜像和设备树文件的位置等。</p>
+<p>测试和调试：将移植好的U-Boot烧录到目标平台上，并进行测试和调试。确保U-Boot能够正确初始化硬件、加载和启动操作系统，并能够与外设进行交互。</p>
+<h4 id="uboot驱动开发需要做哪些工作"><a href="#uboot驱动开发需要做哪些工作" class="headerlink" title="uboot驱动开发需要做哪些工作"></a>uboot驱动开发需要做哪些工作</h4><h4 id="linux中断用什么类型的锁"><a href="#linux中断用什么类型的锁" class="headerlink" title="linux中断用什么类型的锁"></a>linux中断用什么类型的锁</h4><p>中断中一般使用spinlock，并且要保证临界区时间短。不能使用mutex，mutex导致进程休眠切换到其他进程执行，如果其他进程也有对mutex的申请，但是获取不了，会导致中断处理阻塞，中断是不能被阻塞的。</p>
+<p>spinlock不适用的函数：会引起进程调度的函数。一旦进程被调度，就会形成死锁，从而导致内核崩溃。例如：</p>
+<p>1、copy_to_user</p>
+<p>2、copy_from_user</p>
+<p>3、kmalloc</p>
+<p>4、msleep</p>
+<p>一旦在获得自旋锁之后，再去调用这些会引起进程调度的函数，就会形成死锁</p>
+<p>这些为什么会休眠？</p>
+<p>这主要由操作系统的内存设计导致。</p>
+<p>我们知道操作系统的内存设计一般由L1、L2、L3缓存以及内存组成。涉及内存的操作，在缓存上如果没有cache hint的话，操作系统会逐级去查找，知道引发缺页（page fault），从而调度进程，直到能够获取指定内容。</p>
+<p>而上述的函数便是会引发进程调度的函数。</p>
+<h4 id="linux移植的基本步骤"><a href="#linux移植的基本步骤" class="headerlink" title="linux移植的基本步骤"></a>linux移植的基本步骤</h4><p>Linux内核的移植是将Linux内核适配到特定的硬件平台上，使其能够在该硬件上运行。下面将详细讲解Linux内核的移植过程。</p>
+<p>硬件平台了解：<br>首先，需要详细了解目标硬件平台的体系结构、处理器类型、内存布局、外设等硬件特性。这些信息对于移植Linux内核非常重要，因为内核需要与硬件平台进行交互和初始化。</p>
+<p>获取内核源代码：<br>从Linux内核官方网站（<a target="_blank" rel="noopener" href="https://www.kernel.org)或git仓库获取最新的内核源代码.选择下载稳定版本或开发版本./">https://www.kernel.org）或Git仓库获取最新的内核源代码。选择下载稳定版本或开发版本。</a></p>
+<p>配置内核：<br>进入内核源代码目录，在终端中运行make <config>命令，其中<config>是目标硬件平台的配置选项。这将生成适用于目标平台的初始配置文件。</p>
+<p>编辑内核配置：<br>使用文本编辑器打开生成的配置文件（通常为.config），根据目标硬件平台的需求，修改内核配置选项，如处理器类型、内存布局、外设、驱动程序支持等。根据具体的需求启用或禁用特定的内核功能。</p>
+<p>交叉编译工具链配置：<br>配置交叉编译工具链，以便将内核编译为适用于目标硬件平台的可执行文件。交叉编译工具链包括交叉编译器、链接器和其他编译工具，用于在主机系统上生成目标系统的可执行代码。</p>
+<p>编译内核：<br>在终端中运行make命令，编译Linux内核。编译过程可能需要一些时间，具体时间取决于硬件平台和源代码的大小。</p>
+<p>设备树（Device Tree）配置：<br>对于使用设备树的平台，你需要配置和编译相应的设备树文件（通常为.dts或.dtsi）。设备树描述了硬件平台的设备和资源信息，并在运行时提供给内核。根据硬件平台的设备树规范，编写或修改设备树文件，并在内核编译过程中进行配置和编译。</p>
+<p>添加设备驱动程序：<br>根据目标硬件平台的需求，添加和配置设备驱动程序。这些驱动程序负责与硬件外设进行交互。根据硬件平台和操作系统需求，选择合适的设备驱动程序并进行配置。有些硬件平台可能需要自定义的设备驱动程序。</p>
+<p>配置启动加载程序（Bootloader）：<br>在移植Linux内核时，配置启动加载程序（bootloader），以便能够正确加载和启动内核。常见的启动加载程序包括U-Boot、GRUB、Syslinux等。</p>
+<p>在配置启动加载程序时，指定内核映像文件的位置和名称，并设置启动参数，如命令行参数、设备树文件的位置等。这些配置可能需要在启动加载程序的配置文件中进行修改。</p>
+<p>生成内核映像：<br>完成内核配置和设备驱动程序的添加后，使用交叉编译工具链编译内核源代码生成内核映像文件（通常为vmlinuz或zImage）。内核映像文件是可以直接在目标硬件平台上执行的二进制文件。</p>
+<p>烧录内核映像：<br>将生成的内核映像文件烧录到目标硬件平台的启动设备上，例如SD卡、NAND Flash等。确保内核映像可以被启动加载程序正确识别和加载。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/29/life_record/coffee_make/" rel="prev" title="手冲咖啡以及其影响因素">
+                  <i class="fa fa-angle-left"></i> 手冲咖啡以及其影响因素
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/10/29/boot/aov_boot/" rel="next" title="AOV Boot">
+                  AOV Boot <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
