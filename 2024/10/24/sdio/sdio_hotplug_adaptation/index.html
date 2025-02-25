@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="sdcard热插拔机制的实现方式，适配过程记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SDIO SDCard热插拔支持">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/24/sdio/sdio_hotplug_adaptation/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="sdcard热插拔机制的实现方式，适配过程记录">
+<meta property="og:locale">
+<meta property="og:image" content="https://kindresy.github.io/image.png">
+<meta property="og:image" content="https://kindresy.github.io/image-1.png">
+<meta property="og:image" content="https://kindresy.github.io/image-2.png">
+<meta property="og:image" content="https://kindresy.github.io/image-3.png">
+<meta property="og:image" content="https://kindresy.github.io/image-6.png">
+<meta property="og:image" content="https://kindresy.github.io/image-7.png">
+<meta property="og:image" content="https://kindresy.github.io/image-8.png">
+<meta property="og:image" content="https://kindresy.github.io/image-9.png">
+<meta property="og:image" content="https://kindresy.github.io/image-10.png">
+<meta property="article:published_time" content="2024-10-24T02:15:16.000Z">
+<meta property="article:modified_time" content="2025-02-25T08:43:05.110Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/image.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/10/24/sdio/sdio_hotplug_adaptation/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/10/24/sdio/sdio_hotplug_adaptation/","path":"2024/10/24/sdio/sdio_hotplug_adaptation/","title":"SDIO SDCard热插拔支持"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SDIO SDCard热插拔支持 | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="검색" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>태그</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>카테고리</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          목차
+        </li>
+        <li class="sidebar-nav-overview">
+          흝어보기
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MMC-SDCard%E7%83%AD%E6%8F%92%E6%8B%94"><span class="nav-number">1.</span> <span class="nav-text">MMC - SDCard热插拔</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%83%AD%E6%8F%92%E6%8B%94%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">热插拔的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%83%AD%E6%8F%92%E6%8B%94%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">热插拔的实现方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E5%86%85%E6%A0%B8%E4%B8%AD%E5%85%B7%E4%BD%93%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">Linux内核中具体的实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Probe-host%E6%97%B6"><span class="nav-number">1.3.1.</span> <span class="nav-text">Probe host时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cd-gpio%E4%B8%AD%E6%96%AD%E8%A7%A6%E5%8F%91%E6%97%B6"><span class="nav-number">1.3.2.</span> <span class="nav-text">cd-gpio中断触发时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AE%E8%AF%A2%E6%A3%80%E6%B5%8B"><span class="nav-number">1.3.3.</span> <span class="nav-text">轮询检测</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%89%AB%E6%8F%8Fmmc%E7%A1%AC%E4%BB%B6%E6%80%BB%E7%BA%BF"><span class="nav-number">1.4.</span> <span class="nav-text">如何扫描mmc硬件总线</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#detect-task%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">1.4.1.</span> <span class="nav-text">detect task的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#detect-task%E7%9A%84%E5%94%A4%E9%86%92"><span class="nav-number">1.4.2.</span> <span class="nav-text">detect task的唤醒</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#detect-task-mmc-rescan-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.5.</span> <span class="nav-text">detect task(mmc_rescan)的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sd-card%E7%83%AD%E6%8F%92%E6%8B%94%E7%8A%B6%E6%80%81%E7%9A%84%E8%8E%B7%E5%8F%96"><span class="nav-number">1.6.</span> <span class="nav-text">sd card热插拔状态的获取</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gpio%E4%B8%AD%E6%96%AD%E5%AE%9E%E7%8E%B0%E7%83%AD%E6%8F%92%E6%8B%94"><span class="nav-number">1.6.1.</span> <span class="nav-text">gpio中断实现热插拔</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#host%E6%9C%AC%E8%BA%AB%E5%85%B7%E6%9C%89%E6%A3%80%E6%B5%8B%E5%8D%A1%E7%8A%B6%E6%80%81%E7%9A%84%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.6.2.</span> <span class="nav-text">host本身具有检测卡状态的寄存器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E6%AC%A1sd-card%E7%83%AD%E6%8F%92%E6%8B%94%E9%80%82%E9%85%8D%E5%BC%82%E5%B8%B8%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%92%8C%E8%A7%A3%E5%86%B3%E7%BB%8F%E5%8E%86"><span class="nav-number">1.7.</span> <span class="nav-text">一次sd card热插拔适配异常问题的定位和解决经历</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">포스트</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">카테고리</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/sdio/sdio_hotplug_adaptation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SDIO SDCard热插拔支持 | Coffe Pattern">
+      <meta itemprop="description" content="sdcard热插拔机制的实现方式，适配过程记录">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SDIO SDCard热插拔支持
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">작성일</span>
+
+      <time title="Post created: 2024-10-24 10:15:16" itemprop="dateCreated datePublished" datetime="2024-10-24T10:15:16+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Updated at: 2025-02-25 16:43:05" itemprop="dateModified" datetime="2025-02-25T16:43:05+08:00">2025-02-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sdio/" itemprop="url" rel="index"><span itemprop="name">sdio</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">sdcard热插拔机制的实现方式，适配过程记录</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="MMC-SDCard热插拔"><a href="#MMC-SDCard热插拔" class="headerlink" title="MMC - SDCard热插拔"></a>MMC - SDCard热插拔</h1><h2 id="热插拔的定义"><a href="#热插拔的定义" class="headerlink" title="热插拔的定义"></a>热插拔的定义</h2><p>热插拔一般是指某个部件在插入或拔出主体时，能够让主体感知到。在sdcard热插拔这块，也就是指sd card插入和拔出时，linux内核都能<strong>检测</strong>卡的状态，收到通知并做出响应的反馈。</p>
+<h2 id="热插拔的实现方式"><a href="#热插拔的实现方式" class="headerlink" title="热插拔的实现方式"></a>热插拔的实现方式</h2><p>热插拔的实现方式一般有两种：</p>
+<ul>
+<li>轮询</li>
+<li>中断</li>
+</ul>
+<h2 id="Linux内核中具体的实现方式"><a href="#Linux内核中具体的实现方式" class="headerlink" title="Linux内核中具体的实现方式"></a>Linux内核中具体的实现方式</h2><p>linux内核实现了MMC Core，MMC Core在如下情况下会去扫描mmc硬件总线:</p>
+<ul>
+<li>Probe host时，调用_mmc_detect_change，唤醒host-&gt;detect；</li>
+<li>cd-gpio中断检测到card状态发送变化，调用mmc_detect_change，唤醒host-&gt;detect；</li>
+<li>host要求轮询sd card插入状态的情况下，所进行的轮询操作；</li>
+</ul>
+<h3 id="Probe-host时"><a href="#Probe-host时" class="headerlink" title="Probe host时"></a>Probe host时</h3><p>probe host时就已经会解析设备树中指定的cd-gpios了，</p>
+<p><img src="/image.png" alt="alt text"></p>
+<p>内核已经实现了mmc_gpio_cd_irqt回调，gpio中断触发时调用mmc_detect_change函数，该函数负责唤醒detect延时任务，detect在初始化时被绑定为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dw_mci_init_slot(host);</span><br><span class="line">	mmc_alloc_host(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> dw_mci_slot), host-&gt;dev);</span><br><span class="line">		INIT_DELAYED_WORK(&amp;host-&gt;detect, mmc_rescan); </span><br></pre></td></tr></table></figure>
+<p>mmc_rescan中负责检测mmc card</p>
+<p><img src="/image-1.png" alt="alt text"></p>
+<h3 id="cd-gpio中断触发时"><a href="#cd-gpio中断触发时" class="headerlink" title="cd-gpio中断触发时"></a>cd-gpio中断触发时</h3><p>底层硬件发现card插入状态发生变化而调用mmc_detect_change的时候（sd card插入状态监控）。</p>
+<p>当底层硬件发现card插入状态发生变化，例如sd card的插入或者拔出可以触发某个GPIO产生中断。此时，可以在中断处理中调用mmc_detect_change来进行扫描mmc硬件总线，并且根据总线上的card状态变化进行处理。<br>这种情况的主要目的是为了实现sd card的热插拔。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">irqreturn_t</span> <span class="title function_">mmc_gpio_cd_irqt</span><span class="params">(<span class="type">int</span> irq, <span class="type">void</span> *dev_id)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* Schedule a card detection after a debounce timeout */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mmc_host</span> *<span class="title">host</span> =</span> dev_id;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mmc_gpio</span> *<span class="title">ctx</span> =</span> host-&gt;slot.handler_priv;</span><br><span class="line"></span><br><span class="line">	host-&gt;trigger_card_event = <span class="literal">true</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 调用mmc_detect_change对card的插入状态变化进行处理 </span></span><br><span class="line">    <span class="comment">// 注意，这里ctx-&gt;cd_debounce_delay_ms=200，延时了200ms是用来进行消抖</span></span><br><span class="line">	mmc_detect_change(host, msecs_to_jiffies(ctx-&gt;cd_debounce_delay_ms));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> IRQ_HANDLED;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="轮询检测"><a href="#轮询检测" class="headerlink" title="轮询检测"></a>轮询检测</h3><p>host要求轮询sd card插入状态的情况下，所进行的轮询操作（sd card插入状态监控）。一般来说，在host无法根据硬件来及时获取card插入状态发生变化的情况下，会要求mmc_core每隔一段时间（一般是HZ，一秒）扫描一次mmc硬件总线。</p>
+<p>在这种情况下，mmc_host的MMC_CAP_NEEDS_POLL属性会被设置。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mmc_rescan</span><span class="params">(<span class="keyword">struct</span> work_struct *work)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mmc_host</span> *<span class="title">host</span> =</span></span><br><span class="line">		container_of(work, <span class="keyword">struct</span> mmc_host, detect.work);</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">    </span><br><span class="line">    ......</span><br><span class="line">    </span><br><span class="line"> out:</span><br><span class="line">	<span class="comment">// 当host设置了MMC_CAP_NEEDS_POLL属性时，需要每隔HZ的时间轮询检测host的卡槽状态，</span></span><br><span class="line">	<span class="comment">// 调度了host-&gt;detect工作，对应就是mmc_rescan</span></span><br><span class="line">    <span class="comment">// INIT_DELAYED_WORK(&amp;host-&gt;detect, mmc_rescan) </span></span><br><span class="line">    <span class="comment">// 这样，通过mmc_schedule_delayed_work(&amp;host-&gt;detect, HZ)就会每隔HZ时间就会执行一次mmc_rescan</span></span><br><span class="line">	<span class="keyword">if</span> (host-&gt;caps &amp; MMC_CAP_NEEDS_POLL)</span><br><span class="line">		mmc_schedule_delayed_work(&amp;host-&gt;detect, HZ);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="如何扫描mmc硬件总线"><a href="#如何扫描mmc硬件总线" class="headerlink" title="如何扫描mmc硬件总线"></a>如何扫描mmc硬件总线</h2><p>从上述，我们知道了可以通过调用mmc_detect_change和执行host-&gt;detect工作来发起mmc硬件总线的扫描。而mmc_detect_change最终也是执行mmc_host-&gt;detect工作来发起mmc硬件总线扫描的。</p>
+<p>下面描述detect任务的初始化过程和唤醒时机</p>
+<h3 id="detect-task的创建"><a href="#detect-task的创建" class="headerlink" title="detect task的创建"></a>detect task的创建</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> mmc_host *<span class="title function_">mmc_alloc_host</span><span class="params">(<span class="type">int</span> extra, <span class="keyword">struct</span> device *dev)</span></span><br><span class="line">&#123;</span><br><span class="line">    ......</span><br><span class="line">	<span class="comment">// 初始化detect工作为mmc_rescan，</span></span><br><span class="line">	<span class="comment">// 后续调度host-&gt;detect来检测是否有card插入时，</span></span><br><span class="line">	<span class="comment">// 就会调用到mmc_rescan</span></span><br><span class="line">	INIT_DELAYED_WORK(&amp;host-&gt;detect, mmc_rescan);</span><br><span class="line">    ......</span><br><span class="line"> &#125;   </span><br></pre></td></tr></table></figure>
+
+<h3 id="detect-task的唤醒"><a href="#detect-task的唤醒" class="headerlink" title="detect task的唤醒"></a>detect task的唤醒</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mmc_detect_change</span><span class="params">(<span class="keyword">struct</span> mmc_host *host, <span class="type">unsigned</span> <span class="type">long</span> delay)</span></span><br><span class="line">&#123;</span><br><span class="line">	_mmc_detect_change(host, delay, <span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line">EXPORT_SYMBOL(mmc_detect_change);</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> _mmc_detect_change(<span class="keyword">struct</span> mmc_host *host, <span class="type">unsigned</span> <span class="type">long</span> delay, <span class="type">bool</span> cd_irq)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * If the device is configured as wakeup, we prevent a new sleep for</span></span><br><span class="line"><span class="comment">	 * 5 s to give provision for user space to consume the event.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">if</span> (cd_irq &amp;&amp; !(host-&gt;caps &amp; MMC_CAP_NEEDS_POLL) &amp;&amp;</span><br><span class="line">		device_can_wakeup(mmc_dev(host)))</span><br><span class="line">		pm_wakeup_event(mmc_dev(host), <span class="number">5000</span>);</span><br><span class="line"></span><br><span class="line">	host-&gt;detect_change = <span class="number">1</span>; <span class="comment">// 检测到card状态发生变化的标识</span></span><br><span class="line">	mmc_schedule_delayed_work(&amp;host-&gt;detect, delay); <span class="comment">// 间隔delay jiffies之后调用host-&gt;detect的工作(mmc_rescan)</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="detect-task-mmc-rescan-的实现"><a href="#detect-task-mmc-rescan-的实现" class="headerlink" title="detect task(mmc_rescan)的实现"></a>detect task(mmc_rescan)的实现</h2><p><strong>当mmc core检测到一张card并且初始化该card完成时，会将该mmc_bus于该card绑定</strong>，相应的mmc_bus的操作mmc_bus_ops就会被设置成对应card类型的操作集。</p>
+<p>例如emmc的话就是mmc_ops，sd card的话就是mmc_sd_ops，sdio card就是mmc_sdio_ops。</p>
+<p>mmc_rescan主要是进行以下两种操作：</p>
+<ul>
+<li><p>当mmc_host的mmc_bus_ops没有被设置的时候<br>  这种情况下，说明mmc_bus并没有和card绑定。也就是之前并<strong>没有card插入或者识别初始化card的过程中失败了</strong>。<br>  所以只需要去判断当前是否有card插入，如果有的话，进行card的识别和初始化操作（并且会设置mmc_bus_ops）。否则，说明都不做。</p>
+</li>
+<li><p>当mmc_host的mmc_bus_ops被设置的时候<br>  这种情况下，说明mmc_bus已经和card绑定了。也就是之前<strong>已经有card插入并且初始化成功了</strong>。<br>  那么此时，需要调用mmc_bus_ops中的detect方法（对于sd card来说就是mmc_sd_detect）来判断card是否被移除，并且进行相应的动作。</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mmc_rescan</span><span class="params">(<span class="keyword">struct</span> work_struct *work)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mmc_host</span> *<span class="title">host</span> =</span></span><br><span class="line">		container_of(work, <span class="keyword">struct</span> mmc_host, detect.work);</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 如果rescan_disable被设置，说明host此时还禁止rescan */</span></span><br><span class="line">	<span class="keyword">if</span> (host-&gt;rescan_disable)</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* If there is a non-removable card registered, only scan once */</span></span><br><span class="line">	<span class="comment">/* 对于设备不可移除的host来说，只能rescan一次 */</span></span><br><span class="line">	<span class="keyword">if</span> (!mmc_card_is_removable(host) &amp;&amp; host-&gt;rescan_entered)</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	host-&gt;rescan_entered = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (host-&gt;trigger_card_event &amp;&amp; host-&gt;ops-&gt;card_event) &#123;</span><br><span class="line">		mmc_claim_host(host);</span><br><span class="line">		host-&gt;ops-&gt;card_event(host);</span><br><span class="line">		mmc_release_host(host);</span><br><span class="line">		host-&gt;trigger_card_event = <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	mmc_bus_get(host);<span class="comment">// 获取host对应的bus</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Verify a registered card to be functional, else remove it. */</span></span><br><span class="line">	<span class="keyword">if</span> (host-&gt;bus_ops &amp;&amp; !host-&gt;bus_dead)</span><br><span class="line">		host-&gt;bus_ops-&gt;detect(host);</span><br><span class="line"></span><br><span class="line">	host-&gt;detect_change = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Let mmc_bus_put() free the bus/bus_ops if we&#x27;ve found that</span></span><br><span class="line"><span class="comment">	 * the card is no longer present.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	mmc_bus_put(host);</span><br><span class="line">	<span class="comment">// 因为在这个函数的前面已经获取了一次host，</span></span><br><span class="line">	<span class="comment">// 可能导致host-&gt;bus_ops-&gt;detect中检测到card拔出之后，</span></span><br><span class="line">	<span class="comment">// 没有真正释放到host的bus，所以这里先put一次</span></span><br><span class="line">	<span class="comment">// host bus的计数（bus_refs）为0的时候，会调用__mmc_release_bus清空host bus的信息</span></span><br><span class="line">	mmc_bus_get(host);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* if there still is a card present, stop here */</span></span><br><span class="line">	<span class="keyword">if</span> (host-&gt;bus_ops != <span class="literal">NULL</span>) &#123;</span><br><span class="line">		mmc_bus_put(host);</span><br><span class="line">		<span class="keyword">goto</span> out;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Only we can add a new handler, so it&#x27;s safe to</span></span><br><span class="line"><span class="comment">	 * release the lock here.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	mmc_bus_put(host);</span><br><span class="line"></span><br><span class="line">	mmc_claim_host(host);</span><br><span class="line">	<span class="keyword">if</span> (mmc_card_is_removable(host) &amp;&amp; host-&gt;ops-&gt;get_cd &amp;&amp;</span><br><span class="line">			host-&gt;ops-&gt;get_cd(host) == <span class="number">0</span>) &#123;</span><br><span class="line">		mmc_power_off(host);</span><br><span class="line">		mmc_release_host(host);</span><br><span class="line">		<span class="keyword">goto</span> out;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 调用mmc_rescan_try_freq，以支持的最低频率作为工作频率尝试搜索card</span></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ARRAY_SIZE(freqs); i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (!mmc_rescan_try_freq(host, max(freqs[i], host-&gt;f_min)))</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">if</span> (freqs[i] &lt;= host-&gt;f_min)</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	mmc_release_host(host);</span><br><span class="line"></span><br><span class="line"> out:</span><br><span class="line">	<span class="comment">// 当host设置了MMC_CAP_NEEDS_POLL属性时，需要每隔HZ的时间轮询检测host的卡槽状态，</span></span><br><span class="line">	<span class="comment">// 调度了host-&gt;detect工作，对应就是mmc_rescan</span></span><br><span class="line">	<span class="keyword">if</span> (host-&gt;caps &amp; MMC_CAP_NEEDS_POLL)</span><br><span class="line">		mmc_schedule_delayed_work(&amp;host-&gt;detect, HZ);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="sd-card热插拔状态的获取"><a href="#sd-card热插拔状态的获取" class="headerlink" title="sd card热插拔状态的获取"></a>sd card热插拔状态的获取</h2><p>获取方式主要有两种：</p>
+<ul>
+<li>gpio中断</li>
+<li>host本身具有检测卡状态的寄存器</li>
+</ul>
+<h3 id="gpio中断实现热插拔"><a href="#gpio中断实现热插拔" class="headerlink" title="gpio中断实现热插拔"></a>gpio中断实现热插拔</h3><p>mmc core解析gpio中断，在Probe host一节的代码路径里可以看到，这依赖dts中描述cd-gpios节点：<br>一个配置案例：</p>
+<p><img src="/image-2.png" alt="alt text"></p>
+<p>注意，这里必须要引用gpio控制器(带有gpio-controller描述的节点)</p>
+<h3 id="host本身具有检测卡状态的寄存器"><a href="#host本身具有检测卡状态的寄存器" class="headerlink" title="host本身具有检测卡状态的寄存器"></a>host本身具有检测卡状态的寄存器</h3><p>忽略</p>
+<h2 id="一次sd-card热插拔适配异常问题的定位和解决经历"><a href="#一次sd-card热插拔适配异常问题的定位和解决经历" class="headerlink" title="一次sd card热插拔适配异常问题的定位和解决经历"></a>一次sd card热插拔适配异常问题的定位和解决经历</h2><p>内核启动时，sd card初始化成功，但是热插拔时，sd card初始化失败， 所以将drivers\mmc\core\core.c中定义DEBUG宏，对比启动时的初始化log和热插拔时的log</p>
+<p>左 - 内核启动时log<br>右 - 热插拔时的log</p>
+<p><img src="/image-3.png" alt="alt text"></p>
+<p>为了理解上面的指令序列：</p>
+<p>查询spec sdio-spce-v3:</p>
+<p>An SDIO aware host sends CMD5 prior to the CMD55&#x2F;ACMD41 pair, and thus would receive a valid OCR in<br>the R4 response to CMD5 and continue to initialize the card. Figure 3-2 shows the operation of an SDIO<br>aware host operating in the SD modes and Figure 3-3 shows the same operation for a host that operates in<br>the SPI mode.</p>
+<p>在初始化正常的log里，CMD55&#x2F;CMD41指令对协商工作电压，sd card返回的R4类型的回复，bit24为0，而热插拔的log中CMD41的R3返回的bit24为1</p>
+<p><img src="/image-6.png" alt="alt text"></p>
+<p>R4类型的回复中，bit24为S18R，</p>
+<p><img src="/image-7.png" alt="alt text"></p>
+<p>看样子是sdhci开始切换1.8v了，所以右边的log里会在CMD41获取到OCR bit24为1后开始执行CMD11。目前我们的原型平台还不支持1.8v工作。</p>
+<p>正常的初始化序列是：</p>
+<p><img src="/image-8.png" alt="alt text"></p>
+<p>为了屏蔽此处的电压切换，走读代码寻找CMD11的发送位置：</p>
+<p><img src="/image-9.png" alt="alt text"></p>
+<p>临时让mmc_set_uhs_voltage在入口处就返回：</p>
+<p><img src="/image-10.png" alt="alt text"></p>
+<p>再次启动内核，热插拔sd card，初始化可以成功！</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/24/sdio/sdio_dwc_mshc_vol_switch/" rel="prev" title="SDIO MSHC 电压切换">
+                  <i class="fa fa-angle-left"></i> SDIO MSHC 电压切换
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/10/24/dma/dma_basic_knowledge/" rel="next" title="DMA Basic Knowledge">
+                  DMA Basic Knowledge <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

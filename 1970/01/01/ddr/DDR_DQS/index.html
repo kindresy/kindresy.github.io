@@ -20,30 +20,31 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="DDR2操作的有限状态机以及指令真值表">
+    <meta name="description" content="为什么需要DQS信号">
 <meta property="og:type" content="article">
-<meta property="og:title" content="DDR内存原理 - 3">
-<meta property="og:url" content="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/index.html">
+<meta property="og:title" content="DDR - DQS">
+<meta property="og:url" content="https://kindresy.github.io/1970/01/01/ddr/DDR_DQS/index.html">
 <meta property="og:site_name" content="Coffe Pattern">
-<meta property="og:description" content="DDR2操作的有限状态机以及指令真值表">
+<meta property="og:description" content="为什么需要DQS信号">
 <meta property="og:locale">
-<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_finite_state_mechnine.png">
-<meta property="og:image" content="https://kindresy.github.io/stuff/ddr_ins_table.png">
-<meta property="article:published_time" content="2024-11-01T12:43:43.704Z">
-<meta property="article:modified_time" content="2024-11-01T13:53:44.417Z">
+<meta property="og:image" content="https://kindresy.github.io/stuff/111222.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/333444.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/555666.png">
+<meta property="article:published_time" content="1970-01-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-11-04T12:26:09.000Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kindresy.github.io/stuff/ddr_finite_state_mechnine.png">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/111222.png">
 
 
-<link rel="canonical" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/">
+<link rel="canonical" href="https://kindresy.github.io/1970/01/01/ddr/DDR_DQS/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/","path":"2024/11/01/ddr/DDR_SDRAM3/","title":"DDR内存原理 - 3"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/1970/01/01/ddr/DDR_DQS/","path":"1970/01/01/ddr/DDR_DQS/","title":"DDR - DQS"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>DDR内存原理 - 3 | Coffe Pattern</title>
+<title>DDR - DQS | Coffe Pattern</title>
   
 
 
@@ -83,7 +84,7 @@
   </div>
 
   <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    <div class="toggle popup-trigger" aria-label="검색" role="button">
     </div>
   </div>
 </div>
@@ -91,7 +92,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>태그</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>카테고리</a></li>
   </ul>
 </nav>
 
@@ -103,20 +104,19 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
-          Table of Contents
+          목차
         </li>
         <li class="sidebar-nav-overview">
-          Overview
+          흝어보기
         </li>
       </ul>
 
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#V210-K4%E8%8A%AF%E7%89%87-%E6%97%B6%E5%BA%8F-%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">V210 K4芯片 时序-配置过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2%E5%9B%BE"><span class="nav-number">2.</span> <span class="nav-text">状态转换图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E7%9C%9F%E5%80%BC%E8%A1%A8"><span class="nav-number">3.</span> <span class="nav-text">指令真值表</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -129,14 +129,14 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">20</span>
-          <span class="site-state-item-name">posts</span>
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">포스트</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
         <span class="site-state-item-count">9</span>
-        <span class="site-state-item-name">categories</span></a>
+        <span class="site-state-item-name">카테고리</span></a>
       </div>
   </nav>
 </div>
@@ -162,7 +162,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/11/01/ddr/DDR_SDRAM3/">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/ddr/DDR_DQS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -175,12 +175,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="DDR内存原理 - 3 | Coffe Pattern">
-      <meta itemprop="description" content="DDR2操作的有限状态机以及指令真值表">
+      <meta itemprop="name" content="DDR - DQS | Coffe Pattern">
+      <meta itemprop="description" content="为什么需要DQS信号">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          DDR内存原理 - 3
+          DDR - DQS
         </h1>
 
         <div class="post-meta-container">
@@ -189,10 +189,16 @@
       <span class="post-meta-item-icon">
         <i class="far fa-calendar"></i>
       </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
+      <span class="post-meta-item-text">작성일</span>
 
-      <time title="Created: 2024-11-01 20:43:43 / Modified: 21:53:44" itemprop="dateCreated datePublished" datetime="2024-11-01T20:43:43+08:00">2024-11-01</time>
+      <time title="Post created: 1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Updated at: 2024-11-04 20:26:09" itemprop="dateModified" datetime="2024-11-04T20:26:09+08:00">2024-11-04</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -214,31 +220,23 @@
     </span>
 </div>
 
-            <div class="post-description">DDR2操作的有限状态机以及指令真值表</div>
+            <div class="post-description">为什么需要DQS信号</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="V210-K4芯片-时序-配置过程"><a href="#V210-K4芯片-时序-配置过程" class="headerlink" title="V210 K4芯片 时序-配置过程"></a>V210 K4芯片 时序-配置过程</h1><p>参考资料：</p>
-<ol>
-<li>三星 DDR2 SDRAM 操作时序规范</li>
-<li>三星V210芯片手册</li>
-</ol>
-<p>github链接：<br><a target="_blank" rel="noopener" href="https://github.com/zzzhao9426/DDR2-/blob/main/DDR2%E6%93%8D%E4%BD%9C%E6%97%B6%E5%BA%8F%E8%A7%84%E8%8C%83(%E4%B8%89%E6%98%9F).pdf">https://github.com/zzzhao9426/DDR2-/blob/main/DDR2%E6%93%8D%E4%BD%9C%E6%97%B6%E5%BA%8F%E8%A7%84%E8%8C%83(%E4%B8%89%E6%98%9F).pdf</a></p>
-<h1 id="状态转换图"><a href="#状态转换图" class="headerlink" title="状态转换图"></a>状态转换图</h1><p>操作状态的变迁</p>
-<p><img src="/../../stuff/ddr_finite_state_mechnine.png" alt="在这里插入图片描述"></p>
-<p>状态入口为初始化，然后是idle状态，由于ddr漏电特性，所以每过一段时间都要自我刷新，也就是idle状态右边的ref(refresh，对所有位存储cell读取并重写一遍)指向的刷新状态。<br>idle状态向下，是通过ACT命令设置到激活状态，这里更细致的说，应该是激活一个ROW，选通某一个bank里的某一行。</p>
-<p>三星文档里将bank翻译为“簇”</p>
-<p>簇激活后，向右下，DMC发送read指令，数据通过总线送出，可以自循环，读出多个字节。</p>
-<p>read状态结束后，经过precharge，到预充电状态，然后自动回到idle状态。</p>
-<p>簇激活后，向做下是write，过程也是类似的。</p>
-<p>簇激活后，可以发送RDA指令，进入自动预充电状态，然后返回到idle。</p>
-<p>idle状态的右上方向的SRF状态区别于REF，区别在于，如果DMC不发送终止命令，SRF不会结束自我循环刷新状态，一般用于DMC已经掉电了，就可以让device进行自我刷新，也就是retention。</p>
-<p>idle状态的左方，设置MRS&#x2F;EMRS。整个device里面，有若干寄存器是为了保存配置用的。<br>ddr有多种时序模式，那么就需要一些寄存器保存这类配置。最典型的是：burst_length 这类信息需要通过MRS&#x2F;EMRS（extend MRS）配置。</p>
-<h1 id="指令真值表"><a href="#指令真值表" class="headerlink" title="指令真值表"></a>指令真值表</h1><p>手册第37页，所有状态机图里的指令都在这里面：<br><img src="/../../stuff/ddr_ins_table.png" alt="在这里插入图片描述"></p>
-<p>DMC发布cmd，是通过各条设置控制线联合完成的，device来译码这些控制线的信息<br>上图真值表也就是指明了每条指令，对应的控制线状态。</p>
+    <div class="post-body" itemprop="articleBody"><p>DDR(double data rate SDRAM)中的数据是双边沿传输，即在时钟的上升和下降沿都可以采样，它和单边沿传输的SDRAM(即SDR，single data rate SDRAM)的区别如下图，图中的data eye即数据的两次传输之间围成的区域，图(a)为SDR的传输示意图，因为只有一个时钟沿传输数据，所以称为single-edged clocking，图(b)为DDR的传输示意图，因为是两个时钟沿传输数据，所以称为dual-edged clocking。</p>
+<p><img src="/../../stuff/111222.png" alt="在这里插入图片描述"></p>
+<p>在SDR中，data eye是由两个同向时钟沿围成的(在图中即为在时钟上升沿，发送端驱动数据)，中间还会有一个反向时钟沿，在该反向时钟沿的时刻(在图中即为下降沿)数据是稳定的，所以该反向时钟沿可以用来在接受端采样数据。简而言之就是每个data eye有两个可用时钟沿，左边的上升沿用于发送端驱动数据，中间的下降沿用于接收端采样数据，而右边的时钟沿就属于下一个data eye了。</p>
+<p>而在DDR中，data eye是由紧邻的两个反相时钟沿围成，每个data eye可用的时钟沿个数减半(即只有一个)，这个时钟沿只能用于驱动或采样数据，而无法把两件任务都完成。因此必须引入另一种机制来弥补这一缺陷，这一机制就是DQS(data strobe signal)，它被称为同步时序参考信号( source-synchronous timing reference signal)。</p>
+<p>下图是读操作的时序图，DQS由DRAM产生并送给controller，DQS和DQ都和clock的边沿对齐(edge aligned)，controller将DQS delay 90°(需要额外的delay电路)，delay后的DQS边沿和DQ的中心对齐(centere-aligned)，可以用来采样稳定的数据。</p>
+<p><img src="/../../stuff/333444.png" alt="在这里插入图片描述"></p>
+<p>下图是写操作的时序图，DQS由controller产生并送给DRAM，DQS和clock的边沿对齐(edge aligned)，而DQ和clock是中心对齐的(edge-aligned，也需要额外电路)，DRAM就可以直接用DQS的边沿采样数据。</p>
+<p><img src="/../../stuff/555666.png" alt="在这里插入图片描述"></p>
+<p>可以看到，写操作和读操作中的DQS、DQ、clock的关系是不同的，且都需要controller提供额外的电路来保证它们的关系，原因DRAM通常是大规模生产，把额外电路的负担都放到controller一侧，可以降低DRAM的成本。</p>
+<p>另外，在高速接口设计中（尤其是DDR这种并行高速接口），要尽量减少信号传输时间的uncertainty（通常由skew和jitter两部分组成），以保证所有数据都能被同时正确采样，这就需要精细的板上布线和复杂的训练(traning)。为了减小时序收敛难度，DDR不是同时将所有DQ线的时序同时进行约束，而是将它们每8个bit为1组，且每一组都有自己的DQS信号。</p>
 
     </div>
 
@@ -252,13 +250,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/11/01/ddr/DDR_SDRAM2/" rel="prev" title="DDR内存原理 - 2">
+                <a href="/1970/01/01/ddr/DDR_SDRAM2/" rel="prev" title="DDR内存原理 - 2">
                   <i class="fa fa-angle-left"></i> DDR内存原理 - 2
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2024/11/01/ddr/DDR_SDRAM4/" rel="next" title="DDR内存原理 - 4">
-                  DDR内存原理 - 4 <i class="fa fa-angle-right"></i>
+                <a href="/1970/01/01/ddr/DDR_SDRAM/" rel="next" title="DDR内存原理 - 0">
+                  DDR内存原理 - 0 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
@@ -279,7 +277,7 @@
 
   <div class="copyright">
     &copy; 
-    <span itemprop="copyrightYear">2024</span>
+    <span itemprop="copyrightYear">2025</span>
     <span class="with-love">
       <i class="fa fa-heart"></i>
     </span>

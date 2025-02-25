@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="一、命令说明 mmc_go_idle 发送CMD0指令，GO_IDLE_STATE 使mmc card进入idle state。 虽然进入到了Idle State，但是上电复位过程并不一定完成了，这主要靠读取OCR的busy位来判断，而流程归结为下一步。 mmc_send_op_cond 发送CMD1指令，SEND_OP_COND 这里会设置card的工作电压寄存器OCR，并且通过busy位（bi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Coffe Pattern">
+<meta property="og:url" content="https://kindresy.github.io/1970/01/01/face_exp/face_exp_2/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="一、命令说明 mmc_go_idle 发送CMD0指令，GO_IDLE_STATE 使mmc card进入idle state。 虽然进入到了Idle State，但是上电复位过程并不一定完成了，这主要靠读取OCR的busy位来判断，而流程归结为下一步。 mmc_send_op_cond 发送CMD1指令，SEND_OP_COND 这里会设置card的工作电压寄存器OCR，并且通过busy位（bi">
+<meta property="og:locale">
+<meta property="article:published_time" content="1970-01-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-11-19T05:40:40.000Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://kindresy.github.io/1970/01/01/face_exp/face_exp_2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-Hans","comments":true,"permalink":"https://kindresy.github.io/1970/01/01/face_exp/face_exp_2/","path":"1970/01/01/face_exp/face_exp_2/","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title> | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="검색" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>태그</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>카테고리</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          목차
+        </li>
+        <li class="sidebar-nav-overview">
+          흝어보기
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">포스트</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">카테고리</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/face_exp/face_exp_2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">작성일</span>
+
+      <time title="Post created: 1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Updated at: 2024-11-19 13:40:40" itemprop="dateModified" datetime="2024-11-19T13:40:40+08:00">2024-11-19</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>一、命令说明</p>
+<p>mmc_go_idle <br>发送CMD0指令，GO_IDLE_STATE <br>使mmc card进入idle state。 <br>虽然进入到了Idle State，但是上电复位过程并不一定完成了，这主要靠读取OCR的busy位来判断，而流程归结为下一步。</p>
+<p>mmc_send_op_cond <br>发送CMD1指令，SEND_OP_COND <br>这里会设置card的工作电压寄存器OCR，并且通过busy位（bit31）来判断card的上电复位过程是否完成，如果没有完成的话需要重复发送。 <br>完成之后，mmc card进入ready state。</p>
+<p>mmc_all_send_cid <br>这里会发送CMD2指令，ALL_SEND_CID <br>广播指令，使card回复对应的CID寄存器的值。在这里就相应获得了CID寄存器的值了，存储在cid中。 <br>完成之后，MMC card会进入Identification State。</p>
+<p>mmc_set_relative_addr <br>发送CMD3指令，SET_RELATIVE_ADDR <br>设置该mmc card的关联地址为card-&gt;rca，也就是0x0001 <br>完成之后，该MMC card进入standby模式。</p>
+<p>mmc_send_csd <br>发送CMD9指令，MMC_SEND_CSD <br>要求mmc card发送csd寄存器，存储到card-&gt;raw_csd中，也就是原始的csd寄存器的值。 <br>此时mmc card还是处于standby state</p>
+<p>mmc_select_card &amp; mmc_deselect_cards <br>发送CMD7指令，SELECT&#x2F;DESELECT CARD <br>选择或者断开指定的card <br>这时卡进入transfer state。后续可以通过各种指令进入到receive-data state或者sending-data state依次来进行数据的传输</p>
+<p>mmc_get_ext_csd <br>发送CMD8指令，SEND_EXT_CSD <br>这里要求处于transfer state的card发送ext_csd寄存器，这里获取之后存放在ext_csd寄存器中 <br>这里会使card进入sending-data state，完成之后又退出到transfer state。</p>
+<p>mmc_switch <br>发送CMD6命令，MMC_SWITCH <br>用于设置ext_csd寄存器的某些bit</p>
+<p>mmc_send_status <br>发送CMD13命令，MMC_SEND_STATUS <br>要求card发送自己当前的状态寄存器</p>
+<p>mmc_send_cid <br>发送CMD10命令，MMC_SEND_CID <br>要求mmc card回复cid寄存器</p>
+<p>mmc_card_sleepawake <br>发送CMD5命令，MMC_SLEEP_AWAKE <br>使card进入或者退出sleep state，由参数决定。</p>
+<p>二、初始化顺序</p>
+<p>1.power up emmc</p>
+<p>2.设置电压，配置阶段为400khz</p>
+<p>3.设置位宽为1bit</p>
+<p>4.cmd0</p>
+<p>5.cmd1循环一直到检测到emmc返回的电源状态稳定</p>
+<p>6.cmd2获取cid</p>
+<p>7.cmd3 设置rca，如果获取到的数值不正确，可以手动设置为0x01</p>
+<p>8.cmd9 获取csd</p>
+<p>9.可以重新配置工作速率</p>
+<p>10.cmd7 设置为transfer mode</p>
+<p>11.cmd8获取额外的csd信息</p>
+<p>12.cmd 16设置block len</p>
+<p>13.cmd6 设置工作bit模式</p>
+<p>14读cmd17.18</p>
+<p>15.写cmd24.25</p>
+<p>三、EMMC的主机配置</p>
+<p>主机的配置最先要注意的就是IO的配置，很多复用的管脚，是否是EMMC的CMD和DATA功能配置</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/1970/01/01/ddr/DDR_SDRAM4/" rel="prev" title="DDR内存原理 - 4">
+                  <i class="fa fa-angle-left"></i> DDR内存原理 - 4
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/1970/01/01/ddr/DDR_SDRAM2/" rel="next" title="DDR内存原理 - 2">
+                  DDR内存原理 - 2 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
