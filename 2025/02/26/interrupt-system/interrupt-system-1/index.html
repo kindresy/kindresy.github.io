@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kindresy.github.io/stuff/image-gic-struct.png">
 <meta property="article:published_time" content="2025-02-26T02:15:16.000Z">
-<meta property="article:modified_time" content="2025-02-26T07:49:59.990Z">
+<meta property="article:modified_time" content="2025-02-28T09:52:54.274Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://kindresy.github.io/stuff/image-gic-struct.png">
@@ -115,7 +115,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">中断控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GIC%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">GIC控制器的结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%B8%AD%E6%96%AD%E7%9A%84%E5%87%A0%E7%A7%8D%E5%85%B8%E5%9E%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.</span> <span class="nav-text">一个中断的几种典型的状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E8%A7%A6%E5%8F%91%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">中断触发方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%8F%B7"><span class="nav-number">1.4.</span> <span class="nav-text">中断号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%B5%81%E7%A8%8B"><span class="nav-number">1.5.</span> <span class="nav-text">中断流程</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">中断控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GIC%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">GIC的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GIC%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">GIC控制器的结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%B8%AD%E6%96%AD%E7%9A%84%E5%87%A0%E7%A7%8D%E5%85%B8%E5%9E%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.</span> <span class="nav-text">一个中断的几种典型的状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E8%A7%A6%E5%8F%91%E6%96%B9%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">中断触发方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%8F%B7"><span class="nav-number">1.5.</span> <span class="nav-text">中断号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%B5%81%E7%A8%8B"><span class="nav-number">1.6.</span> <span class="nav-text">中断流程</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -128,7 +128,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -189,9 +189,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-02-26 10:15:16 / 修改时间：15:49:59" itemprop="dateCreated datePublished" datetime="2025-02-26T10:15:16+08:00">2025-02-26</time>
+      <time title="创建时间：2025-02-26 10:15:16" itemprop="dateCreated datePublished" datetime="2025-02-26T10:15:16+08:00">2025-02-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-02-28 17:52:54" itemprop="dateModified" datetime="2025-02-28T17:52:54+08:00">2025-02-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -222,6 +228,19 @@
     
     <div class="post-body" itemprop="articleBody"><h1 id="中断控制器"><a href="#中断控制器" class="headerlink" title="中断控制器"></a>中断控制器</h1><p>CPU需要集中“精力”做计算，其他的事务例如IO，例如中断管理，需要其他部件负责。IO可以通过DMA去负责，中断管理就需要中断控制器来做。中断控制器与CPU之间最好只建立少量的连接，比如GIC控制器与cpu cluster之间只有IRQ和FIQ连接用于通知CPU。</p>
 <p>中断控制器还需要负责对各个外设中断的管理，如优先级分配，中断屏蔽，中断认可，中断路由，中断使能等</p>
+<p>ARM提供了一个可用于ARMv8-A系统的通用中断控制器GIC，这个中断控制器的编程接口在GIC架构中定义。通用中断控制器(GIC)支持多核系统中cores之间由软件生成（SGI）、私有（PPI）和共享外设（SPI）中断的路由。</p>
+<p>GIC架构还提供了可用于管理中断源和行为的寄存器，以及(在多核系统中)将中断路由到各个core的寄存器。它使软件能够屏蔽、启用和禁用来自单个源的中断，对单个中断源(在硬件上)进行优先级排序，并生成软件中断。GIC接受在系统级别断言的中断，并可以向它所连接的每个core发出信号，可能导致IRQ或FIQ异常。</p>
+<h2 id="GIC的作用"><a href="#GIC的作用" class="headerlink" title="GIC的作用"></a>GIC的作用</h2><p>GIC可用于ARM A系列和R系列的单core或者多core的架构，在至少1个core的系统中管理中断，它支持：</p>
+<ol>
+<li>有相关寄存器来管理中断源（interrupt sources），中断行为（interrupt behavior）以及中断路由（interrupt routing）</li>
+<li>ARM 架构的安全扩展</li>
+<li>ARM架构虚拟化扩展（实现ARM虚拟化扩展的处理器也必须实现ARM安全扩展）</li>
+<li>从硬件（外设）中断源中，使能、禁止以及产生处理器中断</li>
+<li>软件生成中断(SGI)</li>
+<li>中断屏蔽以及优先级</li>
+<li>支持单核和多核环境</li>
+<li>在电源管理环境（power-management environments)中被事件唤醒</li>
+</ol>
 <h2 id="GIC控制器的结构"><a href="#GIC控制器的结构" class="headerlink" title="GIC控制器的结构"></a>GIC控制器的结构</h2><p>GIC控制器在结构上分为两个部分：</p>
 <ul>
 <li>distributor</li>
@@ -249,8 +268,14 @@
 <li>定义中断抢占策略</li>
 <li>决定当前处于pending状态最高优先级中断</li>
 </ul>
-<h2 id="一个中断的几种典型的状态"><a href="#一个中断的几种典型的状态" class="headerlink" title="一个中断的几种典型的状态"></a>一个中断的几种典型的状态</h2><p>每一个中断支持的状态有：</p>
-<p>不活跃状态(inactive)： 中断处于无效状态<br>等待状态(pending)：中断处于有效状态，但是等待CPU响应该中断。<br>挂起的中断将会被转发到CPU interface，然后会被core进行处理。<br>活跃状态(active)：CPU已经响应该中断，已被core确认，正在处理，但尚未完成。<br>活跃并等待(active and pending)：CPU正在处理该中断，但是该中断源又发了中断过来。</p>
+<h2 id="一个中断的几种典型的状态"><a href="#一个中断的几种典型的状态" class="headerlink" title="一个中断的几种典型的状态"></a>一个中断的几种典型的状态</h2><p>在Distributor中为每个被CPU interface所支持的中断维护了一个<strong>状态机</strong>，每个中断可以具有一下四种状态：<br>每一个中断支持的状态有：</p>
+<ul>
+<li>不活跃状态(inactive)： 中断处于无效状态</li>
+<li>等待状态(pending)：中断处于有效状态，但是等待CPU响应该中断。</li>
+<li>挂起的中断将会被转发到CPU interface，然后会被core进行处理。</li>
+<li>活跃状态(active)：CPU已经响应该中断，已被core确认，正在处理，但尚未完成。</li>
+<li>活跃并等待(active and pending)：CPU正在处理该中断，但是该中断源又发了中断过来。</li>
+</ul>
 <p>一个中断状态变化过程：</p>
 <p>Inactive -&gt; Pending：当中断被外设断言时<br>Pending -&gt; Active：当中断处理器（handler）获知了当前中断<br>Active -&gt; Inactive：handler处理完成了中断</p>
 <p>在Distributor中有相关寄存器能显示不同中断ID的当前中断状态</p>
@@ -259,7 +284,8 @@
 <li>边沿触发</li>
 <li>电平触发</li>
 </ul>
-<h2 id="中断号"><a href="#中断号" class="headerlink" title="中断号"></a>中断号</h2><p>GIC会为每一个硬件外设，也就是每一个硬件中断源，都分配一个中断号，即硬件中断号。SoC设计工程师在设计GIC时会同时出一份中断路由表，告知驱动工程师每个外设对应的硬件中断号，当外设产生中断时，GIC能够获取到中断号，做对应的处理</p>
+<h2 id="中断号"><a href="#中断号" class="headerlink" title="中断号"></a>中断号</h2><p>GIC会为每一个硬件外设，也就是每一个硬件中断源，都分配一个中断号，标识中断。SoC设计工程师在设计GIC时会同时出一份中断路由表，告知驱动工程师每个外设在某个中断控制器上的对应的中断号。驱动工程师和操作系统工程师需要在软件层面建立外设的中断号-中断处理函数之间的映射。当外设产生中断时，中断控制器将中断信号分发给某个CPU，CPU进入操作系统通用的处理代码，通过读取GIC（或其他中断控制器）的Interrupt Acknowledge Register（即IAR寄存器）能够获取到中断号，并通过预先建立的映射，找到该外设的处理函数。</p>
+<p>（需要注意的是，在一些操作系统层面会衍生出虚拟中断号和硬件中断号的概念，这是由于中断控制器级联的情况下产生的概念划分，从GIC中读取到的是硬件中断号，而软件在注册中断时用的是虚拟中断号，操作系统提供通用机制来建立这层映射（如linux下irq_domain机制，irq_of_parse_and_map接口）。从GIC中读取到硬件中断号后，通过查表或者其他方式来获取虚拟中断号，访问中断号-中断处理函数之间的映射，找到处理函数。）</p>
 <p>GIC将中断类型分为三类，中断号有不同的范围：</p>
 <p>对SDI PPI SPI的解释：</p>
 <table>

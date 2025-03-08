@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="SDIO cmd6介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SDIO CMD6 介绍">
+<meta property="og:url" content="https://kindresy.github.io/2024/10/24/sdio/sdio_cmd/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="SDIO cmd6介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kindresy.github.io/stuff/cmd6_para.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdcard-cmd6-para.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdcard-cmd6-desc.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/linux_mmc_sd_switch.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/emmc-cmd6-para.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/sdio_ext_csd_part.png">
+<meta property="article:published_time" content="2024-10-24T02:15:16.000Z">
+<meta property="article:modified_time" content="2025-03-08T07:29:52.947Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/cmd6_para.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/2024/10/24/sdio/sdio_cmd/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kindresy.github.io/2024/10/24/sdio/sdio_cmd/","path":"2024/10/24/sdio/sdio_cmd/","title":"SDIO CMD6 介绍"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SDIO CMD6 介绍 | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SDIO-CMD6-SD-Card"><span class="nav-number">1.</span> <span class="nav-text">SDIO CMD6 - SD Card</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SDIO-CMD6-eMMc"><span class="nav-number">2.</span> <span class="nav-text">SDIO CMD6 - eMMc</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/2024/10/24/sdio/sdio_cmd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SDIO CMD6 介绍 | Coffe Pattern">
+      <meta itemprop="description" content="SDIO cmd6介绍">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SDIO CMD6 介绍
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-10-24 10:15:16" itemprop="dateCreated datePublished" datetime="2024-10-24T10:15:16+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-08 15:29:52" itemprop="dateModified" datetime="2025-03-08T15:29:52+08:00">2025-03-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/sdio/" itemprop="url" rel="index"><span itemprop="name">sdio</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">SDIO cmd6介绍</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="SDIO-CMD6-SD-Card"><a href="#SDIO-CMD6-SD-Card" class="headerlink" title="SDIO CMD6 - SD Card"></a>SDIO CMD6 - SD Card</h1><p>CMD6是SD卡用来扩展功能的一条重要命令。在SD协议1.00和2.00的版本是，该命令主要用于切换卡进入高速模式。而在3.00的协议中，该命令被赋予了更多的功能。</p>
+<p>SD卡协议中定义了6组功能，每组功能相当于是一组单框，我们可以根据自己不同的需要，来对每一组功能进行不同的选择。</p>
+<p>以SD协议2.00版本为例，共定义了两种功能：<br>Group1该组功能的名称叫AccessMode，主要就是用于速度上的选择了。默认选项为0x0，即25MHz的总线速度。我们可以将其选为0x1 High-Speed，即可进入到50MHz的总线速度模式了。<br>Group2功能的名称叫Command system，看样子是做一些命令上的扩展。怀疑可能会与加密卡有关，这里没有进行进一步的研究。</p>
+<p>SD协议3.00版本，定义四种功能：</p>
+<ol>
+<li>访问模式(Access Mode)：SD总线接口速度模式的选择；</li>
+<li>命令系统(Command System)：通过一套莫共有的命令来扩展和控制特定的功能；</li>
+<li>驱动强度(driver strength)：在UHS-I模式下等选择合适的输出驱动强度，和主机环境相关；</li>
+<li>电流&#x2F;功率限制(Current&#x2F;power limits)：UHS-I卡在UHS-I模式大电海底捞针选择，和主机环境相关；</li>
+</ol>
+<p>CMD6的响应是<strong>R1</strong>响应，也就是从data线返回512bit状态信息，相当于一个单块的读操作。</p>
+<p>CMD6本身支持<strong>6个功能组</strong>（目前只用到了两个)，每个功能组支持16种分支，每个功能组只能有一个分支有效，默认是function 0，<br>注意：每次只能选择一组进行访问，其他组参数设为1<br>CMD6有两个不同的模式：Mode 0查询功能，查看卡是否支持特定功能， Mode 1设置功能，直接切换卡的功能。</p>
+<p><img src="/../../stuff/cmd6_para.png" alt="alt text"></p>
+<p>CMD6参数格式：</p>
+<p><img src="/../../stuff/sdcard-cmd6-para.png" alt="alt text"></p>
+<p>示例1：切换到4位总线模式<br>参数值：0x80FFFF01（十六进制）</p>
+<p>Function Group 1 &#x3D; 0x3FF（二进制 11 1111 1111）→ 选择 Function Select 1（总线宽度控制）</p>
+<p>Function Group 3 &#x3D; 0x000（不修改扩展功能）</p>
+<p>Mode &#x3D; 0x01（切换功能）</p>
+<p>示例2：启用高速模式<br>参数值：0x03F00001（十六进制）</p>
+<p>Function Group 1 &#x3D; 0x000（不修改核心功能）</p>
+<p>Function Group 3 &#x3D; 0x3F0（二进制 11 1111 0000）→ 选择 Function Select 1（性能模式）</p>
+<p>Mode &#x3D; 0x01（切换功能）</p>
+<p><img src="/../../stuff/sdcard-cmd6-desc.png" alt="alt text"></p>
+<ol start="4">
+<li>响应格式<br>CMD6 的响应为 R1（1字节状态），状态位的含义如下：</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>位域</th>
+<th>名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>7</td>
+<td>OUT_OF_RANGE</td>
+<td>参数错误（如地址无效）</td>
+</tr>
+<tr>
+<td>6</td>
+<td>FUNCTION_FAILED</td>
+<td>功能切换失败</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ILLEGAL_COMMAND</td>
+<td>命令不支持</td>
+</tr>
+<tr>
+<td>4</td>
+<td>COM_CRC_ERROR</td>
+<td>CRC校验失败</td>
+</tr>
+<tr>
+<td>3</td>
+<td>CARD_LOCKED</td>
+<td>卡被锁定</td>
+</tr>
+<tr>
+<td>1</td>
+<td>WP_VIOLATION</td>
+<td>写保护冲突</td>
+</tr>
+<tr>
+<td>0</td>
+<td>READY_FOR_DATA</td>
+<td>卡准备好传输数据</td>
+</tr>
+</tbody></table>
+<p>注意事项<br>参数有效性：</p>
+<p>如果卡不支持某个 Function Group，响应中会置位 ILLEGAL_COMMAND 或 FUNCTION_FAILED。</p>
+<p>切换功能前需通过 CMD8 或 ACMD41 确认卡的支持能力。</p>
+<p>总线宽度切换：</p>
+<p>切换到4位总线模式后，需通过 CMD52&#x2F;CMD53 修改主控制器的总线宽度（SDIO控制器需同步配置）。</p>
+<p>高速模式：</p>
+<p>启用高速模式（如SDR25）需确保主控制器支持更高的时钟频率（如50MHz）。</p>
+<p>code demo</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">sd_switch</span><span class="params">(<span class="keyword">struct</span> mmc *mmc, <span class="type">int</span> mode, <span class="type">int</span> group, u8 value, u8 *resp)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">       <span class="class"><span class="keyword">struct</span> <span class="title">mmc_cmd</span> <span class="title">cmd</span>;</span></span><br><span class="line">       <span class="class"><span class="keyword">struct</span> <span class="title">mmc_data</span> <span class="title">data</span>;</span></span><br><span class="line">       <span class="comment">/* Switch the frequency */</span></span><br><span class="line">       mode = !!mode;</span><br><span class="line">       cmd.cmdidx = SD_CMD_SWITCH_FUNC;</span><br><span class="line">       cmd.resp_type = MMC_RSP_R1;</span><br><span class="line">       cmd.cmdarg = (mode &lt;&lt; <span class="number">31</span>) | <span class="number">0xffffff</span>;    <span class="comment">//每次只能选择一组进行访问，其他组参数设为1</span></span><br><span class="line">       cmd.cmdarg &amp;= ~(<span class="number">0xf</span> &lt;&lt; (group &lt;&lt; <span class="number">2</span>));</span><br><span class="line">       cmd.cmdarg |= value &lt;&lt; (group &lt;&lt; <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">       data.dest = (<span class="type">char</span> *)resp;</span><br><span class="line">       data.blocksize = <span class="number">64</span>;</span><br><span class="line">       data.blocks = <span class="number">1</span>;</span><br><span class="line">       data.flags = MMC_DATA_READ;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> mmc_send_cmd(mmc, &amp;cmd, &amp;data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>linux内核里的调用：</p>
+<p><img src="/../../stuff/linux_mmc_sd_switch.png" alt="alt text"></p>
+<p>其中第一个搜索项参数都为0。 “Find out the card’s support bits with a mode 0 operation.The argument does not matter, as the support bits do not matter, as the support bits do not change with the argum”</p>
+<p>linux内核用这一次调用来判断是否SD Card支持HIGH_SPEED：</p>
+<pre><code>if (status[13] &amp; SD_MODE_HIGH_SPEED)
+    card-&gt;sw_caps.hs_max_dtr = HIGH_SEEPD_MAX_DTR;
+ 
+</code></pre>
+<p>group0 -&gt; speed<br>group2 –&gt; drive_strength<br>group3 –&gt; current_limit</p>
+<h1 id="SDIO-CMD6-eMMc"><a href="#SDIO-CMD6-eMMc" class="headerlink" title="SDIO CMD6 - eMMc"></a>SDIO CMD6 - eMMc</h1><p>CMD6（SWITCH命令）在SD卡和eMMC中的参数格式和用途存在显著差异。尽管两者均用于动态配置设备功能，但协议规范不同，需严格区分。</p>
+<p>对比eMMc来说 CMD6的用途：<br>修改eMMC的扩展CSD寄存器（EXT_CSD），用于配置高速模式、总线宽度、驱动强度等。</p>
+<p>需结合EXT_CSD寄存器地址操作（如JESD84规范定义）。</p>
+<p>示例：设置HS200模式（EXT_CSD[0xB9]&#x3D;0x02）<br>参数：0x03B90201</p>
+<p>Access &#x3D; 0x03（写入模式）</p>
+<p>Index &#x3D; 0xB9（目标寄存器地址）</p>
+<p>Value &#x3D; 0x02（HS200模式）</p>
+<p><img src="/../../stuff/emmc-cmd6-para.png" alt="alt text"></p>
+<p>code demo：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> CMD6_ACCESS_MODE_WRITE_BYTE (0x03 &lt;&lt; 24)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CMD6_SWITCH_FUNC      6</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CMD6_INDEX(i)  ((i) &lt;&lt; 16)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CMD6_VALUE(v)  ((v) &lt;&lt; 8)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CMD6_REG_WRITE(index,  value) CMD6_ACCESS_MODE_WRITE_BYTE | CMD6_INDEX(index) | CMD6_VALUE(value)</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">mmc_set_bus_width</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    para = CMD6_REG_WRITE(<span class="number">183</span>, bit_width);</span><br><span class="line">    ret = sdmmc_send_cmd(CMD6_SWITCH_FUNC, para);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上面的代码针对emmc,用于切换总线宽度，183 &#x3D; 0xB7，是EXT_CSD中Bus width mode字段所在字节</p>
+<p><img src="/../../stuff/sdio_ext_csd_part.png" alt="alt text"></p>
+<p>0x3B70201  B7&#x3D;183  02 -&gt;BUS WIDTH &#x3D; 8  设置emmc的总线宽度8<br>0x3B30101  B7&#x3D;179  01 -&gt;partition config  设置emmc 分区配置为1</p>
+<p>sdcard<br>0x003FF001<br>为什么Function Group1，也就是[25:16]域内，写入值0x3ff就是配置总线宽度为1了？</p>
+<p>子字段	位域范围	位数	描述</p>
+<p>Function Select	[25:22]	4位	选择FG1的具体功能（如总线宽度控制）。<br>参数值	[21:16]	6位	配置该功能的具体参数（如启用4位模式）。</p>
+<p>总线宽度控制 对应的 Function Select &#x3D; 1（二进制 0001）。<br>此值需写入 FG1的高4位（位25到22），即 0x1。</p>
+<p>SD规范要求，当选择总线宽度控制时，参数值的低6位（[21:16]）必须全为 1（即二进制 111111，十六进制 0x3F）<br>含义：全 1 表示请求切换到 4位总线模式（SD卡不支持8位，仅支持1位或4位）。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/10/24/sdio/sdio_dwc_mshc_vol_switch/" rel="prev" title="SDIO MSHC 电压切换">
+                  <i class="fa fa-angle-left"></i> SDIO MSHC 电压切换
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/10/24/sdio/sdio_basic_knowlegde/" rel="next" title="SDIO eMMc相关知识总结">
+                  SDIO eMMc相关知识总结 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
