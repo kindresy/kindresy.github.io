@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="中断上下半部上半部和下半部的定义区别上半部是处理紧急的任务，比如硬件相关的操作，需要快速执行然后释放中断。这部分通常是在中断上下文中执行的，不能休眠或者进行可能导致阻塞的操作。那下半部呢，就是处理那些不那么紧急的、耗时较长的任务，比如数据处理或者触发软中断。这部分可以延迟执行，允许重新开启中断，从而提升系统的实时性。 实现方法Linux中有几种常见的机制，比如软中断（softirq）、taskle">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Coffe Pattern">
+<meta property="og:url" content="https://kindresy.github.io/1970/01/01/face_exp/face_exp_3/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="中断上下半部上半部和下半部的定义区别上半部是处理紧急的任务，比如硬件相关的操作，需要快速执行然后释放中断。这部分通常是在中断上下文中执行的，不能休眠或者进行可能导致阻塞的操作。那下半部呢，就是处理那些不那么紧急的、耗时较长的任务，比如数据处理或者触发软中断。这部分可以延迟执行，允许重新开启中断，从而提升系统的实时性。 实现方法Linux中有几种常见的机制，比如软中断（softirq）、taskle">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kindresy.github.io/stuff/interrut_sxbb_image.png">
+<meta property="article:published_time" content="1970-01-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-16T04:51:06.529Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/stuff/interrut_sxbb_image.png">
+
+
+<link rel="canonical" href="https://kindresy.github.io/1970/01/01/face_exp/face_exp_3/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kindresy.github.io/1970/01/01/face_exp/face_exp_3/","path":"1970/01/01/face_exp/face_exp_3/","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title> | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E4%B8%8A%E4%B8%8B%E5%8D%8A%E9%83%A8"><span class="nav-number">1.</span> <span class="nav-text">中断上下半部</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E5%8D%8A%E9%83%A8%E5%92%8C%E4%B8%8B%E5%8D%8A%E9%83%A8%E7%9A%84%E5%AE%9A%E4%B9%89%E5%8C%BA%E5%88%AB"><span class="nav-number">1.1.</span> <span class="nav-text">上半部和下半部的定义区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">实现方法</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/face_exp/face_exp_3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-16 12:51:06" itemprop="dateModified" datetime="2025-03-16T12:51:06+08:00">2025-03-16</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="中断上下半部"><a href="#中断上下半部" class="headerlink" title="中断上下半部"></a>中断上下半部</h1><h2 id="上半部和下半部的定义区别"><a href="#上半部和下半部的定义区别" class="headerlink" title="上半部和下半部的定义区别"></a>上半部和下半部的定义区别</h2><p>上半部是处理紧急的任务，比如硬件相关的操作，需要快速执行然后释放中断。这部分通常是在中断上下文中执行的，<strong>不能休眠或者进行可能导致阻塞的操作</strong>。那下半部呢，就是处理那些不那么紧急的、耗时较长的任务，比如数据处理或者触发软中断。这部分可以延迟执行，允许重新开启中断，从而提升系统的实时性。</p>
+<h2 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h2><p>Linux中有几种常见的机制，比如软中断（softirq）、tasklet和工作队列（workqueue）。软中断是静态分配的，运行在中断上下文中，不能休眠，而tasklet是基于软中断实现的，但同一时间只能在一个CPU上运行，适合处理可延迟的任务。工作队列则是在进程上下文中执行，可以休眠，适合需要长时间处理的任务。</p>
+<p>线程化中断（threaded IRQ）这也是现代内核中的一种方式，把下半部放到内核线程里处理，这样可以更灵活地管理优先级和调度。还有小任务（tasklet）和定时器（timer）也可能被用来实现下半部</p>
+<p>Linux内核提供了多种下半部实现机制，适用于不同场景：</p>
+<ol>
+<li><p>软中断（Softirq）<br>特点：<br>静态注册：编译时通过open_softirq()定义，如网络子系统（NET_RX_SOFTIRQ）、定时器（TIMER_SOFTIRQ）。<br>无锁并发：同一软中断可在不同CPU上并行执行，需开发者自行处理竞态条件。<br>执行时机：中断返回前（irq_exit()）或内核线程ksoftirqd中触发。<br>适用场景：高频、低延迟任务（如网卡收包）。</p>
+</li>
+<li><p>Tasklet<br>特点：<br>动态注册：通过tasklet_init()动态创建，基于软中断（TASKLET_SOFTIRQ&#x2F;HI_SOFTIRQ）实现。<br>串行执行：<strong>同一Tasklet在多个CPU上串行执行，天然避免并发问题。</strong><br>优先级区分：高优先级Tasklet（HI_SOFTIRQ）优先执行。<br>适用场景：中低频任务（如USB设备中断处理）。</p>
+</li>
+<li><p>工作队列（Workqueue）<br>特点：<br>进程上下文执行：<strong>通过内核线程（如kworker）调度，允许休眠和阻塞操作。</strong><br>灵活性：支持延迟任务（delayed_work）、绑定特定CPU（queue_work_on()）。<br>资源隔离：可创建专用工作队列（如alloc_workqueue()）避免相互影响。<br>适用场景：复杂、长耗时任务（如文件系统操作）。</p>
+</li>
+<li><p>线程化中断（Threaded IRQ）<br>特点：<br>中断处理线程化：通过request_threaded_irq()注册，上半部仅确认中断，下半部由独立线程执行。<br>实时性优化：可通过调整线程优先级（如SCHED_FIFO）提升响应速度。<br>适用场景：需要复杂处理或与用户空间交互的中断（如GPIO中断）。</p>
+</li>
+</ol>
+<p><img src="/../../stuff/interrut_sxbb_image.png" alt="alt text"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/1970/01/01/face_exp/face_exp_4/" rel="prev" title="">
+                  <i class="fa fa-angle-left"></i> 
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/1970/01/01/ddr/DDR_SDRAM4/" rel="next" title="DDR内存原理 - 4">
+                  DDR内存原理 - 4 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

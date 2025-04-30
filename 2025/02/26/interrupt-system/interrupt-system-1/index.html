@@ -28,8 +28,11 @@
 <meta property="og:description" content="中断控制器GIC的讲解">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://kindresy.github.io/stuff/image-gic-struct.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/Set-EnableRegisters.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/GICD_TYPER.png">
+<meta property="og:image" content="https://kindresy.github.io/stuff/image-iar.png">
 <meta property="article:published_time" content="2025-02-26T02:15:16.000Z">
-<meta property="article:modified_time" content="2025-02-28T09:52:54.274Z">
+<meta property="article:modified_time" content="2025-04-01T06:25:50.332Z">
 <meta property="article:author" content="Luyuan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://kindresy.github.io/stuff/image-gic-struct.png">
@@ -115,7 +118,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">中断控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GIC%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">GIC的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GIC%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">GIC控制器的结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%B8%AD%E6%96%AD%E7%9A%84%E5%87%A0%E7%A7%8D%E5%85%B8%E5%9E%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.</span> <span class="nav-text">一个中断的几种典型的状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E8%A7%A6%E5%8F%91%E6%96%B9%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">中断触发方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%8F%B7"><span class="nav-number">1.5.</span> <span class="nav-text">中断号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%B5%81%E7%A8%8B"><span class="nav-number">1.6.</span> <span class="nav-text">中断流程</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">中断控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GIC%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">GIC的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GIC%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">GIC控制器的结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%B8%AD%E6%96%AD%E7%9A%84%E5%87%A0%E7%A7%8D%E5%85%B8%E5%9E%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.</span> <span class="nav-text">一个中断的几种典型的状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E8%A7%A6%E5%8F%91%E6%96%B9%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">中断触发方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%8F%B7"><span class="nav-number">1.5.</span> <span class="nav-text">中断号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%B5%81%E7%A8%8B"><span class="nav-number">1.6.</span> <span class="nav-text">中断流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.7.</span> <span class="nav-text">相关寄存器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GICD-ISENABLERn%EF%BC%8C-Interrupt-Set-Enable-Registers"><span class="nav-number">1.7.1.</span> <span class="nav-text">GICD_ISENABLERn， Interrupt Set-Enable Registers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Interrupt-Clear-Enable-Registers-GICD-ICENABLERn"><span class="nav-number">1.7.2.</span> <span class="nav-text">Interrupt Clear-Enable Registers, GICD_ICENABLERn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Interrupt-Controller-Type-Register-GICD-TYPER"><span class="nav-number">1.7.3.</span> <span class="nav-text">Interrupt Controller Type Register, GICD_TYPER</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Distributor-Control-Register-GICD-CTLR"><span class="nav-number">1.7.4.</span> <span class="nav-text">Distributor Control Register, GICD_CTLR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Interrupt-Acknowledge-Register-GICC-IAR"><span class="nav-number">1.7.5.</span> <span class="nav-text">Interrupt Acknowledge Register, GICC_IAR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#End-of-Interrupt-Register-GICC-EOIR"><span class="nav-number">1.7.6.</span> <span class="nav-text">End of Interrupt Register, GICC_EOIR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E8%AF%86%E5%88%AB%E7%9B%B8%E5%85%B3%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93"><span class="nav-number">1.7.7.</span> <span class="nav-text">中断识别相关寄存器使用总结</span></a></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -128,13 +131,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
@@ -197,7 +200,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-02-28 17:52:54" itemprop="dateModified" datetime="2025-02-28T17:52:54+08:00">2025-02-28</time>
+      <time title="修改时间：2025-04-01 14:25:50" itemprop="dateModified" datetime="2025-04-01T14:25:50+08:00">2025-04-01</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -248,7 +251,7 @@
 </ul>
 <p>gic控制器的概览，与CPU之间的连接</p>
 <p><img src="/../../stuff/image-gic-struct.png" alt="alt text"></p>
-<p>其中：<br>分发器：主要用于仲裁和分发中断请求给CPU。Distributor有寄存器可以控制每个中断的属性，比如优先级、状态、安全状态、路由信息以及使能状态等。Distributor通过连接的CPU interface，可以决定将哪个中断转发到指定的core中。这种机制使操作系统能够在core之间进行共享和分发中断。</p>
+<p>其中：<br>分发器：<br>主要用于仲裁和分发中断请求给CPU。Distributor有寄存器可以控制每个中断的属性，比如优先级、状态、安全状态、路由信息以及使能状态等。Distributor通过连接的CPU interface，可以决定将哪个中断转发到指定的core中。这种机制使操作系统能够在core之间进行共享和分发中断。<br>Distributor是一个全局的组件，所有CPU共享，负责处理 Shared Peripheral Interrupts (SPIs)，即系统中共享的外设中断，它是整个中断控制器的核心模块。<br>Distributor提供接口来设置每个中断的优先级，还负责SPIs中断的路由，决定哪个中断会发送到哪个处理器核心。Distributor可以配置每个SPI是电平敏感的（Level-sensitive）还是边沿触发的（Edge-triggered）。<br>除了传统的中断信号，Distributor还能生成<strong>消息信号中断</strong>（MSIs），这是一个更灵活的中断触发机制，常用于PCIe总线设备。还可以确定在每个安全状态中使用的程序员模型：亲和性路由还是传统遗留模式；</p>
 <ul>
 <li>全局中断使能</li>
 <li>每个中断的使能</li>
@@ -284,7 +287,8 @@
 <li>边沿触发</li>
 <li>电平触发</li>
 </ul>
-<h2 id="中断号"><a href="#中断号" class="headerlink" title="中断号"></a>中断号</h2><p>GIC会为每一个硬件外设，也就是每一个硬件中断源，都分配一个中断号，标识中断。SoC设计工程师在设计GIC时会同时出一份中断路由表，告知驱动工程师每个外设在某个中断控制器上的对应的中断号。驱动工程师和操作系统工程师需要在软件层面建立外设的中断号-中断处理函数之间的映射。当外设产生中断时，中断控制器将中断信号分发给某个CPU，CPU进入操作系统通用的处理代码，通过读取GIC（或其他中断控制器）的Interrupt Acknowledge Register（即IAR寄存器）能够获取到中断号，并通过预先建立的映射，找到该外设的处理函数。</p>
+<p>GIC还支持软件产生的中断（SGI - Software-generated interrupts)</p>
+<h2 id="中断号"><a href="#中断号" class="headerlink" title="中断号"></a>中断号</h2><p>GIC会为每一个硬件外设，也就是每一个硬件中断源，都分配一个中断号，标识中断。SoC设计工程师在设计GIC时会同时出一份中断路由表，告知驱动工程师每个外设在某个中断控制器上的对应的中断号。驱动工程师和操作系统工程师需要在软件层面建立外设的中断号-中断处理函数之间的映射。当外设产生中断时，中断控制器将中断信号分发给某个CPU，CPU进入操作系统通用的处理代码，通过读取GIC（或其他中断控制器）的Interrupt Acknowledge Register（即<strong>IAR</strong>寄存器）能够获取到中断号，并通过预先建立的映射，找到该外设的处理函数。</p>
 <p>（需要注意的是，在一些操作系统层面会衍生出虚拟中断号和硬件中断号的概念，这是由于中断控制器级联的情况下产生的概念划分，从GIC中读取到的是硬件中断号，而软件在注册中断时用的是虚拟中断号，操作系统提供通用机制来建立这层映射（如linux下irq_domain机制，irq_of_parse_and_map接口）。从GIC中读取到硬件中断号后，通过查表或者其他方式来获取虚拟中断号，访问中断号-中断处理函数之间的映射，找到处理函数。）</p>
 <p>GIC将中断类型分为三类，中断号有不同的范围：</p>
 <p>对SDI PPI SPI的解释：</p>
@@ -323,9 +327,103 @@
 <li>对于每个CPU，分发器会从众多pending状态的中断中，选择一个优先级最高的中断请求发送到与目标CPU对接的CPU接口。</li>
 <li>CPU接口会决定这个中断是否可以发送给目标CPU。如果优先级满足，GIC会发送一个中断请求给目标CPU。</li>
 <li>GIC进入中断异常，读取GICC_IAR来响应这个中断(由软件的异常处理程序负责，这个过程也被叫做中断认可)。GICC_IAR里- 保存的是硬件中断号。对于SGI来说，返回源CPI的ID。</li>
-<li>GIC在感知到软件读取该寄存器后会做如下处理：<br>a. 如果中断处于pending，则pending –&gt; active<br>b. 如果中断重新产生，则pending –&gt; active and pending<br>c. 如果中断处于active，则active –&gt; active and pending</li>
+<li>GIC在感知到软件读取该寄存器后会做如下处理：<ol>
+<li>如果中断处于pending，则pending –&gt; active</li>
+<li>如果中断重新产生，则pending –&gt; active and pending</li>
+<li>如果中断处于active，则active –&gt; active and pending</li>
+</ol>
+</li>
 <li>处理器执行完中断的处理，发送一个EOI信号给GIC。</li>
 </ul>
+<ol>
+<li>GIC首先确认哪些中断已被使能</li>
+<li>对于每个处于pending状态的中断，GIC将确认该中断的目标处理器，即要被转发到何处。</li>
+<li>对于每个CPU interface，Distributor 将转发处于pending状态，并且优先级最高的中断到对于CPU interface。</li>
+<li>每个CPU interface决定是否给与它相连的处理器发送中断请求信号。</li>
+<li>处理器获知了中断，GIC将返回中断ID，并且更新中断状态。</li>
+</ol>
+<p>在处理完中断后，处理器将会发送EOI（End Of Interrupt）给GIC<br>在更多的细节中，还有以下步骤：</p>
+<ol>
+<li>GIC可以决定哪个中断被使能，一个没有被使能的中断在GIC中无影响。</li>
+<li>对于每个被使能的处于pending状态的中断，Distributor决定要转发到哪里。</li>
+<li>对于每个处理器，Distributor基于它保存的每个中断的优先级信息，判断出优先级最高的中断，并将它转发到目标CPU interface中。</li>
+<li>如果Distributor正在转发一个中断请求到CPU interface中，CPU interface将会判断该中断是否有足够的优先级，然后再给处理器发送中断信号。</li>
+<li>当处理器发生中断异常时，它会读取其CPU interface的GICC_IAR寄存器以确认该中断，这个读操作将返回一个中断ID。</li>
+<li>当处理器完成对中断的处理操作时，它必须发信号通知GIC已完成处理，总是需要有效地写入EOIR寄存器，并且可能也需要写入deactivate interrupt register, GICC_DIR寄存器。</li>
+</ol>
+<p>对于每个CPU interface，GIC体系结构要求对EOIR的有效写入的顺序与从GICC_IAR或GICC_AIAR读取的顺序相反，因此每个有效的EOIR写入都将引用最近的一次中断确认。<br>如果在EOIR写入之后，没有具有足够优先级的pending中断，则CPU interface将向处理器取消中断异常请求。<br>CPU interface绝不会向与之相连的处理器发送处于active and pending状态的中断信号，它只会发送处理pending状态，并且有足够的优先级的中断：</p>
+<p>对于PPI和SGI中断(N-N)，特定中断ID的活跃状态在CPU interface之间被复用（banked），这意味着：如果一个特定中断ID的中断在一个CPU interface中处于active或者active and pending状态，那么在该CPU interface上就不会发出具有相同ID的中断信号。<br>对于SPI来讲（1-N），中断的活跃状态对所有CPU interface是共享的，这意味着：如果一个特定中断ID的中断在一个CPU interface中处于active或者active and pending状态，那么在任何 CPU interface上就不会发出具有相同ID的中断信号。</p>
+<h2 id="相关寄存器"><a href="#相关寄存器" class="headerlink" title="相关寄存器"></a>相关寄存器</h2><h3 id="GICD-ISENABLERn，-Interrupt-Set-Enable-Registers"><a href="#GICD-ISENABLERn，-Interrupt-Set-Enable-Registers" class="headerlink" title="GICD_ISENABLERn， Interrupt Set-Enable Registers"></a>GICD_ISENABLERn， Interrupt Set-Enable Registers</h3><p>为了正确地处理中断，软件必须知道GIC所支持的中断ID。<strong>GICD_ISENABLERn寄存器为每个中断提供了一个Set-enable位</strong>，Set-enable位写1，说明该位对应的中断可以从Distributor转发到CPU interface。读取该bit，也可以获知对应中断是否被使能。<br>使用限制：</p>
+<ol>
+<li>如果该寄存器bit对应的是未实现的中断，则表现为RAZ（Read As Zero）和WI（Write Ignore）。</li>
+<li>如果实现了安全扩展，非安全状态下访问Group 0（安全中断）中断对应的寄存器bit，结果为RAZ和WI。</li>
+</ol>
+<p><img src="/../../stuff/Set-EnableRegisters.png" alt="alt text"></p>
+<p>GICD_ISENABLERn里每个bit位对应一个中断ID的中断，比如GICD_ISENABLER0寄存器控制着中断ID为0至31的中断。</p>
+<p>GICD_ISENABLER0 可以控制：</p>
+<p>SGIs, 中断ID为15-0, 对应的寄存器bit为[15:0]<br>PPIs, 中断ID为31-16, 对应的寄存器bit为 [31:16]</p>
+<p><strong>剩余的GICD_ISENABLERn，从GICD_ISENABLER1开始，则是为SPI中断提供对应的控位。</strong></p>
+<p>假设某个中断的ID为M，则GICD_ISENABLERn的n为M ÷ 32的整数部分，它在GICD_ISENABLERn中对应bit位序号为 M mod 32。</p>
+<p>比如中断ID为66的中断，它对应的寄存器为GICD_ISENABLER2，并且GICD_ISENABLER2中的GICD_ISENABLER2[2]为该中断对应的bit位。</p>
+<p>此外，对于SGI中断，对GICD_ISENABLERn的对应bit的读写是未定义的，对于PPI和SPI是有效的。<br><strong>禁用中断仅禁用将中断从Distributor转发到任何CPU interface</strong>。它不会阻止中断改变状态，例如如果它已经为active，则不能阻止其变为pending或者active and pending。</p>
+<h3 id="Interrupt-Clear-Enable-Registers-GICD-ICENABLERn"><a href="#Interrupt-Clear-Enable-Registers-GICD-ICENABLERn" class="headerlink" title="Interrupt Clear-Enable Registers, GICD_ICENABLERn"></a>Interrupt Clear-Enable Registers, GICD_ICENABLERn</h3><p><strong>中断清除寄存器GICD_ICENABLERn为每个中断提供了一个Clear-enable bit</strong>，写1将会禁止Distributor将对应的中断转发给CPU interface，读取对应bit位可以知道该中断是否被使能。<br>对于SGI，GICD_ICENABLERn对应bit的读写无影响。<br>对于PPI和SPI：</p>
+<p>读到0：说明对应中断被禁止转发<br>读到1：说明对应中断可以被转发<br>写入0：无影响<br>写入1：禁止对应中断被转发，写入1后立即读取该bit位，将会返回0。<br>GICD_ICENABLERn其他特性和GICD_ISENABLERn一致。</p>
+<h3 id="Interrupt-Controller-Type-Register-GICD-TYPER"><a href="#Interrupt-Controller-Type-Register-GICD-TYPER" class="headerlink" title="Interrupt Controller Type Register, GICD_TYPER"></a>Interrupt Controller Type Register, GICD_TYPER</h3><p><img src="/../../stuff/GICD_TYPER.png" alt="alt text"></p>
+<p>GICD_TYPER提供GIC的一些配置信息：</p>
+<ol>
+<li>是否实现安全扩展  — SecurityExtn( bit为1说明实现了安全扩展，为0则无。)</li>
+<li>GIC最大支持的中断数量  –– ITLinesNumber</li>
+<li>已经实现的CPU interface 数量  — CPUNumber( 如果GICD_TYPER[7:5]为0b11，说明实现了4个CPU interface。)</li>
+<li>如果实现了安全扩展，所实现的最大LSPI（Lockable Shared Peripheral Interrupts）数量</li>
+</ol>
+<p>GICD_TYPER[4:0]为GIC所支持的最大的中断数量。<br>若GICD_TYPER[4:0]&#x3D;N，则说明最多支持 32*（N+1）个中断。<br>比如N&#x3D;3，则最多支持128个中断，中断号为0~127。GICD_TYPER[4:0]&#x3D;0b11111&#x3D;1020为所支持的最大的中断ID号，并且1020至1023作为其他用途的中断ID而被保留使用。<br>由于SGI和PPI中断的数量固定，所以ITLinesNumber能说明GIC所能支持的SPI中断的最大数量，ITLinesNumber的值也是以下寄存器的n值：</p>
+<ul>
+<li>GICD_IGROUPRn</li>
+<li>GICD_ISENABLERn</li>
+<li>GICD_ICENABLERn</li>
+<li>GICD_ISPENDRn</li>
+<li>GICD_ICPENDRn</li>
+<li>GICD_ISACTIVERn</li>
+<li>GICD_IPRIORITYRn</li>
+<li>GICD_ITARGETSRn</li>
+<li>GICD_ICFGRn</li>
+</ul>
+<h3 id="Distributor-Control-Register-GICD-CTLR"><a href="#Distributor-Control-Register-GICD-CTLR" class="headerlink" title="Distributor Control Register, GICD_CTLR"></a>Distributor Control Register, GICD_CTLR</h3><p>该寄存器将控制Distributor是否能将处于pending状态的中断转发到CPU interfaces中。</p>
+<p>如果没有实现安全扩展，比如在GICv1版本中，GICD_CTLR寄存器只有一个enable bit，用于控制Distributor向CPU interface转发处于pending状态的中断。</p>
+<p>在GICv2中，如果实现了安全扩展，则有两个enable为，分别为Group0和Group1。</p>
+<p>如果enable位置0，说明Distributor不能将中断转发，置1则表明Distributor可以在优先级规则下将中断转发。<br>需要注意的是，即使将Distributor的全局enable位置0，禁止了Distributor的转发功能，其他GIC寄存器仍可以正常进行读写，这意味着在重新enable Distributor之前，软件层可以改变PPI和SPI中断的中断状态，比如：</p>
+<p>通过写入对应的GICD_ISPENDRn寄存器使中断处于pending状态。<br>通过写入对应GICC_EOIR 或GICC_AEOIR寄存器 ，可以移除中断的active状态。<br>当 GICD_CTLR.的{EnableGrp1, EnableGrp0}被设置为不能转发中断，读取 GICC_IAR 或者GICC_AIAR寄存器时将返回一个虚假的中断ID。</p>
+<h3 id="Interrupt-Acknowledge-Register-GICC-IAR"><a href="#Interrupt-Acknowledge-Register-GICC-IAR" class="headerlink" title="Interrupt Acknowledge Register, GICC_IAR"></a>Interrupt Acknowledge Register, GICC_IAR</h3><p>处理器可以读取GICC_IAR寄存器来获取被接收的中断的ID，读该寄存的动作相当于一个获知中断的过程。</p>
+<p><img src="/../../stuff/image-iar.png" alt="alt text"></p>
+<ol>
+<li><p>GICC_IAR[12:10]， CPUID，对于多处理器系统中的SGI中断，这个字段标识了请求中断的那个处理器。它将返回产生这个中断请求的CPU interface的编号，比如3，则表示是core3写入GICD_SGIR寄存器来产生中断的，对于其他中断来讲，该字段是RAZ（Read As Zero）</p>
+</li>
+<li><p>GICC_IAR[9:0] ，Interrupt ID，中断ID。<br>处理器读取 GICC_IAR寄存将返回对应CPU interface中，处于pending状态且优先级最高的中断的ID，以下情况下，将会读到虚假中断ID：</p>
+<ul>
+<li>Distributor的转发功能被禁止。</li>
+<li>CPU interface的发送中断信号功能被禁止。</li>
+<li>CPU interface中没有足够的优先级的，且处于pending状态的中断可以被发送到对应处理器。</li>
+</ul>
+</li>
+</ol>
+<h3 id="End-of-Interrupt-Register-GICC-EOIR"><a href="#End-of-Interrupt-Register-GICC-EOIR" class="headerlink" title="End of Interrupt Register, GICC_EOIR"></a>End of Interrupt Register, GICC_EOIR</h3><p>处理器写入GICC_EOIR寄存器将会通知CPU interface 当前中断已经处理完成，如果是GICv2架构，当GICC_CTLR.EOImode字段被设为1时，CPU interface 还会为当前中断进行中断优先级下降操作（Priority Drop）。</p>
+<ul>
+<li>GICC_EOIR[12:10]，CPUID字段，在多处理器实现中，如果当前写是针对SGI中断，这个字段将包含访问对应GICC_IAR所得到的CPUID，对于其他中断来说，该字段将会被写入0（SBZ，Should Be Zero）。</li>
+<li>GICC_EOIR[9:0]，EOIINTID，中断ID，访问对于的GICC_IAR寄存器所获得的值。<br>每一次从GICC_IAR中有效地读取中断ID时，与之相连的处理器将会对应地写入GICC_EOIR寄存器。写入GICC_EOIR寄存器的中断ID必须是从GICC_IAR中读取到的值。<br>如果 从GICC_IAR中读到的是虚假中断ID（ spurious interrupt ID），软件就没有必要将这个值写入EOIR寄存器，应为写入虚假中断ID将会被GIC忽略。<br>此外，ARM强烈建议将GICC_IAR寄存器的值整个保留下来，然后写入对应的EOIR寄存器。</li>
+</ul>
+<h3 id="中断识别相关寄存器使用总结"><a href="#中断识别相关寄存器使用总结" class="headerlink" title="中断识别相关寄存器使用总结"></a>中断识别相关寄存器使用总结</h3><p>如何找到GIC所支持的中断?</p>
+<ol>
+<li>首先读取GICD_TYPER寄存器， 从GICD_TYPER寄存器的ITLinesNumber字段可以知道所实现的GICD_ISENABLERn寄存器的数量,也就是n的大小，从中也可知当前GIC可支持多少个SPI。</li>
+<li>通过写入GICD_CTLR寄存器，可以禁止Distributor将中断转发到CPU interface。</li>
+<li>对于每个已经实现的GICD_ISENABLERn，从GICD_ISENABLER0开始：<ul>
+<li>对GICD_ISENABLERn.写入0xFFFFFFFF</li>
+<li>然后读取GICD_ISENABLERn.的值，如果读到1，则表明GIC支持对应的中断ID。<br>软件可以使用GICD_ICENABLERn寄存器来发现哪些中断被永久enable了。对于每个已经实现的GICD_ICENABLERn，从GICD_ICENABLER0开始：</li>
+<li>对GICD_ICENABLERn.写入0xFFFFFFFF，将会禁止所有可以被禁止的中断。</li>
+<li>读取GICD_ICENABLERn的值，如果读到1，说明对应中断被永久使能。</li>
+<li>然后再对GICD_ISENABLERn中对应需要被重新enable的中断bit位写入1。<br>当软件完成这次搜索，通常会写入GICD_CTLR寄存器来重新使能Distributor的转发功能。<br>此外，如果软件使用的是非安全访问，则只能搜索并控制被配置为非安全的中断。如果GIC实现了中断分组，软件可以：<br>写入GICD_IGROUPRn寄存器，将中断配置成Group0还是Group1.<br>使用GICD_CTLR.EnableGrp0 和GICD_CTLR.EnableGrp1 两个bit位来单独控制Group0和Group1的中断转发。</li>
+</ul>
+</li>
+</ol>
 
     </div>
 
@@ -339,8 +437,8 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/10/29/life_record/coffee_make/" rel="prev" title="手冲咖啡以及其影响因素">
-                  <i class="fa fa-angle-left"></i> 手冲咖啡以及其影响因素
+                <a href="/2024/10/29/aov/aov-solution/" rel="prev" title="A kind of AOV Solution">
+                  <i class="fa fa-angle-left"></i> A kind of AOV Solution
                 </a>
             </div>
             <div class="post-nav-item">

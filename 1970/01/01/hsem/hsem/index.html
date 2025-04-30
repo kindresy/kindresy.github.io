@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="HSEM的驱动设计-接口设计-实现1. HSEM硬件机制硬件信号量模块(HSEM)。通过读取一个该模块的寄存器地址来申请信号量资源，地址计算公式为:SEM_INDIRECTm ADDR &#x3D; offset + 0x200 * n + 0x4 * m。offset为一个寄存器固定地址偏移 在A核上，HSEM模块硬件上的拓扑结构为: HSEM接到GIC控制器，而GIC接到CPU Cluster">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Coffe Pattern">
+<meta property="og:url" content="https://kindresy.github.io/1970/01/01/hsem/hsem/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="HSEM的驱动设计-接口设计-实现1. HSEM硬件机制硬件信号量模块(HSEM)。通过读取一个该模块的寄存器地址来申请信号量资源，地址计算公式为:SEM_INDIRECTm ADDR &#x3D; offset + 0x200 * n + 0x4 * m。offset为一个寄存器固定地址偏移 在A核上，HSEM模块硬件上的拓扑结构为: HSEM接到GIC控制器，而GIC接到CPU Cluster">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="1970-01-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-04-25T10:13:44.542Z">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://kindresy.github.io/1970/01/01/hsem/hsem/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://kindresy.github.io/1970/01/01/hsem/hsem/","path":"1970/01/01/hsem/hsem/","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title> | Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Coffe Pattern</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HSEM%E7%9A%84%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1-%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1-%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.</span> <span class="nav-text">HSEM的驱动设计-接口设计-实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-HSEM%E7%A1%AC%E4%BB%B6%E6%9C%BA%E5%88%B6"><span class="nav-number">1.1.</span> <span class="nav-text">1. HSEM硬件机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E9%A9%B1%E5%8A%A8%E6%96%B9%E6%A1%88%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.2.</span> <span class="nav-text">2. 驱动方案设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E5%8A%9F%E8%83%BD%E7%9B%AE%E6%A0%87"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 功能目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E9%A9%B1%E5%8A%A8%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 驱动工作流程</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/hsem/hsem/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-04-25 18:13:44" itemprop="dateModified" datetime="2025-04-25T18:13:44+08:00">2025-04-25</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="HSEM的驱动设计-接口设计-实现"><a href="#HSEM的驱动设计-接口设计-实现" class="headerlink" title="HSEM的驱动设计-接口设计-实现"></a>HSEM的驱动设计-接口设计-实现</h1><h2 id="1-HSEM硬件机制"><a href="#1-HSEM硬件机制" class="headerlink" title="1. HSEM硬件机制"></a>1. HSEM硬件机制</h2><p>硬件信号量模块(HSEM)。通过读取一个该模块的寄存器地址来申请信号量资源，地址计算公式为:<br>SEM_INDIRECTm ADDR &#x3D; offset + 0x200 * n + 0x4 * m。<br>offset为一个寄存器固定地址偏移</p>
+<p>在A核上，HSEM模块硬件上的拓扑结构为: HSEM接到GIC控制器，而GIC接到CPU Cluster。A核上，HSEM在GIC中一共有32个bit位的中断。</p>
+<p>上述SEM_INDIRECTm ADDR计算公式的n，对应的是输出32bit中断的序号(Peri下16bit，AO下16bit)。m为信号量的id，系统中一共有128个信号量资源，即 0 &lt; m &lt; 128.</p>
+<p>以Peri子系统下为例：16bit状态位也就对应着前面SEM_INDIRECTm计算公式中的n，而公式中的m则为可以使用的信号量的个数，一共有128个。</p>
+<p>当软件上某个任务A以特定的n和m读取到这个地址时，意味着着gic的某一个中断位n去申请信号量m。如果这个信号量空闲，则会读取到1，并且获取到信号量。另一个任务B可能在A持有期间，也去申请同一个信号量m(此时m与上面的m相同，n不必相同，但要满足n&lt;16)，这时它会读取到0，信号量已经被占用，此时硬件可以帮助任务B以中断n的身份去等待信号量的释放（硬件上有一个等待队列），任务B可以去做其他事务。<br>任务B可以提前用中断号n来向linux注册一个中断处理函数。当任务A释放信号量时，任务A要向SEM_INDIRECTm寄存器写1来做释放。一旦任务A释放信号量m，任务B会立即出发中断n。 </p>
+<h2 id="2-驱动方案设计"><a href="#2-驱动方案设计" class="headerlink" title="2. 驱动方案设计"></a>2. 驱动方案设计</h2><h3 id="2-1-功能目标"><a href="#2-1-功能目标" class="headerlink" title="2.1 功能目标"></a>2.1 功能目标</h3><p>HSEM应该分为两大部件：</p>
+<ol>
+<li>资源管理模块</li>
+<li>信号量控制模块</li>
+</ol>
+<p>驱动要实现对128个信号量资源和中断bit位的管理，并且向其他客户驱动模块，提供申请信号量，释放信号量的接口，在申请信号量时，我们应该将中断n和信号量m标记为已经被占用，并且给予客户模块提供它的处理函数的机会，一旦客户模块无法申请到信号量，它可以做别的任务，直到信号量被释放，自动回调到它提供的处理函数。</p>
+<p>最终实现的模块功能：</p>
+<ul>
+<li>实现多核环境下基于硬件的信号量同步机制</li>
+<li>支持 16 个中断通道 (n) × 128 个信号量 (m) 的管理</li>
+<li>提供阻塞&#x2F;非阻塞式信号量申请接口</li>
+<li>通过中断通知机制实现异步信号量释放监听</li>
+</ul>
+<h3 id="2-2-接口"><a href="#2-2-接口" class="headerlink" title="2.2 接口"></a>2.2 接口</h3><p>这里仅列出要导出给内核其他模块使用的接口</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 申请信号量 (非阻塞)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hsem_try_acquire</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m)</span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 申请信号量 (带回调)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hsem_acquire</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m, <span class="type">void</span> (*callback)(<span class="type">void</span>*), <span class="type">void</span> *data)</span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 释放信号量 </span></span><br><span class="line"><span class="type">void</span> <span class="title function_">hsem_release</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m)</span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 注册中断处理  </span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hsem_request_irq</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m, <span class="type">irq_handler_t</span> handler, <span class="type">void</span> *dev_id)</span>;</span><br></pre></td></tr></table></figure>
+<p>需实现hsem_acquire接口，该接口</p>
+<h3 id="2-3-驱动工作流程"><a href="#2-3-驱动工作流程" class="headerlink" title="2.3 驱动工作流程"></a>2.3 驱动工作流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram </span><br><span class="line">    participant GIC </span><br><span class="line">    participant HSEM_Driver </span><br><span class="line">    participant Client </span><br><span class="line"> </span><br><span class="line">    GIC-&gt;&gt;HSEM_Driver: 触发中断 (n=2)</span><br><span class="line">    HSEM_Driver-&gt;&gt;HSEM_Driver: 扫描所有 m (0..127)</span><br><span class="line">    alt 发现等待的信号量 (m=5)</span><br><span class="line">        HSEM_Driver-&gt;&gt;Client: 调用注册的回调函数 </span><br><span class="line">    else 无等待信号量 </span><br><span class="line">        HSEM_Driver-&gt;&gt;GIC: 忽略中断 </span><br><span class="line">    end</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/1970/01/01/kernel/workqueue/" rel="prev" title="">
+                  <i class="fa fa-angle-left"></i> 
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/1970/01/01/face_exp/face_exp_2/" rel="next" title="">
+                   <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

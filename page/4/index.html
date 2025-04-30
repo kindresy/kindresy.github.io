@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"kindresy.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ARM&#x2F;Liunx Kernel&#x2F;OS&#x2F;Driver">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Coffe Pattern">
+<meta property="og:url" content="https://kindresy.github.io/page/4/index.html">
+<meta property="og:site_name" content="Coffe Pattern">
+<meta property="og:description" content="ARM&#x2F;Liunx Kernel&#x2F;OS&#x2F;Driver">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Luyuan">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://kindresy.github.io/page/4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"page/4/index.html","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Coffe Pattern</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Coffe Pattern</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Linux Kernel Driver</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Luyuan</p>
+  <div class="site-description" itemprop="description">ARM/Liunx Kernel/OS/Driver</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/ddr/DDR_SDRAM4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/1970/01/01/ddr/DDR_SDRAM4/" class="post-title-link" itemprop="url">DDR内存原理 - 4</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-04 13:52:53" itemprop="dateModified" datetime="2024-11-04T13:52:53+08:00">2024-11-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ddr/" itemprop="url" rel="index"><span itemprop="name">ddr</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>DDR MRS和EMRS寄存器，时序模型，刷新指令，时间参数解释表格</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/1970/01/01/ddr/DDR_SDRAM4/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/face_exp/face_exp_3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/1970/01/01/face_exp/face_exp_3/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-16 12:51:06" itemprop="dateModified" datetime="2025-03-16T12:51:06+08:00">2025-03-16</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="中断上下半部"><a href="#中断上下半部" class="headerlink" title="中断上下半部"></a>中断上下半部</h1><h2 id="上半部和下半部的定义区别"><a href="#上半部和下半部的定义区别" class="headerlink" title="上半部和下半部的定义区别"></a>上半部和下半部的定义区别</h2><p>上半部是处理紧急的任务，比如硬件相关的操作，需要快速执行然后释放中断。这部分通常是在中断上下文中执行的，<strong>不能休眠或者进行可能导致阻塞的操作</strong>。那下半部呢，就是处理那些不那么紧急的、耗时较长的任务，比如数据处理或者触发软中断。这部分可以延迟执行，允许重新开启中断，从而提升系统的实时性。</p>
+<h2 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h2><p>Linux中有几种常见的机制，比如软中断（softirq）、tasklet和工作队列（workqueue）。软中断是静态分配的，运行在中断上下文中，不能休眠，而tasklet是基于软中断实现的，但同一时间只能在一个CPU上运行，适合处理可延迟的任务。工作队列则是在进程上下文中执行，可以休眠，适合需要长时间处理的任务。</p>
+<p>线程化中断（threaded IRQ）这也是现代内核中的一种方式，把下半部放到内核线程里处理，这样可以更灵活地管理优先级和调度。还有小任务（tasklet）和定时器（timer）也可能被用来实现下半部</p>
+<p>Linux内核提供了多种下半部实现机制，适用于不同场景：</p>
+<ol>
+<li><p>软中断（Softirq）<br>特点：<br>静态注册：编译时通过open_softirq()定义，如网络子系统（NET_RX_SOFTIRQ）、定时器（TIMER_SOFTIRQ）。<br>无锁并发：同一软中断可在不同CPU上并行执行，需开发者自行处理竞态条件。<br>执行时机：中断返回前（irq_exit()）或内核线程ksoftirqd中触发。<br>适用场景：高频、低延迟任务（如网卡收包）。</p>
+</li>
+<li><p>Tasklet<br>特点：<br>动态注册：通过tasklet_init()动态创建，基于软中断（TASKLET_SOFTIRQ&#x2F;HI_SOFTIRQ）实现。<br>串行执行：<strong>同一Tasklet在多个CPU上串行执行，天然避免并发问题。</strong><br>优先级区分：高优先级Tasklet（HI_SOFTIRQ）优先执行。<br>适用场景：中低频任务（如USB设备中断处理）。</p>
+</li>
+<li><p>工作队列（Workqueue）<br>特点：<br>进程上下文执行：<strong>通过内核线程（如kworker）调度，允许休眠和阻塞操作。</strong><br>灵活性：支持延迟任务（delayed_work）、绑定特定CPU（queue_work_on()）。<br>资源隔离：可创建专用工作队列（如alloc_workqueue()）避免相互影响。<br>适用场景：复杂、长耗时任务（如文件系统操作）。</p>
+</li>
+<li><p>线程化中断（Threaded IRQ）<br>特点：<br>中断处理线程化：通过request_threaded_irq()注册，上半部仅确认中断，下半部由独立线程执行。<br>实时性优化：可通过调整线程优先级（如SCHED_FIFO）提升响应速度。<br>适用场景：需要复杂处理或与用户空间交互的中断（如GPIO中断）。</p>
+</li>
+</ol>
+<p><img src="/../../stuff/interrut_sxbb_image.png" alt="alt text"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/face_exp/face_exp_4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/1970/01/01/face_exp/face_exp_4/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-22 18:17:05" itemprop="dateModified" datetime="2025-03-22T18:17:05+08:00">2025-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>OPPO</p>
+<p>今天分享关于社招驱动工程师的面经，oppo的CPU方向。一面1、i2c和spi区别？2、什么情况下必须要用I2C？什么情况下必须要用SPI？3、perf这块主要做的工作内容？4、perf中统计的cycles、instructions表示什么意思？5、Cache miss是什么意思？6、对功耗了解多少？7、系统稳定性了解吗？8、动态调频相关的了解吗？cpufreq？9、说一个你遇到过的比较棘手的问题，怎么解决的？10、有什么想问的？整体上，主要是从知识面的广度了解，有个初步印象二面1、CPU访问内存的过程？2、什么是Cache一致性？3、驱动中怎么分配DMA内存？带不带Cache？4、驱动中分配内存用哪个函数？kzalloc分配的内存带不带Cache？5、多核下，Cache一致性如何保证？6、多核下，访问寄存器如何避免竞争？7、说下DDR带宽统计这块主要负责的内容？8、内核中申请内存和应用层申请内存有什么区别？9、有什么想问的？</p>
+<p>晶晨半导体</p>
+<p>一面1.自我介绍2.linux驱动分配内存用什么函数？（ 八股，秒了）3.驱动中有没有用到DMA？DMA你是怎么分配的？（dma_alloc_coreherent，不带cache，但我猜他可能想了解更多的，不想挖坑，就没说太多）4.如果dma内存带Cache，怎么处理一致性问题？（随口爆了个刷Cache，后面意识到坑来了，只能硬抗了）5.Cache是怎么知道，现在的数据脏了，需要刷Cache了？（Cacheline有个标记位吧，MESI协议貌似也行，有点乱，全说了）6.BSP适配，主要做哪些工作？（底层内功知识问的差不多了，开始了解下之前的工作，秒了）7.驱动是自己写的，还是有继承的？（os：肯定是有继承的，哪那么多从零的驱动给你写。但我也说了我写过从零开始的，即便是有继承，我也都能看懂，因为我是owner，都能cover住）8.说下遇到过你认为比较难的问题？怎么解决的？（准备了一个概率性问题，涉及到死锁。深度感觉一般，但我还有其他中高难度问题，这块还需要斟酌一下，以后准备个眼前一亮的）9.职业发展？或者对技术方向有什么想法？（os：其实都差不多吧，打工而已。我一般看公司来说，手机厂我就说想做安卓&#x2F;手机产品，工业相关我就说工业，原厂就说想深入底层，反正就舔吧）10.经典反问<br>二面1.自我介绍2.说下UART子系统？（准备的资料有，说过很多次了，秒了）3.uboot的启动流程？（八股，秒了）4.说下SPI子系统？（秒了）5.说下双系统是怎么做的？双系统启动流程？（一个核跑RTOS，一个核跑Linux，通常RTOS先起，后起LInux。。巴拉一堆）6.双系统之间怎么通信？（核间中断 + 共享内存，向另外一个核打一个核间中断过去，然后从共享内存读数据）7.有用过异构通信的一些框架吗？（我猜他想问的是remoteproc、rpmsg框架这些，项目实际上没用，他想了解，我就把我知道的说了）8.遇到过的比较难的问题？（同一面，复刻一遍）9.离职原因？（这种问题，我一般都回答不可抗力：家庭原因）10.经典反问</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/face_exp/face_exp_2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/1970/01/01/face_exp/face_exp_2/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-19 13:40:40" itemprop="dateModified" datetime="2024-11-19T13:40:40+08:00">2024-11-19</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>一、命令说明</p>
+<p>mmc_go_idle <br>发送CMD0指令，GO_IDLE_STATE <br>使mmc card进入idle state。 <br>虽然进入到了Idle State，但是上电复位过程并不一定完成了，这主要靠读取OCR的busy位来判断，而流程归结为下一步。</p>
+<p>mmc_send_op_cond <br>发送CMD1指令，SEND_OP_COND <br>这里会设置card的工作电压寄存器OCR，并且通过busy位（bit31）来判断card的上电复位过程是否完成，如果没有完成的话需要重复发送。 <br>完成之后，mmc card进入ready state。</p>
+<p>mmc_all_send_cid <br>这里会发送CMD2指令，ALL_SEND_CID <br>广播指令，使card回复对应的CID寄存器的值。在这里就相应获得了CID寄存器的值了，存储在cid中。 <br>完成之后，MMC card会进入Identification State。</p>
+<p>mmc_set_relative_addr <br>发送CMD3指令，SET_RELATIVE_ADDR <br>设置该mmc card的关联地址为card-&gt;rca，也就是0x0001 <br>完成之后，该MMC card进入standby模式。</p>
+<p>mmc_send_csd <br>发送CMD9指令，MMC_SEND_CSD <br>要求mmc card发送csd寄存器，存储到card-&gt;raw_csd中，也就是原始的csd寄存器的值。 <br>此时mmc card还是处于standby state</p>
+<p>mmc_select_card &amp; mmc_deselect_cards <br>发送CMD7指令，SELECT&#x2F;DESELECT CARD <br>选择或者断开指定的card <br>这时卡进入transfer state。后续可以通过各种指令进入到receive-data state或者sending-data state依次来进行数据的传输</p>
+<p>mmc_get_ext_csd <br>发送CMD8指令，SEND_EXT_CSD <br>这里要求处于transfer state的card发送ext_csd寄存器，这里获取之后存放在ext_csd寄存器中 <br>这里会使card进入sending-data state，完成之后又退出到transfer state。</p>
+<p>mmc_switch <br>发送CMD6命令，MMC_SWITCH <br>用于设置ext_csd寄存器的某些bit</p>
+<p>mmc_send_status <br>发送CMD13命令，MMC_SEND_STATUS <br>要求card发送自己当前的状态寄存器</p>
+<p>mmc_send_cid <br>发送CMD10命令，MMC_SEND_CID <br>要求mmc card回复cid寄存器</p>
+<p>mmc_card_sleepawake <br>发送CMD5命令，MMC_SLEEP_AWAKE <br>使card进入或者退出sleep state，由参数决定。</p>
+<p>二、初始化顺序</p>
+<p>1.power up emmc</p>
+<p>2.设置电压，配置阶段为400khz</p>
+<p>3.设置位宽为1bit</p>
+<p>4.cmd0</p>
+<p>5.cmd1循环一直到检测到emmc返回的电源状态稳定</p>
+<p>6.cmd2获取cid</p>
+<p>7.cmd3 设置rca，如果获取到的数值不正确，可以手动设置为0x01</p>
+<p>8.cmd9 获取csd</p>
+<p>9.可以重新配置工作速率</p>
+<p>10.cmd7 设置为transfer mode</p>
+<p>11.cmd8获取额外的csd信息</p>
+<p>12.cmd 16设置block len</p>
+<p>13.cmd6 设置工作bit模式</p>
+<p>14读cmd17.18</p>
+<p>15.写cmd24.25</p>
+<p>三、EMMC的主机配置</p>
+<p>主机的配置最先要注意的就是IO的配置，很多复用的管脚，是否是EMMC的CMD和DATA功能配置</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/hsem/hsem/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/1970/01/01/hsem/hsem/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-04-25 18:13:44" itemprop="dateModified" datetime="2025-04-25T18:13:44+08:00">2025-04-25</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="HSEM的驱动设计-接口设计-实现"><a href="#HSEM的驱动设计-接口设计-实现" class="headerlink" title="HSEM的驱动设计-接口设计-实现"></a>HSEM的驱动设计-接口设计-实现</h1><h2 id="1-HSEM硬件机制"><a href="#1-HSEM硬件机制" class="headerlink" title="1. HSEM硬件机制"></a>1. HSEM硬件机制</h2><p>硬件信号量模块(HSEM)。通过读取一个该模块的寄存器地址来申请信号量资源，地址计算公式为:<br>SEM_INDIRECTm ADDR &#x3D; offset + 0x200 * n + 0x4 * m。<br>offset为一个寄存器固定地址偏移</p>
+<p>在A核上，HSEM模块硬件上的拓扑结构为: HSEM接到GIC控制器，而GIC接到CPU Cluster。A核上，HSEM在GIC中一共有32个bit位的中断。</p>
+<p>上述SEM_INDIRECTm ADDR计算公式的n，对应的是输出32bit中断的序号(Peri下16bit，AO下16bit)。m为信号量的id，系统中一共有128个信号量资源，即 0 &lt; m &lt; 128.</p>
+<p>以Peri子系统下为例：16bit状态位也就对应着前面SEM_INDIRECTm计算公式中的n，而公式中的m则为可以使用的信号量的个数，一共有128个。</p>
+<p>当软件上某个任务A以特定的n和m读取到这个地址时，意味着着gic的某一个中断位n去申请信号量m。如果这个信号量空闲，则会读取到1，并且获取到信号量。另一个任务B可能在A持有期间，也去申请同一个信号量m(此时m与上面的m相同，n不必相同，但要满足n&lt;16)，这时它会读取到0，信号量已经被占用，此时硬件可以帮助任务B以中断n的身份去等待信号量的释放（硬件上有一个等待队列），任务B可以去做其他事务。<br>任务B可以提前用中断号n来向linux注册一个中断处理函数。当任务A释放信号量时，任务A要向SEM_INDIRECTm寄存器写1来做释放。一旦任务A释放信号量m，任务B会立即出发中断n。 </p>
+<h2 id="2-驱动方案设计"><a href="#2-驱动方案设计" class="headerlink" title="2. 驱动方案设计"></a>2. 驱动方案设计</h2><h3 id="2-1-功能目标"><a href="#2-1-功能目标" class="headerlink" title="2.1 功能目标"></a>2.1 功能目标</h3><p>HSEM应该分为两大部件：</p>
+<ol>
+<li>资源管理模块</li>
+<li>信号量控制模块</li>
+</ol>
+<p>驱动要实现对128个信号量资源和中断bit位的管理，并且向其他客户驱动模块，提供申请信号量，释放信号量的接口，在申请信号量时，我们应该将中断n和信号量m标记为已经被占用，并且给予客户模块提供它的处理函数的机会，一旦客户模块无法申请到信号量，它可以做别的任务，直到信号量被释放，自动回调到它提供的处理函数。</p>
+<p>最终实现的模块功能：</p>
+<ul>
+<li>实现多核环境下基于硬件的信号量同步机制</li>
+<li>支持 16 个中断通道 (n) × 128 个信号量 (m) 的管理</li>
+<li>提供阻塞&#x2F;非阻塞式信号量申请接口</li>
+<li>通过中断通知机制实现异步信号量释放监听</li>
+</ul>
+<h3 id="2-2-接口"><a href="#2-2-接口" class="headerlink" title="2.2 接口"></a>2.2 接口</h3><p>这里仅列出要导出给内核其他模块使用的接口</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 申请信号量 (非阻塞)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hsem_try_acquire</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m)</span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 申请信号量 (带回调)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hsem_acquire</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m, <span class="type">void</span> (*callback)(<span class="type">void</span>*), <span class="type">void</span> *data)</span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 释放信号量 </span></span><br><span class="line"><span class="type">void</span> <span class="title function_">hsem_release</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m)</span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 注册中断处理  </span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hsem_request_irq</span><span class="params">(<span class="type">int</span> n, <span class="type">int</span> m, <span class="type">irq_handler_t</span> handler, <span class="type">void</span> *dev_id)</span>;</span><br></pre></td></tr></table></figure>
+<p>需实现hsem_acquire接口，该接口</p>
+<h3 id="2-3-驱动工作流程"><a href="#2-3-驱动工作流程" class="headerlink" title="2.3 驱动工作流程"></a>2.3 驱动工作流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram </span><br><span class="line">    participant GIC </span><br><span class="line">    participant HSEM_Driver </span><br><span class="line">    participant Client </span><br><span class="line"> </span><br><span class="line">    GIC-&gt;&gt;HSEM_Driver: 触发中断 (n=2)</span><br><span class="line">    HSEM_Driver-&gt;&gt;HSEM_Driver: 扫描所有 m (0..127)</span><br><span class="line">    alt 发现等待的信号量 (m=5)</span><br><span class="line">        HSEM_Driver-&gt;&gt;Client: 调用注册的回调函数 </span><br><span class="line">    else 无等待信号量 </span><br><span class="line">        HSEM_Driver-&gt;&gt;GIC: 忽略中断 </span><br><span class="line">    end</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/kernel/workqueue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/1970/01/01/kernel/workqueue/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-22 19:38:11" itemprop="dateModified" datetime="2025-03-22T19:38:11+08:00">2025-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://kindresy.github.io/1970/01/01/life_record/linux_learn/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Luyuan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Coffe Pattern">
+      <meta itemprop="description" content="ARM/Liunx Kernel/OS/Driver">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Coffe Pattern">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/1970/01/01/life_record/linux_learn/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：1970-01-01 08:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T08:00:00+08:00">1970-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-04-22 16:09:24" itemprop="dateModified" datetime="2025-04-22T16:09:24+08:00">2025-04-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Linux-Kernel-Driver-Learning-outline"><a href="#Linux-Kernel-Driver-Learning-outline" class="headerlink" title="Linux Kernel Driver Learning outline"></a>Linux Kernel Driver Learning outline</h1><ol>
+<li>字符驱动开发与内核模块的认识</li>
+<li>设备驱动的软件架构思想</li>
+<li>Platform总线理解与使用</li>
+<li>中断子系统</li>
+<li>同步与互斥</li>
+<li>Linux内存管理机制的认识</li>
+<li>内核常见调试方法与异常定位手段</li>
+<li>块设备驱动</li>
+<li>一个内存管理驱动模块的实现</li>
+<li>UART子系统</li>
+<li>GPIO子系统</li>
+<li>SPI子系统</li>
+<li>I2C子系统</li>
+</ol>
+<p>第一章<br>字符驱动是内核中最简单一类驱动框架，通常会编译为模块的形式加载到内核，从字符驱动开始，了解内核驱动开发的编译加载流程，了解内核模块的加载机制，快速对内核驱动开发形成一些入门级的认识</p>
+<p>第二章<br>设备驱动的软件架构思想。linux内核的移植性做的非常优秀，现代内核采用设备树+设备驱动的方法来实现驱动的高移植性和可裁剪性，这一章会学习设备驱动的软件架构思想，以及设备树机制，相关API的使用</p>
+<p>第三章<br>Platform 总线是 Linux 设备驱动模型中用于管理片上系统（SoC）和非标准外设的核心机制，通过统一抽象实现硬件与驱动的解耦。常见的内核驱动都是以platform的形式管理</p>
+<p>第四章<br>Linux 中断子系统是硬件与软件交互的核心枢纽，负责高效响应外设事件并协调CPU资源。Linux中断子系统一章中会我们会学习linux内核中断处理流程，中断上下半部，线程化中断（Threaded IRQ）和中断亲和性与负载均衡，会讲解GIC控制器模块以及其驱动，最终实现一个级联中断控制器。</p>
+<p>第五章<br>同步与互斥。Linux 内核的同步与互斥机制是保障多核、多线程、中断上下文等复杂场景下数据一致性与执行有序性的核心基础设施。在这一章中，我们会学习同步与互斥的基本原理。了解为什么在内核中需要这些机制，在多核并发和中断处理过程中的并发问题案例。也会介绍内核提供的互斥机制如原子操作、自旋锁、信号量、互斥锁、RCU等。</p>
+<p>第六章<br>Linux内存管理机制的认识。Linux 内存管理是操作系统核心功能之一，其设计目标在于高效利用物理资源、保障多任务隔离性、适配异构硬。在这一章中，我们会学习虚拟内存系统和物理内存管理。了解常见的内存分配算法以支持后续模块开发。</p>
+<p>第七章<br>内核常见调试方法与异常定位手段。介绍异常调用栈，中断现场信息，addr2line，k-gdb，ftrace，strace等工具的用。</p>
+<p>第八章<br>块设备驱动。块设备驱动是 Linux 存储生态的核心，负责管理硬盘、SSD、NVMe 等以固定大小数据块为访问单元的存储设备。在这一阶段我们会学习文件系统如UFS等，并学习mmc子系统，对代码的核心流程与请求链路进行跟踪，了解SDIO协议，移植sdhc驱动，并实现sdhc的tuning流程，支持HS400增强模式。最终还会对性能瓶颈做一下摸索，了解mmc_test的基准测试方法。</p>
+<p>第九章<br>我们会学习自己写一个内存管理驱动模块的实现，实现用户态对内核态内存的管理。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+  </nav>
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Luyuan</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div> -->
+
+
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
