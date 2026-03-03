@@ -20,21 +20,21 @@
   <title>pcie_introduction - 庐山东林</title>
 
   
-    <meta name="description" content="本文简介本文主要介绍pci&#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系 PCI 和 PCIePCI &#x3D; Peripheral Component Interconnect早期电脑里最经典的并行总线，白色长插槽那种。核心特点  并行：32bit &#x2F; 64bit 数据同时发 共享总线：所有设备抢一条">
+    <meta name="description" content="本文简介本文主要介绍pci&#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系。 PCI 和 PCIePCI &#x3D; Peripheral Component Interconnect早期电脑里最经典的并行总线，白色长插槽那种。核心特点  并行：32bit &#x2F; 64bit 数据同时发 共享总线：所有设备抢一">
 <meta property="og:type" content="article">
 <meta property="og:title" content="pcie_introduction">
 <meta property="og:url" content="https://kindresy.github.io/2026/03/03/pcie/pcie_introduction/">
 <meta property="og:site_name" content="庐山东林">
-<meta property="og:description" content="本文简介本文主要介绍pci&#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系 PCI 和 PCIePCI &#x3D; Peripheral Component Interconnect早期电脑里最经典的并行总线，白色长插槽那种。核心特点  并行：32bit &#x2F; 64bit 数据同时发 共享总线：所有设备抢一条">
+<meta property="og:description" content="本文简介本文主要介绍pci&#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系。 PCI 和 PCIePCI &#x3D; Peripheral Component Interconnect早期电脑里最经典的并行总线，白色长插槽那种。核心特点  并行：32bit &#x2F; 64bit 数据同时发 共享总线：所有设备抢一">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://kindresy.github.io/images/image.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/03/pcie/pcie_introduction/image.png">
 <meta property="article:published_time" content="2026-03-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-03T06:45:59.892Z">
+<meta property="article:modified_time" content="2026-03-03T06:48:03.523Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kindresy.github.io/images/image.png">
+<meta name="twitter:image" content="https://kindresy.github.io/2026/03/03/pcie/pcie_introduction/image.png">
   
   
   
@@ -50,7 +50,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-03T00:00:00+08:00","dateModified":"2026-03-03T14:45:59+08:00","datePublished":"2026-03-03T00:00:00+08:00","description":"","headline":"pcie_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/03/pcie/pcie_introduction/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/03/pcie/pcie_introduction/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-03T00:00:00+08:00","dateModified":"2026-03-03T14:48:03+08:00","datePublished":"2026-03-03T00:00:00+08:00","description":"","headline":"pcie_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/03/pcie/pcie_introduction/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/03/pcie/pcie_introduction/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -82,7 +82,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-02T16:00:00.000Z">2026-03-03</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-03T06:45:59.892Z">2026-03-03</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-02T16:00:00.000Z">2026-03-03</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-03T06:48:03.523Z">2026-03-03</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -93,7 +93,7 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><h1 id="本文简介"><a href="#本文简介" class="headerlink" title="本文简介"></a>本文简介</h1><p>本文主要介绍pci&#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系</p>
+  </div><article class="md-text content"><h1 id="本文简介"><a href="#本文简介" class="headerlink" title="本文简介"></a>本文简介</h1><p>本文主要介绍pci&#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系。</p>
 <h1 id="PCI-和-PCIe"><a href="#PCI-和-PCIe" class="headerlink" title="PCI 和 PCIe"></a>PCI 和 PCIe</h1><p>PCI &#x3D; Peripheral Component Interconnect<br>早期电脑里最经典的并行总线，白色长插槽那种。<br>核心特点</p>
 <ul>
 <li>并行：32bit &#x2F; 64bit 数据同时发</li>
@@ -122,7 +122,7 @@
 <li>线间干扰、同步时钟做不上去<br>于是业界决定：抛弃并行，走高速串行 + 差分信号 + packet 交换<br>→ 这就是 PCIe。</li>
 </ul>
 <p>PCI和PCIe之间的显著区别：</p>
-<p><img src="/images/image.png" alt="alt text"></p>
+<p><img src="/2026/03/03/pcie/pcie_introduction/image.png" alt="alt text"></p>
 <p>PCIe 只是物理层 &#x2F; 链路层革命，软件层兼容 PCI。</p>
 <p>主要应用场景：</p>
 <ol>
