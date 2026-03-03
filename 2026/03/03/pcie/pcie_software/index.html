@@ -20,16 +20,16 @@
   <title>pcie software - 庐山东林</title>
 
   
-    <meta name="description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。这种角色所对应的软件实现差异很大，RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
+    <meta name="description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
 <meta property="og:type" content="article">
 <meta property="og:title" content="pcie software">
 <meta property="og:url" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/">
 <meta property="og:site_name" content="庐山东林">
-<meta property="og:description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。这种角色所对应的软件实现差异很大，RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
+<meta property="og:description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/image.png">
 <meta property="article:published_time" content="2026-03-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-03T09:04:57.679Z">
+<meta property="article:modified_time" content="2026-03-03T09:52:37.970Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
@@ -50,7 +50,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-03T00:00:00+08:00","dateModified":"2026-03-03T17:04:57+08:00","datePublished":"2026-03-03T00:00:00+08:00","description":"","headline":"pcie software","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-03T00:00:00+08:00","dateModified":"2026-03-03T17:52:37+08:00","datePublished":"2026-03-03T00:00:00+08:00","description":"","headline":"pcie software","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -82,7 +82,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-02T16:00:00.000Z">2026-03-03</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-03T09:04:57.679Z">2026-03-03</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-02T16:00:00.000Z">2026-03-03</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-03T09:52:37.970Z">2026-03-03</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -93,21 +93,25 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。这种角色所对应的软件实现差异很大，RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。<br>我觉得，这篇文章的命名应该改为：<br>《从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程》</p>
+  </div><article class="md-text content"><h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。<br>我觉得，这篇文章的命名应该改为：<br>《从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程》</p>
 <p>硬件环境介绍：<br>主机： 某x86架构服务器<br>设备： 某AI加速卡(Controller IP为Cadence)</p>
 <p>主要过程：<br><img src="/2026/03/03/pcie/pcie_software/image.png" alt="alt text"></p>
-<p>核心目标：<br>从硬件启动到数据传输，完整讲解「RC 如何发现 EP→系统如何配置 EP→RC 与 EP 如何双向访问」的全流程，覆盖枚举、配置、PIO 读写、DMA 传输、MSI 中断5 个核心环节。</p>
-<h1 id="第零章：硬件冷启动"><a href="#第零章：硬件冷启动" class="headerlink" title="第零章：硬件冷启动"></a>第零章：硬件冷启动</h1><p>主机一旦上电，卡槽上的PCIe设备会经历如下事务:<br>阶段 0：供电与物理稳定（完全硬件，BIOS不存在）</p>
+<p>核心目标：<br>从硬件启动到数据传输，完整讲解R<strong>C 如何发现 EP→系统如何配置 EP→RC 与 EP 如何双向访问</strong>的全流程，覆盖枚举、配置、PIO 读写、DMA 传输、MSI 中断5 个核心环节。</p>
+<h1 id="第零章：硬件冷启动"><a href="#第零章：硬件冷启动" class="headerlink" title="第零章：硬件冷启动"></a>第零章：硬件冷启动</h1><p>主机一旦上电，卡槽上的PCIe设备会经历如下事务:</p>
+<h2 id="阶段-0：供电与物理稳定"><a href="#阶段-0：供电与物理稳定" class="headerlink" title="阶段 0：供电与物理稳定"></a>阶段 0：供电与物理稳定</h2><p>（完全硬件，BIOS不存在）</p>
 <ol>
 <li>按下电源键。</li>
 <li>电源供应器（PSU）开始工作，为主板提供 +12V, +5V, +3.3V​ 等电压。</li>
-<li>这些电压经过主板上的电源管理芯片（PCH&#x2F;SOC的一部分）后，产生出各路电源轨，并最终变为 VCC​ 等核心电源，输送给CPU、芯片组和PCIe插槽。<br>关键点：此时，BIOS&#x2F;UEFI固件代码还静静地存放在主板的SPI Flash闪存芯片里，CPU尚未从其中读取任何指令执行。<br>阶段 1：平台复位与初始化（硬件主导，BIOS仍未执行）</li>
+<li>这些电压经过主板上的电源管理芯片（PCH&#x2F;SOC的一部分）后，产生出各路电源轨，并最终变为 VCC​ 等核心电源，输送给CPU、芯片组和PCIe插槽。<br>关键点：此时，BIOS&#x2F;UEFI固件代码还静静地存放在主板的SPI Flash闪存芯片里，CPU尚未从其中读取任何指令执行。</li>
+</ol>
+<h2 id="阶段-1：平台复位与初始化"><a href="#阶段-1：平台复位与初始化" class="headerlink" title="阶段 1：平台复位与初始化"></a>阶段 1：平台复位与初始化</h2><p>（硬件主导，BIOS仍未执行）</p>
+<ol>
 <li>电源稳定后，主板上的时钟发生器开始工作，为各组件提供基准时钟。</li>
 <li>芯片组（或SoC）会发出一个全局性的平台复位信号，让整个系统进入已知的初始状态。</li>
 <li>对于PCIe设备，芯片组的Root Port会发出 PERST#​ 信号（PCIe Reset），这个信号会通过PCIe插槽的引脚传递给设备。<br>PERST#​ 信号有效（低电平）期间，所有PCIe设备被强制复位，内部状态机清零。<br>当 PERST#​ 信号被芯片组释放（拉高）的那一刻，PCIe链路训练（LTSSM）自动开始。这是由设备（EP）和Root Port（RC的一部分）的物理层（PHY）硬件逻辑独立完成的，完全不需要代码干预。<br>此时，CPU可能还在执行其内部的微码（Microcode）进行自检，或者处于等待状态，但绝对没有开始执行主板Flash里的BIOS代码。</li>
 </ol>
 <p>LTSSM会经历一系列状态，比如 Detect（检测）、Polling（轮询）、Configuration（配置） 和 Recovery（恢复）等。在Polling状态，双方会互相发送特定的训练序列（TS1&#x2F;TS2 Ordered Sets），就像在互相喊话：“喂，有人吗？我能跑5.0 GT&#x2F;s（Gen1速度），你能吗？” 对方回应：“收到！我也能跑5.0，那我们先用这个速度握手。” 这就是速率协商。同时，它们还会探测物理通道（Lane）的连接情况，如果设备是x4的，但只连了两根线，它们就会协商工作在x2模式，这就是通道宽度协商。</p>
-<p>注：<br>硬件冷启动步骤为BIOS部分打好基础(先铺好硬件上的通路。)<br>LTSSM是PCIe体系中最</p>
+<p>注：<br>硬件冷启动步骤为BIOS部分打好基础(先铺好硬件上的通路。)<br>LTSSM是PCIe体系中非常复杂的一部分，在此挖坑：《LTSSM状态机解析》</p>
 <h1 id="第一章：BIOS-UEFI阶段"><a href="#第一章：BIOS-UEFI阶段" class="headerlink" title="第一章：BIOS&#x2F;UEFI阶段"></a>第一章：BIOS&#x2F;UEFI阶段</h1><p>BIOS&#x2F;UEFI阶段主要涉及到PCIe RC初始化与EP枚举，这是 PCIe 软件栈的「底层奠基」阶段，决定了后续内核能否正确识别EP。<br>在BIOS阶段，系统会完成硬件探测、资源分配和初始化，以建立基本的PCIe拓扑，为操作系统启动做好准备。其主要事务和职责可概括为两部分：</p>
 <h2 id="对PCIe-RC的事务"><a href="#对PCIe-RC的事务" class="headerlink" title="对PCIe RC的事务"></a>对PCIe RC的事务</h2><p>RC是CPU与PCIe拓扑之间的桥梁，是PCIe树的“根”。BIOS对其处理的核心是<strong>构建和配置整个PCIe系统</strong>。</p>
 <ol>
@@ -137,7 +141,7 @@
 <li>分配总线号：<br>为RC下游的每个PCIe交换机（桥）动态分配次级总线号、下级总线号和总线号范围，确保整个PCIe域内的总线编号唯一。</li>
 </ol>
 <p>举个例子，我们的AI加速卡有1GB的显存（设备本地内存），同时它的控制寄存器也需要被CPU访问。BIOS会为它的寄存器部分分配一个较小的BAR（比如256MB的地址窗口），而加速卡驱动驱动后续会通过这个BAR去初始化并管理那1GB的显存。BIOS枚举完成后，会在内存中建立一张表，记录所有PCIe设备的信息，这就是<strong>ACPI表（如MCFG表）和BIOS数据区里的内容</strong>，它们为接下来的操作系统接力做好了准备。</p>
-<h2 id="对PCIe-EP（端点设备）的事务"><a href="#对PCIe-EP（端点设备）的事务" class="headerlink" title="对PCIe EP（端点设备）的事务"></a>对PCIe EP（端点设备）的事务</h2><p>BIOS对EP的处理是发现、识别并使其进入可操作状态。</p>
+<h2 id="对PCIe-EP的事务"><a href="#对PCIe-EP的事务" class="headerlink" title="对PCIe EP的事务"></a>对PCIe EP的事务</h2><p>BIOS对EP的处理是发现、识别并使其进入可操作状态。</p>
 <ol>
 <li>设备发现与识别：<br>读取EP的配置空间头部，识别其类型和功能。</li>
 <li>配置设备BAR：</li>
@@ -238,7 +242,7 @@
 
 
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E9%9B%B6%E7%AB%A0%EF%BC%9A%E7%A1%AC%E4%BB%B6%E5%86%B7%E5%90%AF%E5%8A%A8"><span class="toc-text">第零章：硬件冷启动</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%9ABIOS-UEFI%E9%98%B6%E6%AE%B5"><span class="toc-text">第一章：BIOS&#x2F;UEFI阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9PCIe-RC%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-text">对PCIe RC的事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9PCIe-EP%EF%BC%88%E7%AB%AF%E7%82%B9%E8%AE%BE%E5%A4%87%EF%BC%89%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-text">对PCIe EP（端点设备）的事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CoreBoot-PCIe%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BB%A3%E7%A0%81%E8%AE%B2%E8%A7%A3"><span class="toc-text">CoreBoot PCIe初始化代码讲解</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%98%B6%E6%AE%B5"><span class="toc-text">第二章：操作系统阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9A%E5%86%85%E6%A0%B8%E7%9A%84%E6%9D%83%E5%A8%81%E6%8E%A5%E7%AE%A1%E4%B8%8E%E6%B7%B1%E5%BA%A6%E6%9E%9A%E4%B8%BE"><span class="toc-text">阶段一：内核的权威接管与深度枚举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9A%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E6%BF%80%E6%B4%BB"><span class="toc-text">阶段二：设备驱动的深度初始化与激活</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E9%9B%B6%E7%AB%A0%EF%BC%9A%E7%A1%AC%E4%BB%B6%E5%86%B7%E5%90%AF%E5%8A%A8"><span class="toc-text">第零章：硬件冷启动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-0%EF%BC%9A%E4%BE%9B%E7%94%B5%E4%B8%8E%E7%89%A9%E7%90%86%E7%A8%B3%E5%AE%9A"><span class="toc-text">阶段 0：供电与物理稳定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-1%EF%BC%9A%E5%B9%B3%E5%8F%B0%E5%A4%8D%E4%BD%8D%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">阶段 1：平台复位与初始化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%9ABIOS-UEFI%E9%98%B6%E6%AE%B5"><span class="toc-text">第一章：BIOS&#x2F;UEFI阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9PCIe-RC%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-text">对PCIe RC的事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9PCIe-EP%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-text">对PCIe EP的事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CoreBoot-PCIe%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BB%A3%E7%A0%81%E8%AE%B2%E8%A7%A3"><span class="toc-text">CoreBoot PCIe初始化代码讲解</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%98%B6%E6%AE%B5"><span class="toc-text">第二章：操作系统阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9A%E5%86%85%E6%A0%B8%E7%9A%84%E6%9D%83%E5%A8%81%E6%8E%A5%E7%AE%A1%E4%B8%8E%E6%B7%B1%E5%BA%A6%E6%9E%9A%E4%B8%BE"><span class="toc-text">阶段一：内核的权威接管与深度枚举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9A%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E6%BF%80%E6%B4%BB"><span class="toc-text">阶段二：设备驱动的深度初始化与激活</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
