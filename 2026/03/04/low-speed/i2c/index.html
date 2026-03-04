@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image3.png">
 <meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image2.png">
 <meta property="article:published_time" content="2026-03-03T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-04T07:51:57.751Z">
+<meta property="article:modified_time" content="2026-03-04T07:59:02.904Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
@@ -53,7 +53,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-04T00:00:00+08:00","dateModified":"2026-03-04T15:51:57+08:00","datePublished":"2026-03-04T00:00:00+08:00","description":"","headline":"i2c_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/04/low-speed/i2c/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/04/low-speed/i2c/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-04T00:00:00+08:00","dateModified":"2026-03-04T15:59:02+08:00","datePublished":"2026-03-04T00:00:00+08:00","description":"","headline":"i2c_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/04/low-speed/i2c/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/04/low-speed/i2c/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -85,7 +85,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-03T16:00:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-04T07:51:57.751Z">2026-03-04</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-03T16:00:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-04T07:59:02.904Z">2026-03-04</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -101,7 +101,7 @@
 <p>其他官方资源<br><a target="_blank" rel="noopener" href="https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#i2c">Raspberry Pi官方文档​</a><br>I2C配置与使用<br>实用配置指南和示例</p>
 <p>Linux内核文档​<br><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/i2c/index.html">I2C子系统文档</a><br>Linux驱动开发者的权威参考</p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/678229227">知乎</a></p>
-<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文介绍与I2C相关的协议以及软硬件知识，包括：如何I2C协议详情，如何初始化I2C设备，与I2C设备通信，I2C总线的硬件设计，I2C驱动如何编写(裸机版本+Linux内核版本，GPIO软件实现版本，加控制器抽象版本)，Linux </p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文介绍与I2C相关的协议以及软硬件知识，包括：如何I2C协议详情，如何初始化I2C设备，与I2C设备通信，I2C总线的硬件设计，I2C驱动如何编写(裸机版本+Linux内核版本，GPIO软件实现版本，控制器抽象版本) ，linux内核I2C子系统框架。</p>
 <h1 id="介绍I2C-附带SMBus"><a href="#介绍I2C-附带SMBus" class="headerlink" title="介绍I2C(附带SMBus)"></a>介绍I2C(附带SMBus)</h1><p>I²C（发音为“ I 平方 C”，在内核文档中写作 I2C）是由飞利浦公司开发的一种协议。它是一种<strong>双线</strong>协议，具有可变速度（通常最高可达 <strong>400K赫兹</strong>，高速模式下可达 <strong>5M赫兹</strong>）。它为连接多种<strong>通信需求不频繁或带宽较低的设备</strong>提供了一种<strong>经济实惠</strong>的总线。I²C 在嵌入式系统中得到了广泛应用。有些系统使用不符合品牌要求的变体，因此不被宣传为 I²C，而是采用不同的名称，例如 TWI（双线接口）、IIC。<br>截至撰写本文时，最新的官方 I2C 规范是恩智浦半导体发布的“ I²C 总线规范和用户手册”（UM10204），版本为 7。<br>SMBus（系统管理总线）基于 I2C 协议，<strong>基本上是 I2C 协议和信号的一个子集</strong>。许多 I2C 设备可以在 SMBus 上运行，但有些 SMBus 协议添加了超出实现 I2C 标识所需的意义。现代 PC 主板依赖于 SMBus。通过 SMBus 连接的最常见设备是使用 I2C EEPROM 进行配置的 RAM 模块和硬件监控芯片。<br>由于 SMBus 大部分是通用 I2C 总线的一个子集，因此我们可以在许多 I2C 系统上使用其协议。然而，有些系统无法同时满足 SMBus 和 I2C 的电气约束条件；还有一些系统无法实现所有常见的 SMBus 协议语义或消息。</p>
 <h1 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h1><ol>
 <li>开始和停止条件：通信由主设备通过在SDA线上生成特定的信号模式来开始和结束。</li>
