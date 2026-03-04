@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
   
-  <meta name="robots" content="none">
+  
   <meta name="generator" content="Hexo 8.1.1">
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   
@@ -17,23 +17,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>庐山东林</title>
+  <title>i2c_introduction - 庐山东林</title>
 
   
-    <meta name="description" content="Embedded software knowledge sharing">
-<meta property="og:type" content="website">
-<meta property="og:title" content="庐山东林">
-<meta property="og:url" content="https://kindresy.github.io/404">
+    <meta name="description" content="参考文档官方标准文档NXP（原飞利浦半导体）官方规范​I2C-bus specification and user manualUM10204 Rev. 7.0 — 这是最权威的官方技术手册 NXP I2C 资源中心​I2C-bus官方主页包含规范、工具、应用笔记等完整资源 其他官方资源Raspberry Pi官方文档​I2C配置与使用实用配置指南和示例 Linux内核文档​I2C子系统文档Lin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="i2c_introduction">
+<meta property="og:url" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/">
 <meta property="og:site_name" content="庐山东林">
-<meta property="og:description" content="Embedded software knowledge sharing">
+<meta property="og:description" content="参考文档官方标准文档NXP（原飞利浦半导体）官方规范​I2C-bus specification and user manualUM10204 Rev. 7.0 — 这是最权威的官方技术手册 NXP I2C 资源中心​I2C-bus官方主页包含规范、工具、应用笔记等完整资源 其他官方资源Raspberry Pi官方文档​I2C配置与使用实用配置指南和示例 Linux内核文档​I2C子系统文档Lin">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image1.png">
+<meta property="article:published_time" content="2026-03-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-04T06:09:42.171Z">
 <meta property="article:author" content="Luyuan">
-<meta property="article:tag" content="Linux PCIe eMMc ARM RTOS Firmware">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="embedded">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image.png">
   
   
   
-  <meta name="keywords" content="Linux PCIe eMMc ARM RTOS Firmware">
+  <meta name="keywords" content="embedded,Linux">
 
   <!-- feed -->
   
@@ -45,12 +51,12 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://kindresy.github.io","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"name":"庐山东林","description":"Embedded software knowledge sharing","url":"https://kindresy.github.io"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-04T00:00:00+08:00","dateModified":"2026-03-04T14:09:42+08:00","datePublished":"2026-03-04T00:00:00+08:00","description":"","headline":"i2c_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/04/low-speed/i2c/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/04/low-speed/i2c/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
 
-<div class="l_body index" id="start" layout="404" type="undefined" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
 <header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/luyuan.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
@@ -62,28 +68,149 @@
 <div class="widgets">
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="Search"></form><div id="search-result"></div><div class="search-no-result">No Results!</div></div>
 
+
+
 <widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/04/low-speed/i2c/"><span class="title">i2c_introduction</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/03/pcie/pcie_introduction/"><span class="title">pcie_introduction</span></a><a class="item title" href="/2026/03/02/mmc/sd_introduction/"><span class="title">sd_introduction</span></a></div></widget>
-
-
 </div>
 
 </div></aside><div class="l_main" id="main">
 
 
 
-<article class='md-text error-page'>
-  <h1><img id='error' src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/404/1c830bfcd517d.svg' alt='404'></h1>
-  <p class='what'>
-    <strong>
-      Page Not Found
-    </strong>
-  </p>
-  <p class='why'>
-    The address may be entered incorrectly or the address has been deleted.
-  </p>
-  <br><br>
-  <a class='button' id='back' href="/">Back to Home</a>
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-03T16:00:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-04T06:09:42.171Z">2026-03-04</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>i2c_introduction</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p>官方标准文档<br>NXP（原飞利浦半导体）官方规范​<br><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/i2c/index.html">I2C-bus specification and user manual</a><br>UM10204 Rev. 7.0 — 这是最权威的官方技术手册</p>
+<p>NXP I2C 资源中心​<br><a target="_blank" rel="noopener" href="https://www.nxp.com/design/design-center/interface-bus/i2c-bus/I2C-bus-resources:I2C-BUS">I2C-bus官方主页</a><br>包含规范、工具、应用笔记等完整资源</p>
+<p>其他官方资源<br><a target="_blank" rel="noopener" href="https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#i2c">Raspberry Pi官方文档​</a><br>I2C配置与使用<br>实用配置指南和示例</p>
+<p>Linux内核文档​<br><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/i2c/index.html">I2C子系统文档</a><br>Linux驱动开发者的权威参考</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文介绍与I2C相关的协议以及软硬件知识，包括：如何I2C协议详情，如何初始化I2C设备，与I2C设备通信，I2C总线的硬件设计，I2C驱动如何编写(裸机版本+Linux内核版本，GPIO软件实现版本，加控制器抽象版本)，Linux </p>
+<h1 id="介绍I2C-附带SMBus"><a href="#介绍I2C-附带SMBus" class="headerlink" title="介绍I2C(附带SMBus)"></a>介绍I2C(附带SMBus)</h1><p>I²C（发音为“ I 平方 C”，在内核文档中写作 I2C）是由飞利浦公司开发的一种协议。它是一种<strong>双线</strong>协议，具有可变速度（通常最高可达 <strong>400K赫兹</strong>，高速模式下可达 <strong>5M赫兹</strong>）。它为连接多种<strong>通信需求不频繁或带宽较低的设备</strong>提供了一种<strong>经济实惠</strong>的总线。I²C 在嵌入式系统中得到了广泛应用。有些系统使用不符合品牌要求的变体，因此不被宣传为 I²C，而是采用不同的名称，例如 TWI（双线接口）、IIC。<br>截至撰写本文时，最新的官方 I2C 规范是恩智浦半导体发布的“ I²C 总线规范和用户手册”（UM10204），版本为 7。<br>SMBus（系统管理总线）基于 I2C 协议，<strong>基本上是 I2C 协议和信号的一个子集</strong>。许多 I2C 设备可以在 SMBus 上运行，但有些 SMBus 协议添加了超出实现 I2C 标识所需的意义。现代 PC 主板依赖于 SMBus。通过 SMBus 连接的最常见设备是使用 I2C EEPROM 进行配置的 RAM 模块和硬件监控芯片。<br>由于 SMBus 大部分是通用 I2C 总线的一个子集，因此我们可以在许多 I2C 系统上使用其协议。然而，有些系统无法同时满足 SMBus 和 I2C 的电气约束条件；还有一些系统无法实现所有常见的 SMBus 协议语义或消息。</p>
+<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><p>I2C总线连接一或多个主控芯片和一或多个目标芯片</p>
+<p><img src="/2026/03/04/low-speed/i2c/image.png" alt="alt text"></p>
+<p><strong>controller</strong> chip是一个开始与目标设备进行通信的节点。在 Linux 内核实现中，它也被称为“适配器”或“总线”。控制器驱动程序通常位于 drivers&#x2F;i2c&#x2F;busses&#x2F; 子目录中。 </p>
+<p><strong>algorithm</strong> 包含了一段通用代码，该代码可用于实现整个一类的 I2C 控制器。每个具体的控制器驱动程序要么依赖于位于 drivers&#x2F;i2c&#x2F;algos&#x2F; 子目录中的算法驱动程序，要么包含其自身的实现。 </p>
+<p><strong>target</strong> chip是指在接收到指令时会响应通信操作的节点。 目标设备。在 Linux 内核实现中，它也被称为“客户端”。虽然目标通常是由独立的外部芯片构成的，但 Linux 也可以充当目标（需要硬件支持）并响应总线上的另一个控制器。这被称为本地目标。相比之下，外部芯片被称为远程目标。 </p>
+<p>Target drivers程序被存放在与它们所提供的功能相对应的特定目录中，例如，用于 GPIO 扩展器的驱动程序存放在“drivers&#x2F;gpio&#x2F;”目录下，用于视频相关芯片的驱动程序存放在“drivers&#x2F;media&#x2F;i2c&#x2F;”目录下。<br>对于上图所示的示例配置，您将需要一个驱动程序来处理该部分。 I2C 控制器以及适用于您 I2C 设备的驱动程序。通常每个设备对应一个驱动程序。</p>
+<p>同义词<br>如上所述，Linux 的 I2C 实现长期以来将控制器称为“适配器”，将目标设备称为“客户端”。许多数据结构在其名称中都使用了这些相同的术语。因此，在讨论实现细节时，您也应该了解这些术语。不过，官方的表述更为推荐。 </p>
+<p>过时的术语 在早期的 I2C 规范中，控制器被称为“主设备”，而目标设备则被称为“从设备”。这些术语在第 7 版规范中已被淘汰，并且 Linux 内核行为准则也不再提倡使用这些术语。您仍可能会在未更新的文档引用中看到它们。然而，总体态度是使用包容性的术语：控制器和目标设备。在 Linux 内核中替换旧术语的工作仍在进行中。</p>
+<h1 id="The-I2C-Protocol"><a href="#The-I2C-Protocol" class="headerlink" title="The I2C Protocol"></a>The I2C Protocol</h1><p>介绍基础的I2C协议，以及内核下的API接口</p>
+<h2 id="关键符号"><a href="#关键符号" class="headerlink" title="关键符号"></a>关键符号</h2><p><img src="/2026/03/04/low-speed/i2c/image1.png" alt="alt text"></p>
+<h2 id="简单的发送事务"><a href="#简单的发送事务" class="headerlink" title="简单的发送事务"></a>简单的发送事务</h2><p>内核实现了i2c_master_send()接口</p>
+<blockquote>
+<p>S Addr Wr [A] Data [A] Data [A] … [A] Data [A] P</p>
+</blockquote>
+<h2 id="简单的接收事务"><a href="#简单的接收事务" class="headerlink" title="简单的接收事务"></a>简单的接收事务</h2><p>内核实现了i2c_master_recv()接口</p>
+<blockquote>
+<p>S Addr Rd [A] [Data] A [Data] A … A [Data] NA P</p>
+</blockquote>
+<h2 id="组合传输"><a href="#组合传输" class="headerlink" title="组合传输"></a>组合传输</h2><p>内核实现了i2c_transfer()用于组合传输<br>它们与上述交易类似，但这里发送的不是停止条件P，而是启动条件S，并且交易会继续进行。一个示例是先读取一个字节，然后写入一个字节：</p>
+<p>一个案例：读一个字节，然后写一个字节</p>
+<blockquote>
+<p>S Addr Rd [A] [Data] NA <strong>S</strong> Addr Wr [A] Data [A] P</p>
+</blockquote>
+<h2 id="修改的事务（特殊事务）"><a href="#修改的事务（特殊事务）" class="headerlink" title="修改的事务（特殊事务）"></a>修改的事务（特殊事务）</h2><p>以下是这些I2C特殊事务的详细介绍和使用场景：</p>
+<ol>
+<li>I2C_M_IGNORE_NAK</li>
+</ol>
+<p>事务类型：忽略无应答事务</p>
+<p>功能说明：<br>• 正常情况下，当从机返回NAK（无应答）时，主机会立即中断当前消息传输</p>
+<p>• 设置此标志后，主机会将所有NAK视为ACK（应答），继续发送完整消息</p>
+<p>使用场景：<br>• 诊断和调试：强制发送完整数据帧，即使从机不响应</p>
+<p>• 广播模式：向多个从机发送相同数据，即使某些从机地址不存在</p>
+<p>• 容错处理：在从机可能暂时不响应的系统中完成传输</p>
+<p>• 时序测试：测试完整消息传输的时序而不受从机响应影响</p>
+<p>代码示例：</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">struct i2c_msg msg = &#123;</span><br><span class="line">    <span class="string">.addr</span> = slave_addr,</span><br><span class="line">    <span class="string">.flags</span> = I2C_M_WR | I2C_M_IGNORE_NAK,</span><br><span class="line">    <span class="string">.len</span> = data_len,</span><br><span class="line">    <span class="string">.buf</span> = data_buffer</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>I2C_M_NO_RD_ACK</li>
+</ol>
+<p>事务类型：读操作无应答事务</p>
+<p>功能说明：<br>• 在读取操作中，跳过主机的应答位（通常是最后一个字节后的ACK&#x2F;NAK）</p>
+<p>• 主机读取数据后不发送应答信号</p>
+<p>使用场景：<br>• SMBus协议兼容：某些SMBus设备需要特殊的应答处理</p>
+<p>• 特殊设备：需要主机读取后立即停止的设备</p>
+<p>• 多字节读取优化：读取最后一个字节时不发送额外应答</p>
+<p>• 旧设备兼容：与不符合标准I2C协议的设备通信</p>
+<ol start="3">
+<li>I2C_M_NOSTART</li>
+</ol>
+<p>事务类型：无起始条件事务</p>
+<p>功能说明：<br>• 在组合事务中，不在某些点生成起始条件（S）和地址字节</p>
+<p>• 允许将多个消息组合成单个连续传输</p>
+<p>典型序列：</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 不使用NOSTART：</span></span><br><span class="line"><span class="selector-tag">S</span> <span class="selector-tag">Addr</span> <span class="selector-tag">Wr</span> <span class="selector-attr">[A]</span> <span class="selector-tag">Data1</span> <span class="selector-attr">[A]</span> <span class="selector-tag">P</span></span><br><span class="line"><span class="selector-tag">S</span> <span class="selector-tag">Addr</span> <span class="selector-tag">Rd</span> <span class="selector-attr">[A]</span> <span class="selector-tag">Data2</span> <span class="selector-attr">[A]</span> <span class="selector-tag">P</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用NOSTART（第二个消息）：</span></span><br><span class="line"><span class="selector-tag">S</span> <span class="selector-tag">Addr</span> <span class="selector-tag">Rd</span> <span class="selector-attr">[A]</span> <span class="selector-tag">Data1</span> <span class="selector-attr">[A]</span> <span class="selector-tag">Data2</span> <span class="selector-attr">[A]</span> <span class="selector-tag">P</span></span><br></pre></td></tr></table></figure>
+
+<p>使用场景：<br>• 数据缓冲合并：将多个内存缓冲区的数据合并为单个I2C传输</p>
+<p>• 复合操作：实现读写组合操作（如先写寄存器地址，再读数据）</p>
+<p>• EEPROM访问：写入地址后立即读取数据</p>
+<p>• 传感器读取：写入命令寄存器后读取测量结果</p>
+<p>• 高效传输：减少重复的起始条件和地址传输开销</p>
+<p>重要警告：<br>• 不要在第一个消息上设置I2C_M_NOSTART，这会产生起始条件但没有地址，会干扰总线上其他设备</p>
+<ol start="4">
+<li>I2C_M_REV_DIR_ADDR</li>
+</ol>
+<p>事务类型：方向标志反转事务</p>
+<p>功能说明：<br>• 切换Rd&#x2F;Wr方向标志位（地址字节的最低有效位）</p>
+<p>• 允许以相反方向执行操作（如想写但发送读标志，或反之）</p>
+<p>使用场景：<br>• 特殊协议设备：如某些I2C设备使用非常规的方向位定义</p>
+<p>• SCCB协议：某些摄像头传感器使用的协议</p>
+<p>• 兼容性适配：与非标准I2C实现通信</p>
+<p>• 测试验证：测试设备对不同方向位的响应</p>
+<p>• 寄存器访问：某些设备用方向位选择寄存器组</p>
+<ol start="5">
+<li>I2C_M_STOP</li>
+</ol>
+<p>事务类型：强制停止条件事务</p>
+<p>功能说明：<br>• 在消息后强制产生停止条件（P）</p>
+<p>• 正常情况下，组合事务的消息之间不会产生停止条件</p>
+<p>使用场景：<br>• SCCB协议：SCCB（串行摄像头控制总线）需要每个操作后有停止条件</p>
+<p>• 设备复位：某些设备需要停止条件来复位内部状态机</p>
+<p>• 总线释放：确保在消息后释放总线控制权</p>
+<p>• 错误恢复：在错误条件后强制总线重置</p>
+<p>• 时序要求：满足特定设备的时序要求</p>
+<p>实际应用示例</p>
+<p>传感器读取操作（常见模式）</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">//</span> 1. 写入寄存器地址（无停止条件）</span><br><span class="line">struct i2c_msg msg1 = &#123;</span><br><span class="line">    <span class="string">.addr</span> = sensor_addr,</span><br><span class="line">    <span class="string">.flags</span> = I2C_M_WR,</span><br><span class="line">    <span class="string">.len</span> = 1,</span><br><span class="line">    <span class="string">.buf</span> = ®_addr</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="string">//</span> 2. 从该地址读取数据（无起始条件）</span><br><span class="line">struct i2c_msg msg2 = &#123;</span><br><span class="line">    <span class="string">.addr</span> = sensor_addr,</span><br><span class="line">    <span class="string">.flags</span> = I2C_M_RD | I2C_M_NOSTART,</span><br><span class="line">    <span class="string">.len</span> = 2,</span><br><span class="line">    <span class="string">.buf</span> = data_buffer</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">SCCB协议实现</span><br><span class="line"></span><br><span class="line"><span class="string">//</span> SCCB需要每个消息后有停止条件</span><br><span class="line">struct i2c_msg msg = &#123;</span><br><span class="line">    <span class="string">.addr</span> = camera_addr,</span><br><span class="line">    <span class="string">.flags</span> = I2C_M_WR | I2C_M_STOP,</span><br><span class="line">    <span class="string">.len</span> = 2,</span><br><span class="line">    <span class="string">.buf</span> = &#123;reg_addr, reg_value&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>注意事项</p>
+<ol>
+<li>设备兼容性：这些特殊标志主要用于解决特定设备问题</li>
+<li>总线干扰：不当使用（如第一个消息用NOSTART）会干扰其他设备</li>
+<li>协议合规：标准I2C设备通常不需要这些标志</li>
+<li>调试工具：使用逻辑分析仪验证特殊事务的波形</li>
+<li>文档参考：仔细阅读设备数据手册，确认是否需要特殊事务</li>
+</ol>
+<p>这些特殊事务为I2C总线提供了更大的灵活性，但应谨慎使用，只在必要时用于解决特定设备或协议的兼容性问题。</p>
 </article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>License</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/03/pcie/pcie_software/">pcie software</a></div></section></div>
+
+
 
 
 
@@ -91,7 +218,12 @@
 <footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
 </div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-</aside><div class='float-panel'>
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-text">参考文档</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8DI2C-%E9%99%84%E5%B8%A6SMBus"><span class="toc-text">介绍I2C(附带SMBus)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%AF%E8%AF%AD"><span class="toc-text">术语</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-I2C-Protocol"><span class="toc-text">The I2C Protocol</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E7%AC%A6%E5%8F%B7"><span class="toc-text">关键符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E5%8F%91%E9%80%81%E4%BA%8B%E5%8A%A1"><span class="toc-text">简单的发送事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E6%8E%A5%E6%94%B6%E4%BA%8B%E5%8A%A1"><span class="toc-text">简单的接收事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E4%BC%A0%E8%BE%93"><span class="toc-text">组合传输</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E7%9A%84%E4%BA%8B%E5%8A%A1%EF%BC%88%E7%89%B9%E6%AE%8A%E4%BA%8B%E5%8A%A1%EF%BC%89"><span class="toc-text">修改的事务（特殊事务）</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
+</div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
