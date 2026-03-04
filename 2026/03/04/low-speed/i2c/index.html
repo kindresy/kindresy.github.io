@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image3.png">
 <meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image2.png">
 <meta property="article:published_time" content="2026-03-03T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-04T07:59:02.904Z">
+<meta property="article:modified_time" content="2026-03-04T08:07:13.863Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
@@ -53,7 +53,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-04T00:00:00+08:00","dateModified":"2026-03-04T15:59:02+08:00","datePublished":"2026-03-04T00:00:00+08:00","description":"","headline":"i2c_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/04/low-speed/i2c/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/04/low-speed/i2c/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-04T00:00:00+08:00","dateModified":"2026-03-04T16:07:13+08:00","datePublished":"2026-03-04T00:00:00+08:00","description":"","headline":"i2c_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/04/low-speed/i2c/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/04/low-speed/i2c/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -85,7 +85,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-03T16:00:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-04T07:59:02.904Z">2026-03-04</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-03T16:00:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-04T08:07:13.863Z">2026-03-04</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -214,11 +214,15 @@
 <ul>
 <li>信号不是瞬间变稳</li>
 <li>接收器不是瞬间就能采样</li>
-<li>总线有多个设备，电平变化需要时间<br>如果没有这两段 “保护时间”：</li>
+<li>总线有多个设备，电平变化需要时间</li>
+</ul>
+<p>如果没有这两段 “保护时间”：</p>
+<ul>
 <li>数据还在晃，时钟就采样 → 采样错误</li>
 <li>时钟刚采完，数据立刻变 → 被误读成新数据<br>100K和400Khz下的参数，关注下SDA建立时间和SDA保持时间</li>
 </ul>
-<p>I2C 是同步串行通信，靠 SCL（时钟） 和 SDA（数据） 配合采样。<br>① 建立时间<br>tSU—Setup Time<br>定义：<br>数据 SDA 必须在时钟 SCL 有效边沿到来之前，提前稳定好的时间。<br>通俗说：<br>    时钟跳变前，数据先站稳。<br>② 保持时间<br>tHD—Hold Time<br>定义：<br>时钟有效边沿过后，数据 SDA 必须继续保持稳定不变的时间。<br>通俗说：<br>    时钟跳变后，数据再多稳一会儿。</p>
+<p>I2C 是同步串行通信，靠 SCL（时钟） 和 SDA（数据） 配合采样。<br>① 建立时间  tSU—Setup Time<br>定义：<br>数据 SDA 必须在时钟 SCL 有效边沿到来之前，提前稳定好的时间。<br>通俗说：<br>    时钟跳变前，数据先站稳。<br>② 保持时间  tHD—Hold Time<br>定义：<br>时钟有效边沿过后，数据 SDA 必须继续保持稳定不变的时间。<br>通俗说：<br>    时钟跳变后，数据再多稳一会儿。</p>
+<p>Hold Time可以是0，因为SCL下降沿之后，SDA就不需要稳定了(I2C协议是边沿触发采样，电平保持无关的)。<br>发送方：在 SCL 高电平期间保持 SDA 稳定（满足 t_SU:DAT和 t_HD:DAT的最大值约束）<br>接收方：在 SCL 高电平中间采样 SDA<br>SCL 下降沿后：发送方可立即改变 SDA，准备下一个比特或停止条件<br>注意：<br>t_HD:DAT的最大值（3.45μs）更重要 —— 它表示 SDA 不能太晚改变，否则可能影响下一个设备的采样（尤其在高速或长距离总线中）。最小值为 0 是为了兼容低速、简单设备，不代表推荐值为 0。</p>
 <p><img src="/2026/03/04/low-speed/i2c/image3.png" alt="alt text"></p>
 <p><img src="/2026/03/04/low-speed/i2c/image2.png" alt="alt text"></p>
 </article>
@@ -232,7 +236,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/03/pcie/pcie_introduction/">pcie_introduction</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/03/pcie/pcie_software/">pcie software</a></div></section></div>
 
 
 
