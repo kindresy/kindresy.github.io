@@ -285,44 +285,9 @@
 <li>RD_REQ</li>
 <li>TX_ABRT</li>
 </ol>
-<pre class="mermaid">flowchart TD
-    A[主机发起I2C传输，地址匹配从机IC_SAR] --> B[传输方向是否为读R?]
-    B -- 是 --> C[从机ACK地址，识别为Slave-Transmitter]
-    C --> D[产生RD_REQ中断，拉低SCL线等待软件响应]
-    D --> E[RD_REQ中断是否被屏蔽?]
-    E -- 否 --> F[软件响应RD_REQ中断]
-    E -- 是 --> G[软件定期轮询IC_RAW_INTR_STAT.5]
-    G --> H[检测到R_RD_REQ位为1]
-    H -- 是 --> F
-    F --> I[Tx FIFO中是否有旧数据?]
-    I -- 是 --> J[产生TX_ABRT中断，清空Tx FIFO]
-    J --> K[软件读取IC_CLR_TX_ABRT寄存器释放状态]
-    I -- 否 --> L[软件向IC_DATA_CMD写入待发送数据]
-    K --> L
-    L --> M[软件清除RD_REQ和TX_ABRT中断标志]
-    M --> N[从机释放SCL，发送数据字节到总线]
-    N --> O[主机操作]
-    O -- RESTART --> A
-    O -- STOP --> P[传输结束，释放总线]
-    B -- 否 --> Q[从机识别为Slave-Receiver，执行其他流程]</pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[主机发起I2C传输，地址匹配从机IC_SAR] --&gt; B[传输方向是否为读R?]</span><br><span class="line">    B -- 是 --&gt; C[从机ACK地址，识别为Slave-Transmitter]</span><br><span class="line">    C --&gt; D[产生RD_REQ中断，拉低SCL线等待软件响应]</span><br><span class="line">    D --&gt; E[RD_REQ中断是否被屏蔽?]</span><br><span class="line">    E -- 否 --&gt; F[软件响应RD_REQ中断]</span><br><span class="line">    E -- 是 --&gt; G[软件定期轮询IC_RAW_INTR_STAT.5]</span><br><span class="line">    G --&gt; H[检测到R_RD_REQ位为1]</span><br><span class="line">    H -- 是 --&gt; F</span><br><span class="line">    F --&gt; I[Tx FIFO中是否有旧数据?]</span><br><span class="line">    I -- 是 --&gt; J[产生TX_ABRT中断，清空Tx FIFO]</span><br><span class="line">    J --&gt; K[软件读取IC_CLR_TX_ABRT寄存器释放状态]</span><br><span class="line">    I -- 否 --&gt; L[软件向IC_DATA_CMD写入待发送数据]</span><br><span class="line">    K --&gt; L</span><br><span class="line">    L --&gt; M[软件清除RD_REQ和TX_ABRT中断标志]</span><br><span class="line">    M --&gt; N[从机释放SCL，发送数据字节到总线]</span><br><span class="line">    N --&gt; O[主机操作]</span><br><span class="line">    O -- RESTART --&gt; A</span><br><span class="line">    O -- STOP --&gt; P[传输结束，释放总线]</span><br><span class="line">    B -- 否 --&gt; Q[从机识别为Slave-Receiver，执行其他流程]</span><br></pre></td></tr></table></figure>
 <p>从机可以主动拉低SCL，发送完数据后release总线。</p>
-<h6 id="Slave-Receiver-Operation-for-Single-Byte"><a href="#Slave-Receiver-Operation-for-Single-Byte" class="headerlink" title="Slave-Receiver Operation for Single Byte"></a>Slave-Receiver Operation for Single Byte</h6><pre class="mermaid">flowchart TD
-    A[I²C 主机发起传输，地址匹配 IC_SAR] --> B[DW_apb_i2c 应答地址，识别为写操作 Slave-Receiver]
-    B --> C[Rx FIFO 是否已满?]
-    C -->|否| D[接收字节并存入 Rx FIFO]
-    C -->|是| E[IC_RX_FULL_HLD_BUS_EN = 1?]
-    E -->|是| F[拉低 SCL，暂停总线，等待软件读取数据]
-    F --> G[软件读取 IC_DATA_CMD，释放空间]
-    G --> D
-    E -->|否| H[发生溢出，置位 R_RX_OVER，继续接收]
-    D --> I[RX_FULL 中断是否被屏蔽?]
-    I -->|否| J[触发 RX_FULL 中断 IC_RAW_INTR_STAT.2]
-    I -->|是| K[软件定时轮询 IC_STATUS 寄存器，检查 RFNE 位]
-    J --> L[软件读取 IC_DATA_CMD bits 7:0 取出数据]
-    K --> L
-    L --> M[主机操作?]
-    M -->|发送 STOP| N[传输结束，释放总线]
-    M -->|发送 RESTART| A[新的传输周期]</pre>
+<h6 id="Slave-Receiver-Operation-for-Single-Byte"><a href="#Slave-Receiver-Operation-for-Single-Byte" class="headerlink" title="Slave-Receiver Operation for Single Byte"></a>Slave-Receiver Operation for Single Byte</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[I²C 主机发起传输，地址匹配 IC_SAR] --&gt; B[DW_apb_i2c 应答地址，识别为写操作 Slave-Receiver]</span><br><span class="line">    B --&gt; C[Rx FIFO 是否已满?]</span><br><span class="line">    C --&gt;|否| D[接收字节并存入 Rx FIFO]</span><br><span class="line">    C --&gt;|是| E[IC_RX_FULL_HLD_BUS_EN = 1?]</span><br><span class="line">    E --&gt;|是| F[拉低 SCL，暂停总线，等待软件读取数据]</span><br><span class="line">    F --&gt; G[软件读取 IC_DATA_CMD，释放空间]</span><br><span class="line">    G --&gt; D</span><br><span class="line">    E --&gt;|否| H[发生溢出，置位 R_RX_OVER，继续接收]</span><br><span class="line">    D --&gt; I[RX_FULL 中断是否被屏蔽?]</span><br><span class="line">    I --&gt;|否| J[触发 RX_FULL 中断 IC_RAW_INTR_STAT.2]</span><br><span class="line">    I --&gt;|是| K[软件定时轮询 IC_STATUS 寄存器，检查 RFNE 位]</span><br><span class="line">    J --&gt; L[软件读取 IC_DATA_CMD bits 7:0 取出数据]</span><br><span class="line">    K --&gt; L</span><br><span class="line">    L --&gt; M[主机操作?]</span><br><span class="line">    M --&gt;|发送 STOP| N[传输结束，释放总线]</span><br><span class="line">    M --&gt;|发送 RESTART| A[新的传输周期]</span><br></pre></td></tr></table></figure>
 
 <h6 id="Slave-Transfer-Operation-for-Bulk-Transfers"><a href="#Slave-Transfer-Operation-for-Bulk-Transfers" class="headerlink" title="Slave Transfer Operation for Bulk Transfers"></a>Slave Transfer Operation for Bulk Transfers</h6><ol>
 <li>批量传输的核心设计思想<br>在标准 I²C 协议中，单次读请求通常只传输一个字节，这会<strong>导致频繁的中断开销</strong>。DW_apb_i2c 支持批量传输模式，允许软件预先将多个字节写入 TX FIFO，然后在一次传输中连续发送，从而消除了每次数据传输都触发中断的延迟。</li>
@@ -330,23 +295,7 @@
 </ol>
 <p><img src="/2026/03/06/low-speed/i2c_controller/2026-03-09-15-22-15.png"></p>
 <p>总结流程图：</p>
-<pre class="mermaid">flowchart TD
-    A[远程主机发起读请求，DW_apb_i2c 作为 Slave-Transmitter] --> B[TX FIFO 是否为空?]
-    B -->|否| C[从 TX FIFO 中取出字节发送给主机]
-    B -->|是| D[RD_REQ 中断是否被屏蔽?]
-    D -->|否| E[触发 RD_REQ 中断 M_RD_REQ 位]
-    D -->|是| F[软件定时轮询 IC_RAW_INTR_STAT，检查 R_RD_REQ 位]
-    E --> G[ISR 中向 TX FIFO 写入一个或多个字节]
-    F --> G
-    G --> C
-    C --> H[主机是否应答 ACK?]
-    H -->|是| I[TX FIFO 是否还有数据?]
-    I -->|是| C
-    I -->|否| J[主机是否还需要更多数据?]
-    J -->|是| A
-    J -->|否| K[主机发送 NACK，传输结束]
-    H -->|否| K
-    K --> L[清空 TX FIFO，清除残留数据]</pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[远程主机发起读请求，DW_apb_i2c 作为 Slave-Transmitter] --&gt; B[TX FIFO 是否为空?]</span><br><span class="line">    B --&gt;|否| C[从 TX FIFO 中取出字节发送给主机]</span><br><span class="line">    B --&gt;|是| D[RD_REQ 中断是否被屏蔽?]</span><br><span class="line">    D --&gt;|否| E[触发 RD_REQ 中断 M_RD_REQ 位]</span><br><span class="line">    D --&gt;|是| F[软件定时轮询 IC_RAW_INTR_STAT，检查 R_RD_REQ 位]</span><br><span class="line">    E --&gt; G[ISR 中向 TX FIFO 写入一个或多个字节]</span><br><span class="line">    F --&gt; G</span><br><span class="line">    G --&gt; C</span><br><span class="line">    C --&gt; H[主机是否应答 ACK?]</span><br><span class="line">    H --&gt;|是| I[TX FIFO 是否还有数据?]</span><br><span class="line">    I --&gt;|是| C</span><br><span class="line">    I --&gt;|否| J[主机是否还需要更多数据?]</span><br><span class="line">    J --&gt;|是| A</span><br><span class="line">    J --&gt;|否| K[主机发送 NACK，传输结束]</span><br><span class="line">    H --&gt;|否| K</span><br><span class="line">    K --&gt; L[清空 TX FIFO，清除残留数据]</span><br></pre></td></tr></table></figure>
 
 <h4 id="Master-Mode"><a href="#Master-Mode" class="headerlink" title="Master Mode"></a>Master Mode</h4><p>主机模式下有个很重要的配置参数： I2C_DYNAMIC_TAR_UPDATE<br>决定了主机模式下目标地址（TAR）和传输参数的更新时机</p>
 <p><img src="/2026/03/06/low-speed/i2c_controller/2026-03-09-16-18-45.png"></p>
