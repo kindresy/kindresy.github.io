@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image3.png">
 <meta property="og:image" content="https://kindresy.github.io/2026/03/04/low-speed/i2c/image2.png">
 <meta property="article:published_time" content="2026-03-03T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-04T08:11:23.327Z">
+<meta property="article:modified_time" content="2026-03-06T02:29:31.701Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
@@ -53,7 +53,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-04T00:00:00+08:00","dateModified":"2026-03-04T16:11:23+08:00","datePublished":"2026-03-04T00:00:00+08:00","description":"","headline":"i2c_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/04/low-speed/i2c/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/04/low-speed/i2c/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-04T00:00:00+08:00","dateModified":"2026-03-06T10:29:31+08:00","datePublished":"2026-03-04T00:00:00+08:00","description":"","headline":"i2c_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/04/low-speed/i2c/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/04/low-speed/i2c/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -72,7 +72,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/04/low-speed/i2c/"><span class="title">i2c_introduction</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/03/pcie/pcie_introduction/"><span class="title">pcie_introduction</span></a><a class="item title" href="/2026/03/02/mmc/sd_introduction/"><span class="title">sd_introduction</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">i2c_introduction</span></a><a class="item title" href="/2026/03/04/low-speed/i2c/"><span class="title">i2c_introduction</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/03/pcie/pcie_introduction/"><span class="title">pcie_introduction</span></a><a class="item title" href="/2026/03/02/mmc/sd_introduction/"><span class="title">sd_introduction</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -85,7 +85,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-03T16:00:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-04T08:11:23.327Z">2026-03-04</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-03T16:00:00.000Z">2026-03-04</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-06T02:29:31.701Z">2026-03-06</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -219,12 +219,181 @@
 <p>如果没有这两段 “保护时间”：</p>
 <ul>
 <li>数据还在晃，时钟就采样 → 采样错误</li>
-<li>时钟刚采完，数据立刻变 → 被误读成新数据<br>100K和400Khz下的参数，关注下SDA建立时间和SDA保持时间</li>
+<li>时钟刚采完，数据立刻变 → 被误读成新数据</li>
 </ul>
-<p>I2C 是同步串行通信，靠 SCL（时钟） 和 SDA（数据） 配合采样。<br>① 建立时间  tSU—Setup Time<br>定义：<br>数据 SDA 必须在时钟 SCL 有效边沿到来之前，提前稳定好的时间。<br>通俗说：<br>    时钟跳变前，数据先站稳。<br>② 保持时间  tHD—Hold Time<br>定义：<br>时钟有效边沿过后，数据 SDA 必须继续保持稳定不变的时间。<br>通俗说：<br>    时钟跳变后，数据再多稳一会儿。</p>
+<p>下面分析100K和400Khz下的参数的SDA建立时间和SDA保持时间<br>首先讲解建立时间和保持时间<br>I2C 是同步串行通信，靠 SCL（时钟） 和 SDA（数据） 配合采样。<br>① 建立时间  tSU—Setup Time<br>定义：<br>数据 SDA 必须在时钟 SCL 有效边沿到来之前，提前稳定好的时间。<br>通俗说：<br>    时钟跳变前，数据先站稳。<br>② 保持时间  tHD—Hold Time<br>定义：<br>时钟有效边沿过后，数据 SDA 必须继续保持稳定不变的时间。<br>通俗说：<br>    时钟跳变后，数据再多稳一会儿。</p>
 <p>Hold Time可以是0，因为SCL下降沿之后，SDA就不需要稳定了(I2C协议是边沿触发采样，电平保持无关的)。<br>发送方：在 SCL 高电平期间保持 SDA 稳定（满足 t_SU:DAT和 t_HD:DAT的最大值约束）<br>接收方：在 SCL 高电平中间采样 SDA<br>SCL下降沿后：发送方可立即改变SDA，准备下一个比特或停止条件<br>注意：<br>t_HD:DAT的最大值（3.45μs）更重要 —— 它表示 SDA 不能太晚改变，否则可能影响下一个设备的采样（尤其在高速或长距离总线中）。最小值为 0 是为了兼容低速、简单设备，不代表推荐值为 0。</p>
 <p><img src="/2026/03/04/low-speed/i2c/image3.png" alt="alt text"></p>
 <p><img src="/2026/03/04/low-speed/i2c/image2.png" alt="alt text"></p>
+<h2 id="Bus-Clear"><a href="#Bus-Clear" class="headerlink" title="Bus Clear"></a>Bus Clear</h2><p>结合您表格中已有的SMBus Slave Case（Device ID、ARP、中断、读写），以及SMBus协议特有的规范（如超时机制、PEC校验、主机通知协议等），以下是针对SMBus测试的补充Case建议。这些Case旨在覆盖协议细节和边缘场景，提升测试覆盖率：</p>
+<p>一、SMBus 协议特性专项Case</p>
+<ol>
+<li>SMBus 超时（Timeout）机制验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0006</p>
+<p>• Test Objective：验证SMBus设备在总线空闲超时（T_TIMEOUT）后是否自动复位状态机，避免总线死锁。</p>
+<p>• Test Method：</p>
+<p>  • 配置SMBus Slave为支持超时（通常SMBus要求时钟低电平最短10kHz，超时通常在25ms~35ms左右，需参考具体Slave规格）。</p>
+<p>  • 主机发起一次事务后，故意不发送P信号（让总线进入空闲但未结束的状态），等待超时时间后，检查Slave是否回到初始状态（如地址可响应、状态寄存器清零）。</p>
+<p>  • 再次发起事务，验证Slave能正常响应。</p>
+<p>• Expected Result：超时后Slave状态机复位，可正常参与下一次事务。</p>
+<ol start="2">
+<li>PEC（Packet Error Checking）校验验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0007</p>
+<p>• Test Objective：验证SMBus传输中PEC校验位的生成、传输和验证功能（SMBus可选但常见的特性，用于数据完整性检查）。</p>
+<p>• Test Method：</p>
+<p>  • 配置Slave支持PEC（需Slave硬件支持）。</p>
+<p>  • 主机发起带PEC的SMBus事务（如Read Byte + PEC、Write Word + PEC）。</p>
+<p>  • 主机端计算PEC并比较，或模拟PEC错误（如手动修改数据），检查Slave是否置位PEC错误状态位。</p>
+<p>• Expected Result：PEC正确时事务成功；PEC错误时，Slave或主机检测到错误并置位相应标志。</p>
+<ol start="3">
+<li>SMBus 主机通知协议（Host Notify Protocol）验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0008</p>
+<p>• Test Objective：验证SMBus Slave通过“主机通知”主动向主机发送事件通知（如电池电量低、温度异常）。</p>
+<p>• Test Method：</p>
+<p>  • 配置Slave支持主机通知（通常Slave会主动发起一个特殊的事务，格式为：S Addr(W) A Data A P，其中Data为通知的从机地址和数据）。</p>
+<p>  • 主机监听总线，捕获Slave的通知事务，解析数据并验证是否符合预期。</p>
+<p>• Expected Result：Slave成功发起主机通知事务，主机能正确接收并解析通知内容。</p>
+<p>二、SMBus 读写场景扩展Case</p>
+<ol start="4">
+<li>SMBus Block Read&#x2F;Write 验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0009（Block Read）、I2C_SMBUS_F0010（Block Write）</p>
+<p>• Test Objective：验证SMBus的块传输（支持可变长度数据，需遵循SMBus块协议格式：首字节为数据长度，后续为数据）。</p>
+<p>• Test Method：</p>
+<p>  • 主机发起Block Write：发送数据长度 + 数据内容（如长度&#x3D;3，数据为0x11,0x22,0x33）。</p>
+<p>  • 主机发起Block Read：读取从机的块数据，验证长度和数据是否匹配。</p>
+<p>• Expected Result：块传输的长度和数据一致，无截断或溢出。</p>
+<ol start="5">
+<li>SMBus 组合事务（Combined Transaction）验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0011</p>
+<p>• Test Objective：验证SMBus的“组合事务”（如Send Byte + Read Byte，格式为 S Addr(W) A Command A Sr Addr(R) A Data P），用于快速读写同一设备的不同寄存器。</p>
+<p>• Test Method：</p>
+<p>  • 主机配置Slave为一个组合事务（如先写命令寄存器，再读状态寄存器）。</p>
+<p>  • 发起组合事务，检查数据传输的连续性和正确性。</p>
+<p>• Expected Result：组合事务的两次操作（写+读）原子性完成，数据正确。</p>
+<p>三、SMBus 边缘场景与错误处理Case</p>
+<ol start="6">
+<li>SMBus 地址冲突与ARP重试验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0012</p>
+<p>• Test Objective：验证SMBus ARP在地址冲突时的重试机制（参考SMBus ARP协议：主机会发送ARP请求，从机响应自己的地址；若冲突，主机会分配新地址）。</p>
+<p>• Test Method：</p>
+<p>  • 配置两个SMBus Slave（或模拟两个设备）在同一时刻响应ARP请求（地址冲突）。</p>
+<p>  • 观察主机ARP流程：是否重新分配地址、Slave是否正确更新地址。</p>
+<p>• Expected Result：ARP流程正确处理冲突，最终从机获得唯一地址。</p>
+<ol start="7">
+<li>SMBus 非法命令&#x2F;数据长度验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0013</p>
+<p>• Test Objective：验证Slave对非法命令（如不支持的SMBus命令码）或非法数据长度（如Block Read长度超过Slave最大支持长度）的响应。</p>
+<p>• Test Method：</p>
+<p>  • 主机发送不支持的SMBus命令（如SMBus命令码0x00，但Slave未实现）。</p>
+<p>  • 主机发起Block Read，长度设为Slave最大支持长度+1。</p>
+<p>  • 检查Slave是否置位错误标志（如命令错误、数据长度错误）。</p>
+<p>• Expected Result：Slave检测到非法操作，置位相应错误状态，事务失败。</p>
+<ol start="8">
+<li>SMBus 时钟拉伸（Clock Stretching）验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0014</p>
+<p>• Test Objective：验证SMBus Slave在忙时（如内部处理数据）通过时钟拉伸（拉低SCL）暂停主机传输的能力（SMBus允许时钟拉伸，但需注意超时机制）。</p>
+<p>• Test Method：</p>
+<p>  • 配置Slave在数据准备阶段拉伸SCL（如拉低SCL 10ms）。</p>
+<p>  • 主机发起SMBus事务，检查是否能正确等待Slave释放SCL，并完成传输。</p>
+<p>• Expected Result：主机检测到时钟拉伸，等待后继续传输，事务成功。</p>
+<p>四、SMBus 与I2C兼容性验证Case</p>
+<ol start="9">
+<li>SMBus 设备与I2C主机的兼容性验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0015</p>
+<p>• Test Objective：验证SMBus Slave能被标准I2C主机（非SMBus主机）正确访问，以及I2C设备能被SMBus主机访问（验证协议的互操作性）。</p>
+<p>• Test Method：</p>
+<p>  • 用SMBus主机访问I2C设备（如EEPROM），检查是否能正常读写。</p>
+<p>  • 用I2C主机访问SMBus Slave（如PMU），检查是否能正常响应（需Slave兼容I2C协议）。</p>
+<p>• Expected Result：跨协议访问时，事务基本成功（注意SMBus特有特性如PEC、超时可能不生效，但基础读写正常）。</p>
+<p>五、SMBus 寄存器与中断增强Case</p>
+<ol start="10">
+<li>SMBus 状态寄存器全位验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0016</p>
+<p>• Test Objective：验证SMBus Slave所有状态寄存器位（如错误标志、事务状态、PEC错误、超时标志等）的正确置位和清除。</p>
+<p>• Test Method：</p>
+<p>  • 通过寄存器遍历Case，逐个测试每个状态位的触发条件（如发送NACK、PEC错误、超时、Block传输完成等）。</p>
+<p>  • 检查状态位是否按协议要求置位，清除操作是否有效。</p>
+<p>• Expected Result：所有状态位在对应条件下正确置位&#x2F;清除，无错漏。</p>
+<ol start="11">
+<li>SMBus 中断优先级与嵌套验证</li>
+</ol>
+<p>• Test Case ID：I2C_SMBUS_F0017</p>
+<p>• Test Objective：验证SMBus Slave的中断优先级和嵌套机制（若有多个中断源同时触发时，是否正确响应高优先级中断）。</p>
+<p>• Test Method：</p>
+<p>  • 配置Slave同时触发多个中断（如PEC错误 + 超时 + 事务完成）。</p>
+<p>  • 检查中断服务程序是否按优先级处理，状态寄存器是否记录正确中断源。</p>
+<p>• Expected Result：高优先级中断先被响应，状态寄存器正确记录所有中断源。</p>
+<p>总结：新增Case的价值</p>
+<p>• 协议覆盖更全面：覆盖了SMBus特有的超时、PEC、主机通知、块传输、组合事务等，确保Slave严格遵循SMBus规范。</p>
+<p>• 边缘场景与错误处理：验证了地址冲突、非法命令、时钟拉伸、跨协议兼容性等，提升IP的鲁棒性。</p>
+<p>• 状态与中断增强：细化了状态寄存器和中断的测试，确保驱动能正确识别和处理所有事件。</p>
+<p>这些Case可作为您现有SMBus Case的补充，进一步提升FPGA原型验证的覆盖率和可靠性。<br>根据您提供的【链接内容】（即Linux内核官方文档关于I2C设备实例化的部分）以及您对Bus Clear功能的了解，并结合I2C控制器的通用硬件实现知识，以下是针对您问题的分析。</p>
+<p>首先，需要明确的是，您提供的【链接内容】主要介绍了I2C设备在内核中的软件实例化方法，并未涉及Bus Clear功能的硬件实现细节、中断机制或软件交互流程。因此，以下回答将主要基于I2C&#x2F;SMBus总线控制器硬件的通用设计原理。</p>
+<ol>
+<li>硬件如何检测总线挂死？</li>
+</ol>
+<p>I2C控制器硬件实现Bus Clear功能，其检测机制通常依赖于超时计时器。具体实现逻辑如下：</p>
+<p>•   检测对象：硬件会持续监控SCL和SDA两条信号线的电平状态。</p>
+<p>•   检测条件：核心是检测总线是否长时间处于“忙”或“被拉低”的状态，且这个时间超出了协议或配置允许的正常范围。</p>
+<p>•   常见检测场景：</p>
+<pre><code>1.  时钟线（SCL）被拉低超时：某个Slave设备（或主机自身）因故障长时间将SCL线拉低（时钟拉伸过长），导致主机无法产生时钟进行后续通信。
+2.  数据线（SDA）被拉低超时：在非数据传输阶段，SDA线被意外拉低，使得总线无法进入空闲状态（SCL为高时，SDA也应为高）。
+3.  START与STOP之间超时：一次I2C事务（从START信号开始到STOP信号结束）的持续时间超过了预设的最大值。
+</code></pre>
+<p>•   硬件实现：控制器内部会集成一个或多个可编程的超时计数器。例如，SMBus协议明确规定了总线时钟低电平超时（T_LOW:SEXT）和总线空闲超时（T_TIMEOUT）。当硬件检测到上述异常状态持续时间超过配置的阈值时，就会触发一个内部标志，标志着“总线可能已挂死”，可以启动恢复流程。</p>
+<ol start="2">
+<li>硬件实现了，软件就无需管理吗？</li>
+</ol>
+<p>不完全正确。硬件实现了检测和恢复的“能力”，但软件的“管理”和“配置”至关重要。</p>
+<p>•   硬件负责：实时监控信号线、计时、在超时发生时自动执行Bus Clear的物理操作（发送9个时钟脉冲、尝试产生STOP）。</p>
+<p>•   软件（驱动）负责：</p>
+<pre><code>1.  初始配置：软件需要在上电初始化时，配置Bus Clear功能的使能位、设置超时阈值等寄存器。
+2.  策略选择：软件可以决定是让硬件自动触发Bus Clear，还是仅在软件干预下手动触发。这通常由配置寄存器控制。
+3.  事后处理：Bus Clear执行后，无论成功与否，软件都需要被通知，并执行相应的错误处理、状态清理和可能的重试逻辑。软件不能完全“置身事外”。
+</code></pre>
+<ol start="3">
+<li>软件如何被通知锁死状态到来了？</li>
+</ol>
+<p>软件主要通过两种机制感知总线异常和Bus Clear事件：中断 和 状态寄存器轮询。其中，中断是更高效、更常见的方式。</p>
+<ol>
+<li><p>中断通知（主流方式）：<br>◦   当硬件检测到总线超时并触发Bus Clear流程时，或当Bus Clear流程执行完毕后，I2C控制器通常会生成一个中断信号给CPU。</p>
+<p>◦   该中断可能对应一个特定的“总线错误中断”或“仲裁丢失&#x2F;超时中断”。驱动的中断服务程序（ISR）被调用后，会去读取控制器的状态寄存器以确认具体原因。</p>
+</li>
+<li><p>状态寄存器轮询：<br>◦   软件也可以定期（或在每次传输前）主动读取控制器的状态寄存器，检查“总线忙超时”、“仲裁丢失”、“总线错误”等标志位是否被置位。这种方式效率较低，通常用于简单的系统或调试。</p>
+</li>
+<li><p>软件交互流程：配置、执行与感知</p>
+</li>
+</ol>
+<p>您描述的流程基本正确，但更完整和典型的工作流程如下：</p>
+<p>软件配置 -&gt; 硬件监控 -&gt; 事件发生 -&gt; 硬件响应 -&gt; 通知软件 -&gt; 软件处理</p>
+<ol>
+<li><p>初始化与配置：软件在驱动初始化阶段，配置I2C控制器：<br>◦   使能Bus Clear功能（例如，设置 BCEN 位）。</p>
+<p>◦   配置总线超时时间（例如，写入 TIMEOUT 寄存器）。</p>
+<p>◦   使能相应的中断（例如，使能“总线错误中断”）。</p>
+<p>◦   将中断服务程序（ISR）注册到系统。</p>
+</li>
+<li><p>死锁发生与硬件自动处理：<br>◦   当总线因故挂死，且持续时间超过配置的阈值时，硬件自动检测到超时事件。</p>
+<p>◦   硬件自动启动内置的Bus Clear恢复序列：接管SCL为输出，发送9个时钟脉冲，尝试产生STOP。</p>
+<p>◦   硬件自动将状态寄存器中的“总线超时”或“Bus Clear完成”标志位置1。</p>
+<p>◦   硬件自动断言中断信号线（如果已使能），通知CPU。</p>
+</li>
+<li><p>软件感知与处理：<br>◦   CPU跳转到预先注册的I2C中断服务程序（ISR）。</p>
+<p>◦   ISR读取状态寄存器，确认是“总线超时”或“Bus Clear”事件。</p>
+<p>◦   ISR进行必要的清理工作：清除中断标志，可能还会重置控制器的内部状态机，或尝试重新初始化通信。</p>
+<p>◦   ISR可能会通知上层的驱动逻辑或应用层：上一次传输因总线错误失败，需要决定是重试、记录日志还是上报错误。</p>
+</li>
+</ol>
+<p>总结：<br>一个集成了Bus Clear功能的现代I2C控制器，其理想协作模式是：软件负责“使能”和“配置”，硬件负责“实时检测”和“自动执行”恢复动作，最后通过“中断”高效地“通知”软件进行后续处理。 软件并非无需管理，而是从繁重的实时监控和位操作中解放出来，专注于配置和策略性的错误恢复。</p>
 </article>
 <div class="article-footer">
     <section id="license">
@@ -236,7 +405,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/03/pcie/pcie_introduction/">pcie_introduction</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">Newer</div><a href="/2026/03/06/low-speed/i2c_controller/">i2c_introduction</a></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/03/pcie/pcie_introduction/">pcie_introduction</a></div></section></div>
 
 
 
@@ -250,7 +419,7 @@
 
 
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-text">参考文档</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8DI2C-%E9%99%84%E5%B8%A6SMBus"><span class="toc-text">介绍I2C(附带SMBus)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-text">工作原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%AF%E8%AF%AD"><span class="toc-text">术语</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-I2C-Protocol"><span class="toc-text">The I2C Protocol</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%97%B6%E9%97%B4-%E6%97%B6%E5%BA%8F"><span class="toc-text">关键时间&#x2F;时序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E7%AC%A6%E5%8F%B7"><span class="toc-text">关键符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E5%8F%91%E9%80%81%E4%BA%8B%E5%8A%A1"><span class="toc-text">简单的发送事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E6%8E%A5%E6%94%B6%E4%BA%8B%E5%8A%A1"><span class="toc-text">简单的接收事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E4%BC%A0%E8%BE%93"><span class="toc-text">组合传输</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E7%9A%84%E4%BA%8B%E5%8A%A1%EF%BC%88%E7%89%B9%E6%AE%8A%E4%BA%8B%E5%8A%A1%EF%BC%89"><span class="toc-text">修改的事务（特殊事务）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E5%BA%8F%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90"><span class="toc-text">时序参数分析</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-text">参考文档</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8DI2C-%E9%99%84%E5%B8%A6SMBus"><span class="toc-text">介绍I2C(附带SMBus)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-text">工作原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%AF%E8%AF%AD"><span class="toc-text">术语</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#The-I2C-Protocol"><span class="toc-text">The I2C Protocol</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%97%B6%E9%97%B4-%E6%97%B6%E5%BA%8F"><span class="toc-text">关键时间&#x2F;时序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E7%AC%A6%E5%8F%B7"><span class="toc-text">关键符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E5%8F%91%E9%80%81%E4%BA%8B%E5%8A%A1"><span class="toc-text">简单的发送事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E6%8E%A5%E6%94%B6%E4%BA%8B%E5%8A%A1"><span class="toc-text">简单的接收事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E4%BC%A0%E8%BE%93"><span class="toc-text">组合传输</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E7%9A%84%E4%BA%8B%E5%8A%A1%EF%BC%88%E7%89%B9%E6%AE%8A%E4%BA%8B%E5%8A%A1%EF%BC%89"><span class="toc-text">修改的事务（特殊事务）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E5%BA%8F%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90"><span class="toc-text">时序参数分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bus-Clear"><span class="toc-text">Bus Clear</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>

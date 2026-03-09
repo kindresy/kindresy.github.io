@@ -17,28 +17,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>pcie software - 庐山东林</title>
+  <title>庐山东林</title>
 
   
-    <meta name="description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
+    <meta name="description" content="现在我对这个项目有了较好的理解。让我整理一下并给用户一个全面的介绍。 这是一个Linux内核PCIe设备驱动程序，用于与Edge SoC（可能是某种AI加速卡或边缘计算设备）通信。主要功能包括： PCIe驱动 - 支持多种Edge设备DMA引擎 - uDMA（微DMA）传输引擎，支持4个通道中断管理 - 支持MSI&#x2F;MSI-X中断通知IRQ - 实现设备间消息传递SMBus支持 - 系统">
 <meta property="og:type" content="article">
-<meta property="og:title" content="pcie software">
-<meta property="og:url" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/">
+<meta property="og:title" content="庐山东林">
+<meta property="og:url" content="https://kindresy.github.io/2026/03/06/pcie/pcie_ep_demo/">
 <meta property="og:site_name" content="庐山东林">
-<meta property="og:description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
+<meta property="og:description" content="现在我对这个项目有了较好的理解。让我整理一下并给用户一个全面的介绍。 这是一个Linux内核PCIe设备驱动程序，用于与Edge SoC（可能是某种AI加速卡或边缘计算设备）通信。主要功能包括： PCIe驱动 - 支持多种Edge设备DMA引擎 - uDMA（微DMA）传输引擎，支持4个通道中断管理 - 支持MSI&#x2F;MSI-X中断通知IRQ - 实现设备间消息传递SMBus支持 - 系统">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/image.png">
-<meta property="article:published_time" content="2026-03-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-03T09:52:37.970Z">
+<meta property="article:published_time" content="2026-03-06T06:06:30.671Z">
+<meta property="article:modified_time" content="2026-03-06T06:06:32.109Z">
 <meta property="article:author" content="Luyuan">
-<meta property="article:tag" content="Linux">
-<meta property="article:tag" content="embedded">
+<meta property="article:tag" content="Linux PCIe eMMc ARM RTOS Firmware">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/image.png">
   
   
   
-  <meta name="keywords" content="embedded,Linux">
+  <meta name="keywords" content="Linux PCIe eMMc ARM RTOS Firmware">
 
   <!-- feed -->
   
@@ -50,7 +47,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-03T00:00:00+08:00","dateModified":"2026-03-03T17:52:37+08:00","datePublished":"2026-03-03T00:00:00+08:00","description":"","headline":"pcie software","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-06T14:06:30+08:00","dateModified":"2026-03-06T14:06:32+08:00","datePublished":"2026-03-06T14:06:30+08:00","description":"","headline":"","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/06/pcie/pcie_ep_demo/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/06/pcie/pcie_ep_demo/","image":[]}</script>
   
 </head>
 <body>
@@ -81,142 +78,109 @@
 <div class="article banner top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-02T16:00:00.000Z">2026-03-03</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-03T09:52:37.970Z">2026-03-03</time></span></div></div></div>
-    
-    <div class="bottom only-title">
-      
-      <div class="text-area">
-        <h1 class="text title"><span>pcie software</span></h1>
-        
-      </div>
-    </div>
+<span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-06T06:06:30.671Z">2026-03-06</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-06T06:06:32.109Z">2026-03-06</time></span></div></div></div>
     
   </div>
-  </div><article class="md-text content"><h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。<br>我觉得，这篇文章的命名应该改为：<br>《从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程》</p>
-<p>硬件环境介绍：<br>主机： 某x86架构服务器<br>设备： 某AI加速卡(Controller IP为Cadence)</p>
-<p>主要过程：<br><img src="/2026/03/03/pcie/pcie_software/image.png" alt="alt text"></p>
-<p>核心目标：<br>从硬件启动到数据传输，完整讲解R<strong>C 如何发现 EP→系统如何配置 EP→RC 与 EP 如何双向访问</strong>的全流程，覆盖枚举、配置、PIO 读写、DMA 传输、MSI 中断5 个核心环节。</p>
-<h1 id="第零章：硬件冷启动"><a href="#第零章：硬件冷启动" class="headerlink" title="第零章：硬件冷启动"></a>第零章：硬件冷启动</h1><p>主机一旦上电，卡槽上的PCIe设备会经历如下事务:</p>
-<h2 id="阶段-0：供电与物理稳定"><a href="#阶段-0：供电与物理稳定" class="headerlink" title="阶段 0：供电与物理稳定"></a>阶段 0：供电与物理稳定</h2><p>（完全硬件，BIOS不存在）</p>
+  </div><article class="md-text content"><p>现在我对这个项目有了较好的理解。让我整理一下并给用户一个全面的介绍。</p>
+<p>这是一个Linux内核PCIe设备驱动程序，用于与Edge SoC（可能是某种AI加速卡或边缘计算设备）通信。主要功能包括：</p>
+<p>PCIe驱动 - 支持多种Edge设备<br>DMA引擎 - uDMA（微DMA）传输引擎，支持4个通道<br>中断管理 - 支持MSI&#x2F;MSI-X中断<br>通知IRQ - 实现设备间消息传递<br>SMBus支持 - 系统管理总线<br>启动固件加载 - 支持BOOTROM, PCS, BL2, UBoot, Linux的启动状态管理<br>异常处理 - 设备异常事件处理<br>BAR空间访问 - 访问设备的BAR0-BAR5空间<br>带宽监控 - DMA带宽统计<br>DMA池管理 - 用于更高效的DMA操作 <br>根据代码分析，这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&#x2F;边缘计算设备）进行通信。以下是工程详细介绍：</p>
+<p>项目概述<br>这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6000-ds-v0.7.1，支持多种 Edge PCIe 设备（如 IPU X2000&#x2F;X5000&#x2F;X5500 等）。</p>
+<p>主要功能模块</p>
 <ol>
-<li>按下电源键。</li>
-<li>电源供应器（PSU）开始工作，为主板提供 +12V, +5V, +3.3V​ 等电压。</li>
-<li>这些电压经过主板上的电源管理芯片（PCH&#x2F;SOC的一部分）后，产生出各路电源轨，并最终变为 VCC​ 等核心电源，输送给CPU、芯片组和PCIe插槽。<br>关键点：此时，BIOS&#x2F;UEFI固件代码还静静地存放在主板的SPI Flash闪存芯片里，CPU尚未从其中读取任何指令执行。</li>
+<li>PCIe 设备管理<br>支持最多 128 个设备实例<br>字符设备接口 (&#x2F;dev&#x2F;edge0, &#x2F;dev&#x2F;edge1 等)<br>自动识别设备类型、PCIe 链路速度和宽度<br>支持 BAR0-BAR5 内存映射 I&#x2F;O</li>
+<li>DMA 引擎 (uDMA)<br>4 个 DMA 通道 (EDGE_DMA_CH_NUM &#x3D; 4)<br>支持 散列表 (Scatter-Gather) 传输模式<br>支持 inbound (H2D) 和 outbound (D2H) 传输<br>带宽监控和统计功能</li>
+<li>中断管理<br>支持 MSI、MSI-X 中断<br>最多 25 个中断向量<br>通知 IRQ 机制（用于 Host 与 Device 之间的消息传递）</li>
+<li>固件&#x2F;启动管理<br>支持读取设备启动状态：</li>
 </ol>
-<h2 id="阶段-1：平台复位与初始化"><a href="#阶段-1：平台复位与初始化" class="headerlink" title="阶段 1：平台复位与初始化"></a>阶段 1：平台复位与初始化</h2><p>（硬件主导，BIOS仍未执行）</p>
+<p>BOOTROM → PCS → BL2 → UBoot → Linux<br>5. 异常处理<br>设备异常事件捕获（温度、PCIe、DDR、D2D 等模块）<br>支持 32 个异常事件队列<br>6. SMBus 支持<br>设备热插拔模拟<br>ARP 表管理<br>关键数据结构<br>结构体	用途<br>edge_dev	主设备结构，包含所有设备状态<br>udma_engine	DMA 引擎结构<br>udma_xfer	DMA 传输描述符<br>notify_irq_chan	通知 IRQ 通道<br>smbus_dev	SMBus 设备管理<br>IOCTL 接口<br>驱动程序通过 ioctl 提供用户空间接口，主要包括：</p>
+<p>&#x2F;&#x2F; DMA 传输<br>EDGE_IOCTL_UDMA_D2H_XFER   &#x2F;&#x2F; 设备到主机 DMA<br>EDGE_IOCTL_UDMA_H2D_XFER   &#x2F;&#x2F; 主机到设备 DMA</p>
+<p>&#x2F;&#x2F; 启动管理<br>EDGE_IOCTL_BOOT_READ       &#x2F;&#x2F; 读取启动固件<br>EDGE_IOCTL_BOOT_WRITE      &#x2F;&#x2F; 写入启动固件<br>EDGE_IOCTL_GET_BOOT_STATE  &#x2F;&#x2F; 获取启动状态</p>
+<p>&#x2F;&#x2F; BAR 访问<br>EDGE_IOCTL_READ_BAR        &#x2F;&#x2F; 读取 BAR 空间<br>EDGE_IOCTL_WRITE_BAR       &#x2F;&#x2F; 写入 BAR 空间</p>
+<p>&#x2F;&#x2F; 设备信息<br>EDGE_IOCTL_GET_CARD_TYPE   &#x2F;&#x2F; 获取卡类型<br>EDGE_IOCTL_GET_PCIE_INFO   &#x2F;&#x2F; 获取 PCIe 信息<br>EDGE_IOCTL_GET_CH_STS      &#x2F;&#x2F; 获取通道状态<br>文件结构<br>文件	说明<br>edge.c	驱动程序主实现 (~2000+ 行)<br>edge.h	头文件，定义所有结构体和宏<br>version.h	版本信息<br>Makefile	内核模块构建文件<br>硬件寄存器地址<br>驱动中定义了多个硬件寄存器基地址：</p>
+<p>PCIe 控制器基址: 0x100000<br>UDMA 寄存器: PCIE_CONTROLLER_X8_BASE + 0x600000<br>系统控制寄存器: 0x80000<br>通知 IRQ 共享内存: 0x40000 ~ 0x5A100<br>这是一个典型的 PCIe 加速卡驱动程序，为用户空间应用提供对 Edge 硬件的底层访问能力，包括 DMA 传输、中断处理、固件加载等功能。</p>
+<p>请你分析这个驱动程序的结构，以及逻辑。如果可以的话也找出其中潜在的问题。<br><think>用户希望我深入分析这个驱动程序的结构、逻辑，并找出潜在的问题。我需要更全面地阅读代码，特别是关键功能模块的实现。让我分模块来阅读和分析：</think></p>
+<p>驱动初始化和退出<br>字符设备操作<br>DMA 相关功能<br>中断处理<br>IOCTL 处理<br>让我继续阅读更多代码来全面分析。<br></p>
+<p>我来深入分析这个驱动程序的结构、逻辑和潜在问题。让我先阅读更多关键代码模块。</p>
+<p>Grep “static int edge_.*init|static void edge_.*exit|module_init|module_exit” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>3 lines of output<br>Grep “static int edge_.*open|static int edge_.*release|static ssize_t” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>6 lines of output<br>让我继续查看驱动的主要函数，包括初始化、PCIe探测、IOCTL处理等。<br></p>
+<p>Grep “static int edge_.*probe|static int edge_.*remove|static int __init|static void __exit” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>23 lines of output<br>让我继续阅读更多代码来分析关键模块，包括ioctl处理和DMA操作。<br></p>
+<p>Grep “static long edge_ioctl|ioctl_do_” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>79 lines of output<br>现在让我查看probe函数的完整实现来理解驱动的初始化流程。<br></p>
+<p>Read edge.c (lines 4446-4695)<br>现在让我查看更多关键模块，比如DMA传输、open&#x2F;release等。<br></p>
+<p>Read edge.c (lines 3751-3900)<br>现在让我查看DMA相关的代码，分析可能存在的问题。<br></p>
+<p>Grep “edge_create_udma_engines|edge_destroy_udma_engines|static int ioctl_do_udma” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>93 lines of output<br>现在让我查看udma_transfer函数的实现来理解DMA的工作方式。<br></p>
+<p>Grep “^static int udma_transfer(“ (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>21 lines of output<br>现在我已经对代码有了足够的了解。让我整理一下这个驱动的结构、逻辑和潜在问题。<br></p>
+<p>Grep “static int edge_map_bars” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>11 lines of output<br>我已经收集了足够的信息来分析这个驱动程序。现在让我整理一个完整的分析报告。<br></p>
+<p>Grep “copy_from_user|copy_to_user” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>21 lines of output<br>我已经收集了足够的信息。现在让我综合分析这个驱动程序的：</p>
+<p>整体结构<br>工作逻辑<br>潜在问题<br>让我也检查一下edge_open的错误路径是否正确释放资源。<br></p>
+<p>Grep “edge_open.*{“ (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>1 line of output<br>让我用不同的方式搜索open函数<br></p>
+<p>Grep “^static int edge_open” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>101 lines of output<br>我已经发现了一个潜在问题：在edge_open函数中，当检查到edev-&gt;bar[0]为空或者后续的IRQ设置失败时，会直接返回错误，但之前分配的priv内存没有被释放。让我继续查看更多代码，找出所有潜在的问题。</p>
+<p>让我查看更多代码来做全面分析。<br></p>
+<p>Grep “static int edge_create_cdev” (in &#x2F;home&#x2F;luyuan&#x2F;workspace&#x2F;merge_dsvs&#x2F;edge-driver&#x2F;pcie&#x2F;edge.c)<br>41 lines of output<br>我已经收集了足够的信息来做一个全面的分析。让我总结这个驱动程序的结构、逻辑以及潜在的问题。<br></p>
+<p>基于对代码的详细分析，我来总结这个驱动程序的结构、逻辑和潜在问题：</p>
+<p>一、驱动程序结构分析</p>
 <ol>
-<li>电源稳定后，主板上的时钟发生器开始工作，为各组件提供基准时钟。</li>
-<li>芯片组（或SoC）会发出一个全局性的平台复位信号，让整个系统进入已知的初始状态。</li>
-<li>对于PCIe设备，芯片组的Root Port会发出 PERST#​ 信号（PCIe Reset），这个信号会通过PCIe插槽的引脚传递给设备。<br>PERST#​ 信号有效（低电平）期间，所有PCIe设备被强制复位，内部状态机清零。<br>当 PERST#​ 信号被芯片组释放（拉高）的那一刻，PCIe链路训练（LTSSM）自动开始。这是由设备（EP）和Root Port（RC的一部分）的物理层（PHY）硬件逻辑独立完成的，完全不需要代码干预。<br>此时，CPU可能还在执行其内部的微码（Microcode）进行自检，或者处于等待状态，但绝对没有开始执行主板Flash里的BIOS代码。</li>
+<li>架构概览</li>
 </ol>
-<p>LTSSM会经历一系列状态，比如 Detect（检测）、Polling（轮询）、Configuration（配置） 和 Recovery（恢复）等。在Polling状态，双方会互相发送特定的训练序列（TS1&#x2F;TS2 Ordered Sets），就像在互相喊话：“喂，有人吗？我能跑5.0 GT&#x2F;s（Gen1速度），你能吗？” 对方回应：“收到！我也能跑5.0，那我们先用这个速度握手。” 这就是速率协商。同时，它们还会探测物理通道（Lane）的连接情况，如果设备是x4的，但只连了两根线，它们就会协商工作在x2模式，这就是通道宽度协商。</p>
-<p>注：<br>硬件冷启动步骤为BIOS部分打好基础(先铺好硬件上的通路。)<br>LTSSM是PCIe体系中非常复杂的一部分，在此挖坑：《LTSSM状态机解析》</p>
-<h1 id="第一章：BIOS-UEFI阶段"><a href="#第一章：BIOS-UEFI阶段" class="headerlink" title="第一章：BIOS&#x2F;UEFI阶段"></a>第一章：BIOS&#x2F;UEFI阶段</h1><p>BIOS&#x2F;UEFI阶段主要涉及到PCIe RC初始化与EP枚举，这是 PCIe 软件栈的「底层奠基」阶段，决定了后续内核能否正确识别EP。<br>在BIOS阶段，系统会完成硬件探测、资源分配和初始化，以建立基本的PCIe拓扑，为操作系统启动做好准备。其主要事务和职责可概括为两部分：</p>
-<h2 id="对PCIe-RC的事务"><a href="#对PCIe-RC的事务" class="headerlink" title="对PCIe RC的事务"></a>对PCIe RC的事务</h2><p>RC是CPU与PCIe拓扑之间的桥梁，是PCIe树的“根”。BIOS对其处理的核心是<strong>构建和配置整个PCIe系统</strong>。</p>
+<p>┌─────────────────────────────────────────────────────────────────┐<br>│                     用户空间 (User Space)                        │<br>│  &#x2F;dev&#x2F;edge0, &#x2F;dev&#x2F;edge1 … (字符设备)                          │<br>└─────────────────────────────────────────────────────────────────┘<br>                              │<br>                     ioctl() &#x2F; read() &#x2F; write()<br>                              │<br>┌─────────────────────────────────────────────────────────────────┐<br>│                     驱动层 (Driver Layer)                        │<br>├─────────────────────────────────────────────────────────────────┤<br>│  文件操作接口: edge_open&#x2F;release&#x2F;ioctl&#x2F;llseek                   │<br>├─────────────────────────────────────────────────────────────────┤<br>│  核心功能模块:                                                  │<br>│  ├─ DMA引擎管理 (4通道 uDMA)                                    │<br>│  ├─ 中断管理 (MSI&#x2F;MSI-X&#x2F;传统IRQ)                                │<br>│  ├─ BAR空间映射                                                 │<br>│  ├─ 通知IRQ (Host↔Device通信)                                   │<br>│  ├─ 异常事件处理                                                │<br>│  └─ SMBus模拟 (热插拔)                                          │<br>├─────────────────────────────────────────────────────────────────┤<br>│  PCIe设备驱动: edge_probe&#x2F;remove                                │<br>└─────────────────────────────────────────────────────────────────┘<br>                              │<br>┌─────────────────────────────────────────────────────────────────┐<br>│                     硬件层 (Hardware)                            │<br>│  Edge SoC (X2000&#x2F;X5000&#x2F;X5500 PCIe加速卡)                        │<br>└─────────────────────────────────────────────────────────────────┘<br>2. 关键数据结构关系</p>
+<p>edge_dev (主设备结构)<br>├── pdev              → PCI设备<br>├── cdev              → 字符设备<br>├── bar[6]            → PCIe BAR空间映射<br>├── uengine[4]        → 4个DMA引擎<br>├── notify_irq_chan   → 通知IRQ通道<br>├── dma_pool          → DMA内存池<br>└── pub               → 公共数据(device_id, card_type等)</p>
+<p>file_priv (文件私有数据)<br>├── edev              → 指向edge_dev<br>├── bmeminfo_list     → 块内存列表(用户申请)<br>└── lock              → 保护列表<br>3. 初始化流程</p>
+<p>module_init(edge_pci_driver_init)<br>    │<br>    ├─&gt; smbus_misc_register()       &#x2F;&#x2F; 注册SMBus杂项设备<br>    ├─&gt; hot_reset_buslock_init()    &#x2F;&#x2F; 初始化热复位锁<br>    ├─&gt; edge_proc_register()        &#x2F;&#x2F; 注册proc接口<br>    └─&gt; pci_register_driver()       &#x2F;&#x2F; 注册PCI驱动</p>
+<p>PCI设备插入 → edge_probe()<br>    │<br>    ├─&gt; kzalloc(edge_dev)<br>    ├─&gt; pci_enable_device()<br>    ├─&gt; pci_request_regions()<br>    ├─&gt; edge_map_bars()             &#x2F;&#x2F; 映射BAR0-BAR5<br>    ├─&gt; edge_create_udma_engines()  &#x2F;&#x2F; 创建4个DMA引擎<br>    ├─&gt; class_create()              &#x2F;&#x2F; 创建sysfs类<br>    ├─&gt; edge_create_cdev()          &#x2F;&#x2F; 创建字符设备<br>    └─&gt; device_create_file()        &#x2F;&#x2F; 创建sysfs属性<br>二、工作逻辑分析</p>
 <ol>
-<li>枚举PCIe总线拓扑：</li>
+<li>DMA传输流程</li>
 </ol>
-<ul>
-<li>从RC自身（通常作为Bus 0, Device 0, Function 0）开始，通过深度优先搜索遍历其下的所有PCIe交换机和端点设备。</li>
-<li>读取每个设备的供应商ID（Vendor ID）、设备ID（Device ID）​ 和类型（Type，判断是EP、桥还是交换机），建立硬件树结构。</li>
-</ul>
+<p>用户空间<br>    │<br>    ▼<br>ioctl(EDGE_IOCTL_UDMA_H2D_XFER &#x2F; _D2H_XFER)<br>    │<br>    ├─&gt; copy_from_user(&amp;dma_task)   &#x2F;&#x2F; 复制任务参数<br>    │   - host_virt, host_phys      &#x2F;&#x2F; 主机虚拟&#x2F;物理地址<br>    │   - dev_addr                  &#x2F;&#x2F; 设备地址<br>    │   - xfer_size                 &#x2F;&#x2F; 传输大小<br>    │   - ch_mask                   &#x2F;&#x2F; 通道掩码<br>    │<br>    ├─&gt; udma_alloc_channel()        &#x2F;&#x2F; 分配DMA通道<br>    │<br>    ├─&gt; udma_transfer()             &#x2F;&#x2F; 执行传输<br>    │   ├─&gt; get_user_pages()        &#x2F;&#x2F; 获取用户页<br>    │   ├─&gt; dma_map_sg()            &#x2F;&#x2F; 映射散列表<br>    │   ├─&gt; 构建udma_desc链         &#x2F;&#x2F; 描述符链表<br>    │   ├─&gt; 启动DMA (写寄存器)      &#x2F;&#x2F; 触发传输<br>    │   └─&gt; wait_event()            &#x2F;&#x2F; 等待完成<br>    │<br>    └─&gt; 返回完成状态<br>2. 通知IRQ (IPC机制)</p>
+<p>Host → Device:</p>
+<ol>
+<li>写共享内存 (bar[0] + 0x40100 + chan_id * 0x800)</li>
+<li>写NOTIFY_IRQ_ADDR寄存器触发中断</li>
+<li>Device响应MSI-X中断读取消息</li>
+</ol>
+<p>Device → Host:</p>
+<ol>
+<li>Device写共享内存</li>
+<li>Device触发MSI-X中断</li>
+<li>edge_notify_irq_isr()处理</li>
+<li>blocking_notifier_call_chain()通知上层<br>三、潜在问题分析<br>🔴 严重问题</li>
+<li>内存泄漏 - edge_open 错误路径<br>位置: edge.c:3778-3781</li>
+</ol>
+<p>if (!edev-&gt;bar[0]) {<br>    pr_err(“Device is not available.\n”);<br>    return -ECANCELED;  &#x2F;&#x2F; ❌ priv未释放!<br>}<br>问题: 当 bar[0] 为空时返回错误，但之前已经分配了 priv (line 3766)，导致内存泄漏。应该先 kfree(priv) 再返回。</p>
+<p>同样问题在: edge.c:3786-3791 - IRQ初始化失败时也未释放priv。</p>
 <ol start="2">
-<li>配置PCIe基址寄存器：</li>
+<li>空指针解引用 - edge_release<br>位置: edge.c:3807-3808</li>
 </ol>
-<ul>
-<li>分配内存空间：为每个需要映射内存空间（如设备寄存器、设备自带内存）的BAR（Base Address Register）分配非预取内存地址。</li>
-<li>分配I&#x2F;O空间：为传统的PCI设备BAR（如果需要）分配I&#x2F;O端口地址。</li>
-<li>处理64位BAR和预取内存：为需要大量连续空间（如显卡显存）的设备分配64位预取内存地址。</li>
-<li>此过程确保系统中所有设备的BAR地址全局唯一、无冲突，并写入设备配置空间。</li>
-</ul>
+<p>static int edge_release(struct inode *inode, struct file *file)<br>{<br>    struct file_priv *priv &#x3D; (struct file_priv *)file-&gt;private_data;<br>    struct edge_dev *edev &#x3D; priv-&gt;edev;  &#x2F;&#x2F; ❌ 如果priv为NULL?<br>问题: 如果 open() 失败但用户仍调用 close()，file-&gt;private_data 可能为 NULL，导致空指针解引用。</p>
 <ol start="3">
-<li>配置PCIe路由：</li>
+<li>DMA池释放问题 - edge_destroy_udma_engines<br>位置: edge.c:4082-4089</li>
 </ol>
-<ul>
-<li>如果系统支持基于地址的路由，BIOS确保分配的地址空间是连续和正确的。</li>
-<li>如果支持基于ID的路由（在SR-IOV等场景），BIOS可能会初始化相关路由表。</li>
-</ul>
-<ol start="4">
-<li>分配总线号：<br>为RC下游的每个PCIe交换机（桥）动态分配次级总线号、下级总线号和总线号范围，确保整个PCIe域内的总线编号唯一。</li>
-</ol>
-<p>举个例子，我们的AI加速卡有1GB的显存（设备本地内存），同时它的控制寄存器也需要被CPU访问。BIOS会为它的寄存器部分分配一个较小的BAR（比如256MB的地址窗口），而加速卡驱动驱动后续会通过这个BAR去初始化并管理那1GB的显存。BIOS枚举完成后，会在内存中建立一张表，记录所有PCIe设备的信息，这就是<strong>ACPI表（如MCFG表）和BIOS数据区里的内容</strong>，它们为接下来的操作系统接力做好了准备。</p>
-<h2 id="对PCIe-EP的事务"><a href="#对PCIe-EP的事务" class="headerlink" title="对PCIe EP的事务"></a>对PCIe EP的事务</h2><p>BIOS对EP的处理是发现、识别并使其进入可操作状态。</p>
-<ol>
-<li>设备发现与识别：<br>读取EP的配置空间头部，识别其类型和功能。</li>
-<li>配置设备BAR：</li>
-</ol>
-<ul>
-<li>响应RC的配置流程，向BIOS报告其每个BAR所需的地址空间大小和类型（通过向BAR写入全1再回读的方式）。</li>
-<li>接收BIOS分配的具体基地址，并使其生效。</li>
-</ul>
-<ol start="3">
-<li>设置中断：</li>
-</ol>
-<ul>
-<li>传统的PCI设备：为其分配IRQ线（在ACPI系统中，通常最终会转换为GSI和APIC设置）。</li>
-<li>原生MSI&#x2F;MSI-X设备：BIOS通常只需确保其MSI&#x2F;MSI-X能力结构可访问，具体的中断向量&#x2F;CPU分配多由操作系统驱动完成。</li>
-</ul>
-<ol start="4">
-<li>设备初始化与使能：</li>
-</ol>
-<ul>
-<li>设置配置空间命令寄存器中的 Memory Space Enable​ 或 I&#x2F;O Space Enable​ 位，启用设备对内存或I&#x2F;O空间的响应。</li>
-<li>对于某些关键启动设备（如引导显卡），BIOS会进行更深入的初始化（如设置为VGA兼容模式，并初始化其显示输出）。</li>
-</ul>
+<p>static void edge_destroy_udma_engines(struct edge_dev *edev)<br>{<br>    int i;<br>    for (i &#x3D; 0; i &lt; EDGE_DMA_CH_NUM; i++) {<br>        if (edev-&gt;uengine[i])<br>            kfree(edev-&gt;uengine[i]);  &#x2F;&#x2F; ❌ 只释放结构体<br>    }<br>}<br>问题:</p>
+<p>未释放正在进行的DMA传输 (transfer_list 中的条目)<br>未释放描述符内存 (desc_virt_base)<br>未调用 dma_unmap_sg() 释放散列表映射<br>🟠 中等问题<br>4. 竞态条件 - instance_opened<br>位置: edge.c:3796 和 edge.c:3829</p>
+<p>&#x2F;&#x2F; edge_open<br>edev-&gt;instance_opened++;</p>
+<p>&#x2F;&#x2F; edge_release<br>edev-&gt;instance_opened–;<br>问题: instance_opened 的增减没有原子操作保护，且在 edge_remove() 中检查此值判断是否可以安全卸载设备，可能导致竞争。</p>
 <ol start="5">
-<li>处理高级功能：</li>
+<li>未检查的copy_to_user&#x2F;copy_from_user返回值<br>位置: 多处</li>
 </ol>
-<ul>
-<li>对于支持SR-IOV的设备，BIOS可能会发现其VF并预留资源。</li>
-<li>对于支持ARI（替代路由ID）的设备，进行相应配置。</li>
-</ul>
-<h2 id="CoreBoot-PCIe初始化代码讲解"><a href="#CoreBoot-PCIe初始化代码讲解" class="headerlink" title="CoreBoot PCIe初始化代码讲解"></a>CoreBoot PCIe初始化代码讲解</h2><p>TODO:</p>
-<h1 id="第二章：操作系统阶段"><a href="#第二章：操作系统阶段" class="headerlink" title="第二章：操作系统阶段"></a>第二章：操作系统阶段</h1><p>BIOS完成了基础的“安家”工作，但它只是一个临时的引导期管理员。当操作系统（如Linux或Windows）的引导程序接管后，内核会启动一个更具权威、更为精细的资源管理过程。这是因为：</p>
-<ol>
-<li>管理主权转移：现代操作系统需要建立独立、统一的硬件抽象层，以确保对资源的绝对控制权，不依赖于固件实现。</li>
-<li>策略优化需求：操作系统可能采用与BIOS不同的资源分配策略，例如考虑NUMA架构下的内存节点亲和性、虚拟化支持、或更动态的电源管理需求。<br>因此，操作系统不会完全信任BIOS留下的配置，而是会进行一次彻底的、独立的重新枚举。</li>
+<p>&#x2F;&#x2F; 例如 edge.c:150<br>rc &#x3D; copy_to_user((void __user *)arg, &amp;msg, sizeof(struct exception_msg));<br>if (rc) {<br>    pr_err(“Failed to copy to user space 0x%lx\n”, arg);<br>    return -EINVAL;<br>}<br>问题: 很多地方虽然检查了返回值，但没有回传实际复制失败的字节数，应该返回 -EFAULT 而不是 -EINVAL。</p>
+<ol start="6">
+<li>用户指针未验证<br>位置: 多处ioctl处理函数</li>
 </ol>
-<h2 id="阶段一：内核的权威接管与深度枚举"><a href="#阶段一：内核的权威接管与深度枚举" class="headerlink" title="阶段一：内核的权威接管与深度枚举"></a>阶段一：内核的权威接管与深度枚举</h2><p>Linux内核启动早期，会执行以下关键步骤：</p>
-<ol>
-<li>解析ACPI表，但保持审视：<br>内核会解析BIOS留下的ACPI表（特别是MCFG表），获取PCIe配置空间的物理地址映射信息。这为内核提供了访问硬件的“地图”。<br>但内核不会直接采用BIOS枚举的设备树和资源分配结果。它将这些信息视为建议或初始状态，而非最终配置。</li>
-<li>重新扫描与独立建树：<br>Linux的PCI子系统会从根总线（Bus 0）开始，重新执行一次深度优先的拓扑扫描。这个过程在逻辑上与BIOS的枚举类似，但驱动、实现和决策完全在内核控制下。<br>对于扫描到的每个设备，内核不仅读取其Vendor&#x2F;Device ID，还会完整读取其PCIe能力结构（如PCIe Capabilities, MSI&#x2F;MSI-X Capability, ACS Capability等），以获取更全面的设备能力信息。</li>
-<li>重建资源视图与精细分配：<br>内核基于其全局物理内存视图，重新为设备分配内存和I&#x2F;O空间地址。它会覆盖BIOS写入BAR的值，以确保其分配符合内核的内存管理策略（如避免内存空洞、优化NUMA本地性）。<br>同时，内核重新分配中断号。对于支持MSI&#x2F;MSI-X的现代设备，内核会为其分配中断向量，这通常与BIOS的传统PIC&#x2F;APIC设置完全不同。</li>
-<li>导出详尽的设备信息：<br>内核在 &#x2F;sys&#x2F;bus&#x2F;pci&#x2F;devices&#x2F;目录下为每个设备创建详细的属性文件，如 vendor、device、config、resource等。<code>lspci -vvv</code>等工具正是通过读取这些内核维护的、已解析的信息，而非直接访问硬件，来展示设备详情的。这体现了操作系统作为硬件访问唯一仲裁者的角色。</li>
+<p>&#x2F;&#x2F; 例如 edge.c:2463<br>rc &#x3D; copy_from_user(&amp;dma_task, (struct xfer_task __user *)arg, …);<br>问题: 没有验证用户传入的指针是否合法（如 dma_task.host_virt 是否在用户空间范围内），可能被恶意用户利用。</p>
+<ol start="7">
+<li>SMBus设备销毁竞态<br>位置: edge.c:4564 和 edge.c:4664</li>
 </ol>
-<h2 id="阶段二：设备驱动的深度初始化与激活"><a href="#阶段二：设备驱动的深度初始化与激活" class="headerlink" title="阶段二：设备驱动的深度初始化与激活"></a>阶段二：设备驱动的深度初始化与激活</h2><p>设备在内核的PCI子系统完成枚举和资源配置后，仍然处于“被发现但未就绪”的状态。使其成为系统可用功能部件的最后一步，由设备驱动完成。驱动通过其<code>probe()</code>函数，执行以下关键、有序的初始化序列：</p>
-<ol>
-<li>资源获取与地址映射：</li>
+<p>if (g_edge_class &amp;&amp; list_empty(&amp;edev_list)) {<br>    class_destroy(g_edge_class);<br>问题: 使用 list_empty() 判断设备列表为空不可靠，因为 edge_remove() 中先调用 list_del() 再做其他清理，期间列表可能暂时为空。</p>
+<p>🟡 小问题 &#x2F; 代码质量<br>8. 版本兼容性代码<br>多处使用 #if LINUX_VERSION_CODE 条件编译：</p>
+<p>#if LINUX_VERSION_CODE &lt; KERNEL_VERSION(6, 4, 0)<br>    g_edge_class &#x3D; class_create(THIS_MODULE, EDGE_CLASS_NAME);<br>#else<br>    g_edge_class &#x3D; class_create(EDGE_CLASS_NAME);<br>#endif<br>问题: 新版内核 (6.4+) 的 class_create() 不再接受 THIS_MODULE 参数，但这种兼容性代码增加了维护复杂度。</p>
+<ol start="9">
+<li>Magic Number硬编码<br>多处使用硬编码的寄存器地址和值：</li>
 </ol>
-<ul>
-<li>驱动通过 <code>pci_request_selected_regions()</code>等API，正式向内核声明对特定BAR资源的占用，防止其他驱动冲突。</li>
-<li>通过 <code>pcim_iomap()</code>或 <code>ioremap()</code>等函数，将设备寄存器所在的物理地址（由BAR定义）映射到内核的虚拟地址空间，使驱动代码能够通过指针安全访问。</li>
-</ul>
-<ol start="2">
-<li>核心功能使能：</li>
+<p>#define REG_PCIE_MSIGEN_ADDR (PCIE_X8_SYSTEM_CONTROL_BASE + 0x600)<br>#define EDGE_EXCEPTION_FIFO_OFFSET 0x6E000<br>问题: 缺乏文档说明，可读性差。</p>
+<ol start="10">
+<li>中断处理潜在问题<br>位置: edge.c:371-376</li>
 </ol>
-<ul>
-<li>总线主控使能：通过设置PCI命令寄存器的 Bus Master Enable位，允许设备发起DMA操作。这是设备与内存交互的前提，若遗漏，设备将完全无法传输数据。</li>
-<li>中断模式配置：对于支持MSI&#x2F;MSI-X的设备，驱动会优先配置并使用，这比传统的INTx（引脚中断）有更高的性能和可扩展性。此过程涉及与内核中断子系统的深度交互。</li>
-<li>DMA配置：设置设备的DMA寻址能力（如64位DMA），并为其分配一致性（Coherent）或流式（Streaming）DMA缓冲区。</li>
-</ul>
-<ol start="3">
-<li>设备私有状态初始化：</li>
-</ol>
-<ul>
-<li>驱动分配并初始化其私有的 driver_data结构体，用于管理设备的运行时状态、队列、缓冲区等。</li>
-<li>根据设备规格，对设备进行功能特定的配置，如设置工作模式、初始化内部队列、清零状态寄存器等。</li>
-</ul>
-<ol start="4">
-<li>注册到内核框架：<br>驱动将设备注册到相应的内核子系统，这是设备“提供服务”的标志性一步：<br>网卡驱动注册 struct net_device→ 网络协议栈可见。<br>块设备驱动（如NVMe）注册 struct gendisk→ 块I&#x2F;O层可见，文件系统可挂载。<br>显卡驱动初始化显示引擎并注册DRM设备 → 图形服务器（如X&#x2F;Wayland）可驱动显示输出。</li>
-</ol>
-<p><strong>调试视角：</strong><br>驱动开发中，probe()阶段是问题的高发区。常见的关键错误包括：</p>
-<ul>
-<li>总线主控未使能：设备如同“瘫痪”，无法发起任何数据传输。</li>
-<li>中断配置错误（如MSI向量未正确请求）：系统无法收到设备完成操作的通知，表现为操作“挂起”。</li>
-<li>资源映射或DMA地址错误：导致内核崩溃（Oops）或静默的数据损坏。</li>
-<li>框架注册失败：设备在系统中“可见”但“不可用”。<br>这些问题的排查严重依赖于内核的 printk日志、动态调试（dyndbg）以及对 &#x2F;sys&#x2F;下设备状态文件和 &#x2F;proc&#x2F;interrupts等信息的细致分析。</li>
-</ul>
+<p>static irqreturn_t edge_notify_irq_isr(int irq, void *dev_id)<br>{<br>    &#x2F;&#x2F; … 直接在中断上下文中调用 blocking_notifier<br>    blocking_notifier_call_chain(&amp;chan-&gt;notifier, event, msg);<br>问题: blocking_notifier_call_chain() 可能在某些情况下导致死锁，应该使用工作队列处理。</p>
+<p>四、修复建议优先级<br>优先级	问题	风险<br>P0	edge_open内存泄漏	内存耗尽<br>P0	edge_release空指针	崩溃<br>P1	DMA引擎资源未完全释放	内存泄漏&#x2F;崩溃<br>P1	instance_opened竞态	设备卸载不安全<br>P2	用户指针验证缺失	安全漏洞<br>P2	copy_to_user返回值处理	逻辑错误<br>P3	代码可读性改善	维护困难<br>五、总结<br>这是一个功能完整的 PCIe 加速卡Linux内核驱动，提供了：</p>
+<p>字符设备接口<br>4通道DMA引擎<br>MSI&#x2F;MSI-X中断支持<br>Host-Device IPC机制<br>固件加载和启动状态管理<br>但代码中存在 内存泄漏、空指针解引用、资源未完全释放 等潜在问题，建议优先修复高优先级问题以提高驱动稳定性。</p>
 </article>
 <div class="article-footer">
     <section id="license">
@@ -228,7 +192,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">Newer</div><a href="/2026/03/03/pcie/pcie_introduction/">pcie_introduction</a></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/02/mmc/sd_introduction/">sd_introduction</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">Newer</div><a href="/2026/03/06/low-speed/i2c_intro/">2026-03-06</a></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/06/low-speed/i2c_controller/">i2c_introduction</a></div></section></div>
 
 
 
@@ -238,12 +202,7 @@
 <footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
 </div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-<div class="widgets">
-
-
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E9%9B%B6%E7%AB%A0%EF%BC%9A%E7%A1%AC%E4%BB%B6%E5%86%B7%E5%90%AF%E5%8A%A8"><span class="toc-text">第零章：硬件冷启动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-0%EF%BC%9A%E4%BE%9B%E7%94%B5%E4%B8%8E%E7%89%A9%E7%90%86%E7%A8%B3%E5%AE%9A"><span class="toc-text">阶段 0：供电与物理稳定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-1%EF%BC%9A%E5%B9%B3%E5%8F%B0%E5%A4%8D%E4%BD%8D%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">阶段 1：平台复位与初始化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%9ABIOS-UEFI%E9%98%B6%E6%AE%B5"><span class="toc-text">第一章：BIOS&#x2F;UEFI阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9PCIe-RC%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-text">对PCIe RC的事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9PCIe-EP%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-text">对PCIe EP的事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CoreBoot-PCIe%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BB%A3%E7%A0%81%E8%AE%B2%E8%A7%A3"><span class="toc-text">CoreBoot PCIe初始化代码讲解</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%98%B6%E6%AE%B5"><span class="toc-text">第二章：操作系统阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9A%E5%86%85%E6%A0%B8%E7%9A%84%E6%9D%83%E5%A8%81%E6%8E%A5%E7%AE%A1%E4%B8%8E%E6%B7%B1%E5%BA%A6%E6%9E%9A%E4%B8%BE"><span class="toc-text">阶段一：内核的权威接管与深度枚举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9A%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E6%BF%80%E6%B4%BB"><span class="toc-text">阶段二：设备驱动的深度初始化与激活</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
-</div></aside><div class='float-panel'>
+</aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
