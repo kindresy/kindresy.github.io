@@ -1,0 +1,1203 @@
+
+<!DOCTYPE html><html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>DW APB I2C Controller 第二篇 - 庐山东林</title>
+
+  
+    <meta name="description" content="简介本文主要是针对新思的I2C控制器的学习,翻译的第二篇文章。 本文涉及:chapter5,6。主要包括寄存器与Programing Flow 寄存器详解IC_CON - 控制寄存器IC_CON是DW_apb_i2c的核心控制寄存器,用于配置控制器的基本工作模式: 关键位域 MASTER_MODE (bit 0): 主机模式使能  1 &#x3D; 主机模式 0 &#x3D; 从机模式   SPE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DW APB I2C Controller 第二篇">
+<meta property="og:url" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/">
+<meta property="og:site_name" content="庐山东林">
+<meta property="og:description" content="简介本文主要是针对新思的I2C控制器的学习,翻译的第二篇文章。 本文涉及:chapter5,6。主要包括寄存器与Programing Flow 寄存器详解IC_CON - 控制寄存器IC_CON是DW_apb_i2c的核心控制寄存器,用于配置控制器的基本工作模式: 关键位域 MASTER_MODE (bit 0): 主机模式使能  1 &#x3D; 主机模式 0 &#x3D; 从机模式   SPE">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-10-55-51.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-16-58-59.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-10-56-38.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-11-24-08.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-10-56-54.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-11-28-12.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-11-31-14.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-14-12-04.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-15-22-15.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-19-34-47.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-10-14-25-11.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-10-14-50-18.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-10-14-53-29.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-17-52-03.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-19-40-09.png">
+<meta property="article:published_time" content="2026-03-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-11T02:55:39.760Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="embedded">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-09-10-55-51.png">
+  
+  
+  
+  <meta name="keywords" content="embedded,Linux">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-10T00:00:00+08:00","dateModified":"2026-03-11T10:55:39+08:00","datePublished":"2026-03-10T00:00:00+08:00","description":"","headline":"DW APB I2C Controller 第二篇","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/","keywords":"embedded, Linux","image":[]}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="Search"></form><div id="search-result"></div><div class="search-no-result">No Results!</div></div>
+
+
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/04/low-speed/i2c/"><span class="title">i2c_introduction</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/03/pcie/pcie_introduction/"><span class="title">pcie_introduction</span></a><a class="item title" href="/2026/03/02/mmc/sd_introduction/"><span class="title">sd_introduction</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-09T16:00:00.000Z">2026-03-10</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-11T02:55:39.760Z">2026-03-11</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>DW APB I2C Controller 第二篇</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文主要是针对新思的I2C控制器的学习,翻译的第二篇文章。</p>
+<p>本文涉及:<br>chapter5,6。主要包括寄存器与Programing Flow</p>
+<h1 id="寄存器详解"><a href="#寄存器详解" class="headerlink" title="寄存器详解"></a>寄存器详解</h1><h2 id="IC-CON-控制寄存器"><a href="#IC-CON-控制寄存器" class="headerlink" title="IC_CON - 控制寄存器"></a>IC_CON - 控制寄存器</h2><p>IC_CON是DW_apb_i2c的核心控制寄存器,用于配置控制器的基本工作模式:</p>
+<h3 id="关键位域"><a href="#关键位域" class="headerlink" title="关键位域"></a>关键位域</h3><ul>
+<li><p><strong>MASTER_MODE (bit 0)</strong>: 主机模式使能</p>
+<ul>
+<li>1 &#x3D; 主机模式</li>
+<li>0 &#x3D; 从机模式</li>
+</ul>
+</li>
+<li><p><strong>SPEED (bits 2:1)</strong>: 速度模式选择</p>
+<ul>
+<li>00 &#x3D; 标准速度(100 kb&#x2F;s)</li>
+<li>01 &#x3D; 快速速度(400 kb&#x2F;s)</li>
+<li>10 &#x3D; 高速模式(3.4 Mb&#x2F;s)</li>
+</ul>
+</li>
+<li><p><strong>IC_10BITADDR_MASTER (bit 12)</strong>: 主机地址模式</p>
+<ul>
+<li>1 &#x3D; 10-bit地址模式</li>
+<li>0 &#x3D; 7-bit地址模式</li>
+</ul>
+</li>
+<li><p><strong>IC_10BITADDR_SLAVE (bit 3)</strong>: 从机地址模式</p>
+<ul>
+<li>1 &#x3D; 10-bit地址模式</li>
+<li>0 &#x3D; 7-bit地址模式</li>
+</ul>
+</li>
+<li><p><strong>IC_SLAVE_DISABLE (bit 6)</strong>: 从机模式禁用</p>
+<ul>
+<li>1 &#x3D; 禁用从机模式</li>
+<li>0 &#x3D; 使能从机模式</li>
+</ul>
+</li>
+</ul>
+<h3 id="动态地址更新"><a href="#动态地址更新" class="headerlink" title="动态地址更新"></a>动态地址更新</h3><p>I2C_DYNAMIC_TAR_UPDATE参数决定了地址更新时机:</p>
+<p><strong>I2C_DYNAMIC_TAR_UPDATE &#x3D; 0 (静态模式)</strong></p>
+<ul>
+<li>切换目标地址时需要:禁用控制器→重配置IC_TAR→重新启用</li>
+<li>流程复杂,但配置稳定</li>
+</ul>
+<p><strong>I2C_DYNAMIC_TAR_UPDATE &#x3D; 1 (动态模式)</strong></p>
+<ul>
+<li>可在运行中直接修改IC_TAR,无需禁用控制器</li>
+<li>IC_10BITADDR_MASTER位可动态调整</li>
+<li>适合需要频繁切换从机地址的场景</li>
+</ul>
+<h2 id="IC-TAR-目标地址寄存器"><a href="#IC-TAR-目标地址寄存器" class="headerlink" title="IC_TAR - 目标地址寄存器"></a>IC_TAR - 目标地址寄存器</h2><p>用于指定主机模式下要访问的从机地址:</p>
+<ul>
+<li><strong>IC_TAR (bits 9:0)</strong>: 目标从机地址</li>
+<li><strong>GC_OR_START (bit 10)</strong>: 通用呼叫或START BYTE命令</li>
+</ul>
+<h2 id="IC-DATA-CMD-数据命令寄存器"><a href="#IC-DATA-CMD-数据命令寄存器" class="headerlink" title="IC_DATA_CMD - 数据命令寄存器"></a>IC_DATA_CMD - 数据命令寄存器</h2><p>这是最重要的数据传输寄存器,所有读写操作都通过它完成:</p>
+<h3 id="寄存器结构"><a href="#寄存器结构" class="headerlink" title="寄存器结构"></a>寄存器结构</h3><p>根据IC_EMPTYFIFO_HOLD_MASTER_EN配置,寄存器结构有所不同:</p>
+<h4 id="IC-EMPTYFIFO-HOLD-MASTER-EN-0"><a href="#IC-EMPTYFIFO-HOLD-MASTER-EN-0" class="headerlink" title="IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0"></a>IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0</h4><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-10-55-51.png"></p>
+<ul>
+<li><strong>CMD (bit 8)</strong>: 传输类型<ul>
+<li>1 &#x3D; 读操作</li>
+<li>0 &#x3D; 写操作</li>
+</ul>
+</li>
+<li><strong>DATA (bits 7:0)</strong>: 数据区</li>
+</ul>
+<h4 id="IC-EMPTYFIFO-HOLD-MASTER-EN-1"><a href="#IC-EMPTYFIFO-HOLD-MASTER-EN-1" class="headerlink" title="IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1"></a>IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1</h4><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-16-58-59.png"></p>
+<ul>
+<li><strong>RESTART (bit 10)</strong>: 生成RESTART信号</li>
+<li><strong>STOP (bit 9)</strong>: 生成STOP信号</li>
+<li><strong>CMD (bit 8)</strong>: 传输类型</li>
+<li><strong>DATA (bits 7:0)</strong>: 数据区</li>
+</ul>
+<h2 id="IC-ENABLE-使能寄存器"><a href="#IC-ENABLE-使能寄存器" class="headerlink" title="IC_ENABLE - 使能寄存器"></a>IC_ENABLE - 使能寄存器</h2><ul>
+<li><p><strong>IC_ENABLE (bit 0)</strong>: 控制器使能</p>
+<ul>
+<li>1 &#x3D; 使能控制器</li>
+<li>0 &#x3D; 禁用控制器</li>
+</ul>
+</li>
+<li><p><strong>ABORT (bit 1)</strong>: 强制中止传输</p>
+<ul>
+<li>仅主机模式有效</li>
+<li>触发后发送STOP条件,清空Tx FIFO</li>
+</ul>
+</li>
+</ul>
+<h2 id="IC-ENABLE-STATUS-使能状态寄存器-v2-03a"><a href="#IC-ENABLE-STATUS-使能状态寄存器-v2-03a" class="headerlink" title="IC_ENABLE_STATUS - 使能状态寄存器 (v2.03a+)"></a>IC_ENABLE_STATUS - 使能状态寄存器 (v2.03a+)</h2><ul>
+<li><strong>IC_EN (bit 0)</strong>: 控制器实际使能状态<ul>
+<li>用于判断硬件是否已完成关闭</li>
+</ul>
+</li>
+</ul>
+<h2 id="时钟配置寄存器组"><a href="#时钟配置寄存器组" class="headerlink" title="时钟配置寄存器组"></a>时钟配置寄存器组</h2><h3 id="IC-FS-SCL-LCNT-IC-FS-SCL-HCNT"><a href="#IC-FS-SCL-LCNT-IC-FS-SCL-HCNT" class="headerlink" title="IC_FS_SCL_LCNT &#x2F; IC_FS_SCL_HCNT"></a>IC_FS_SCL_LCNT &#x2F; IC_FS_SCL_HCNT</h3><p>配置Fast Mode下的SCL低电平和高电平周期:</p>
+<ul>
+<li><strong>最小值约束</strong>:<ul>
+<li>LCNT &gt; SPKLEN + 7 (IC_CLK_FREQ_OPTIMIZATION &#x3D; 0)</li>
+<li>LCNT ≥ 6 (IC_CLK_FREQ_OPTIMIZATION &#x3D; 1)</li>
+<li>HCNT &gt; SPKLEN + 5 (IC_CLK_FREQ_OPTIMIZATION &#x3D; 0)</li>
+<li>HCNT ≥ 1 (IC_CLK_FREQ_OPTIMIZATION &#x3D; 1)</li>
+</ul>
+</li>
+</ul>
+<h3 id="IC-FS-SPKLEN-毛刺抑制寄存器"><a href="#IC-FS-SPKLEN-毛刺抑制寄存器" class="headerlink" title="IC_FS_SPKLEN - 毛刺抑制寄存器"></a>IC_FS_SPKLEN - 毛刺抑制寄存器</h3><p>配置Fast Mode下的最大毛刺抑制时间:</p>
+<ul>
+<li>最小值为1</li>
+<li>计算公式: SPKLEN &#x3D; 毛刺时间 &#x2F; ic_clk周期 - 1</li>
+</ul>
+<h3 id="IC-SDA-HOLD-SDA保持时间寄存器"><a href="#IC-SDA-HOLD-SDA保持时间寄存器" class="headerlink" title="IC_SDA_HOLD - SDA保持时间寄存器"></a>IC_SDA_HOLD - SDA保持时间寄存器</h3><p>控制SDA数据保持时间(tHD;DAT):</p>
+<ul>
+<li><strong>IC_SDA_RX_HOLD (bits 15:0)</strong>: 接收模式SDA保持时间</li>
+<li><strong>IC_SDA_TX_HOLD (bits 31:16)</strong>: 发送模式SDA保持时间</li>
+<li>单位: 1个ic_clk周期</li>
+<li>必须在控制器禁用时写入</li>
+</ul>
+<h2 id="DMA配置寄存器"><a href="#DMA配置寄存器" class="headerlink" title="DMA配置寄存器"></a>DMA配置寄存器</h2><h3 id="IC-DMA-CR-DMA控制寄存器"><a href="#IC-DMA-CR-DMA控制寄存器" class="headerlink" title="IC_DMA_CR - DMA控制寄存器"></a>IC_DMA_CR - DMA控制寄存器</h3><ul>
+<li><strong>TDMAE (bit 1)</strong>: 发送DMA使能</li>
+<li><strong>RDMAE (bit 0)</strong>: 接收DMA使能</li>
+</ul>
+<h3 id="IC-DMA-TDLR-发送DMA水位寄存器"><a href="#IC-DMA-TDLR-发送DMA水位寄存器" class="headerlink" title="IC_DMA_TDLR - 发送DMA水位寄存器"></a>IC_DMA_TDLR - 发送DMA水位寄存器</h3><p>设置TX FIFO触发DMA请求的水位阈值:</p>
+<ul>
+<li>数值越大,触发越早,FIFO溢出风险越低</li>
+<li>数值越小,触发越晚,总线效率越高但下溢风险增加</li>
+</ul>
+<h3 id="IC-DMA-RDLR-接收DMA水位寄存器"><a href="#IC-DMA-RDLR-接收DMA水位寄存器" class="headerlink" title="IC_DMA_RDLR - 接收DMA水位寄存器"></a>IC_DMA_RDLR - 接收DMA水位寄存器</h3><p>设置RX FIFO触发DMA请求的水位阈值:</p>
+<ul>
+<li>最优配置: SRC_MSIZE &#x3D; RDLR + 1</li>
+</ul>
+<h1 id="Programming-Flow-编程流程"><a href="#Programming-Flow-编程流程" class="headerlink" title="Programming Flow (编程流程)"></a>Programming Flow (编程流程)</h1><h2 id="主机模式初始化流程"><a href="#主机模式初始化流程" class="headerlink" title="主机模式初始化流程"></a>主机模式初始化流程</h2><h3 id="静态模式初始化-I2C-DYNAMIC-TAR-UPDATE-0"><a href="#静态模式初始化-I2C-DYNAMIC-TAR-UPDATE-0" class="headerlink" title="静态模式初始化 (I2C_DYNAMIC_TAR_UPDATE &#x3D; 0)"></a>静态模式初始化 (I2C_DYNAMIC_TAR_UPDATE &#x3D; 0)</h3><ol>
+<li><strong>禁用控制器</strong>: 向IC_ENABLE[0]写入0</li>
+<li><strong>配置控制寄存器</strong>: <ul>
+<li>写入IC_CON,设置速度模式、地址模式</li>
+<li>确保IC_SLAVE_DISABLE &#x3D; 1, MASTER_MODE &#x3D; 1</li>
+</ul>
+</li>
+<li><strong>设置目标地址</strong>: 写入IC_TAR,指定从机地址</li>
+<li><strong>高速模式配置</strong> (可选): 写入IC_HS_MADDR</li>
+<li><strong>启用控制器</strong>: 向IC_ENABLE[0]写入1</li>
+<li><strong>发起传输</strong>: 向IC_DATA_CMD写入数据&#x2F;命令</li>
+</ol>
+<blockquote>
+<p>切换从机地址时需重复步骤1-6</p>
+</blockquote>
+<h3 id="动态模式初始化-I2C-DYNAMIC-TAR-UPDATE-1"><a href="#动态模式初始化-I2C-DYNAMIC-TAR-UPDATE-1" class="headerlink" title="动态模式初始化 (I2C_DYNAMIC_TAR_UPDATE &#x3D; 1)"></a>动态模式初始化 (I2C_DYNAMIC_TAR_UPDATE &#x3D; 1)</h3><ol>
+<li><strong>禁用控制器</strong> (仅初始化时): 向IC_ENABLE[0]写入0</li>
+<li><strong>配置控制寄存器</strong>: <ul>
+<li>写入IC_CON,设置速度模式</li>
+<li>主机地址模式由IC_10BITADDR_MASTER动态控制</li>
+</ul>
+</li>
+<li><strong>设置目标地址</strong>: 写入IC_TAR</li>
+<li><strong>高速模式配置</strong> (可选): 写入IC_HS_MADDR</li>
+<li><strong>启用控制器</strong>: 向IC_ENABLE[0]写入1</li>
+<li><strong>发起传输</strong>: 向IC_DATA_CMD写入数据&#x2F;命令</li>
+<li><strong>切换地址</strong> (运行中): 直接写入新的IC_TAR,无需禁用</li>
+</ol>
+<h2 id="数据传输流程"><a href="#数据传输流程" class="headerlink" title="数据传输流程"></a>数据传输流程</h2><h3 id="Master-Transmitter-主机发送器"><a href="#Master-Transmitter-主机发送器" class="headerlink" title="Master Transmitter (主机发送器)"></a>Master Transmitter (主机发送器)</h3><h4 id="IC-EMPTYFIFO-HOLD-MASTER-EN-0-1"><a href="#IC-EMPTYFIFO-HOLD-MASTER-EN-0-1" class="headerlink" title="IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0"></a>IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0</h4><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-10-56-38.png"></p>
+<ol>
+<li>向Tx FIFO写入数据(CMD&#x3D;0)</li>
+<li>控制器自动产生START条件</li>
+<li>发送地址+W+数据字节</li>
+<li>Tx FIFO为空时自动生成STOP条件</li>
+</ol>
+<h4 id="IC-EMPTYFIFO-HOLD-MASTER-EN-1-1"><a href="#IC-EMPTYFIFO-HOLD-MASTER-EN-1-1" class="headerlink" title="IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1"></a>IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1</h4><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-11-24-08.png"></p>
+<ol>
+<li>向Tx FIFO写入数据(CMD&#x3D;0)</li>
+<li>控制器产生START,开始传输</li>
+<li><strong>最后一个字节需设置STOP位&#x3D;1</strong></li>
+<li>否则控制器会拉低SCL,等待新数据</li>
+</ol>
+<h3 id="Master-Receiver-主机接收器"><a href="#Master-Receiver-主机接收器" class="headerlink" title="Master Receiver (主机接收器)"></a>Master Receiver (主机接收器)</h3><h4 id="IC-EMPTYFIFO-HOLD-MASTER-EN-0-2"><a href="#IC-EMPTYFIFO-HOLD-MASTER-EN-0-2" class="headerlink" title="IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0"></a>IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0</h4><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-10-56-54.png"></p>
+<ol>
+<li>向Tx FIFO写入读命令(CMD&#x3D;1)</li>
+<li>控制器产生START,发送地址+R</li>
+<li>依次读取数据字节,最后发送NACK</li>
+<li>Tx FIFO为空时生成STOP条件</li>
+</ol>
+<h4 id="IC-EMPTYFIFO-HOLD-MASTER-EN-1-2"><a href="#IC-EMPTYFIFO-HOLD-MASTER-EN-1-2" class="headerlink" title="IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1"></a>IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1</h4><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-11-28-12.png"></p>
+<ol>
+<li>向Tx FIFO写入读命令(CMD&#x3D;1)</li>
+<li>控制器发送地址+R,开始读取</li>
+<li><strong>最后一个命令需设置STOP位&#x3D;1</strong></li>
+<li>否则控制器会拉低SCL保持总线</li>
+</ol>
+<h3 id="RESTART条件生成"><a href="#RESTART条件生成" class="headerlink" title="RESTART条件生成"></a>RESTART条件生成</h3><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-11-31-14.png"></p>
+<p>当IC_DATA_CMD[10] &#x3D; 1且IC_RESTART_EN &#x3D; 1时:</p>
+<p><strong>发送器</strong>:</p>
+<ul>
+<li>当前字节传输完成后生成RESTART</li>
+<li>立即开始新传输(地址+W+数据)</li>
+<li>FIFO为空时先拉低SCL,等新数据</li>
+</ul>
+<p><strong>接收器</strong>:</p>
+<ul>
+<li><strong>必须先发送NACK</strong></li>
+<li>然后生成RESTART,开始新读传输</li>
+</ul>
+<h2 id="从机模式流程"><a href="#从机模式流程" class="headerlink" title="从机模式流程"></a>从机模式流程</h2><h3 id="Slave-Transmitter单字节操作"><a href="#Slave-Transmitter单字节操作" class="headerlink" title="Slave-Transmitter单字节操作"></a>Slave-Transmitter单字节操作</h3><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-14-12-04.png"></p>
+<p>核心流程:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[主机发起I2C传输,地址匹配从机IC_SAR] --&gt; B[传输方向是否为读R?]</span><br><span class="line">    B -- 是 --&gt; C[从机ACK地址,识别为Slave-Transmitter]</span><br><span class="line">    C --&gt; D[产生RD_REQ中断,拉低SCL线等待软件响应]</span><br><span class="line">    D --&gt; E[RD_REQ中断是否被屏蔽?]</span><br><span class="line">    E -- 否 --&gt; F[软件响应RD_REQ中断]</span><br><span class="line">    E -- 是 --&gt; G[软件定期轮询IC_RAW_INTR_STAT.5]</span><br><span class="line">    G --&gt; H[检测到R_RD_REQ位为1]</span><br><span class="line">    H -- 是 --&gt; F</span><br><span class="line">    F --&gt; I[Tx FIFO中是否有旧数据?]</span><br><span class="line">    I -- 是 --&gt; J[产生TX_ABRT中断,清空Tx FIFO]</span><br><span class="line">    J --&gt; K[软件读取IC_CLR_TX_ABRT寄存器释放状态]</span><br><span class="line">    I -- 否 --&gt; L[软件向IC_DATA_CMD写入待发送数据]</span><br><span class="line">    K --&gt; L</span><br><span class="line">    L --&gt; M[软件清除RD_REQ和TX_ABRT中断标志]</span><br><span class="line">    M --&gt; N[从机释放SCL,发送数据字节到总线]</span><br><span class="line">    N --&gt; O[主机操作]</span><br><span class="line">    O -- RESTART --&gt; A</span><br><span class="line">    O -- STOP --&gt; P[传输结束,释放总线]</span><br><span class="line">    B -- 否 --&gt; Q[从机识别为Slave-Receiver,执行其他流程]</span><br></pre></td></tr></table></figure>
+
+<h3 id="Slave-Receiver单字节操作"><a href="#Slave-Receiver单字节操作" class="headerlink" title="Slave-Receiver单字节操作"></a>Slave-Receiver单字节操作</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[I²C 主机发起传输,地址匹配 IC_SAR] --&gt; B[DW_apb_i2c 应答地址,识别为写操作 Slave-Receiver]</span><br><span class="line">    B --&gt; C[Rx FIFO 是否已满?]</span><br><span class="line">    C --&gt;|否| D[接收字节并存入 Rx FIFO]</span><br><span class="line">    C --&gt;|是| E[IC_RX_FULL_HLD_BUS_EN = 1?]</span><br><span class="line">    E --&gt;|是| F[拉低 SCL,暂停总线,等待软件读取数据]</span><br><span class="line">    F --&gt; G[软件读取 IC_DATA_CMD,释放空间]</span><br><span class="line">    G --&gt; D</span><br><span class="line">    E --&gt;|否| H[发生溢出,置位 R_RX_OVER,继续接收]</span><br><span class="line">    D --&gt; I[RX_FULL 中断是否被屏蔽?]</span><br><span class="line">    I --&gt;|否| J[触发 RX_FULL 中断 IC_RAW_INTR_STAT.2]</span><br><span class="line">    I --&gt;|是| K[软件定时轮询 IC_STATUS 寄存器,检查 RFNE 位]</span><br><span class="line">    J --&gt; L[软件读取 IC_DATA_CMD bits 7:0 取出数据]</span><br><span class="line">    K --&gt; L</span><br><span class="line">    L --&gt; M[主机操作?]</span><br><span class="line">    M --&gt;|发送 STOP| N[传输结束,释放总线]</span><br><span class="line">    M --&gt;|发送 RESTART| A[新的传输周期]</span><br></pre></td></tr></table></figure>
+
+<h3 id="Slave-Transmitter批量传输"><a href="#Slave-Transmitter批量传输" class="headerlink" title="Slave-Transmitter批量传输"></a>Slave-Transmitter批量传输</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A[远程主机发起读请求,DW_apb_i2c 作为 Slave-Transmitter] --&gt; B[TX FIFO 是否为空?]</span><br><span class="line">    B --&gt;|否| C[从 TX FIFO 中取出字节发送给主机]</span><br><span class="line">    B --&gt;|是| D[RD_REQ 中断是否被屏蔽?]</span><br><span class="line">    D --&gt;|否| E[触发 RD_REQ 中断 M_RD_REQ 位]</span><br><span class="line">    D --&gt;|是| F[软件定时轮询 IC_RAW_INTR_STAT,检查 R_RD_REQ 位]</span><br><span class="line">    E --&gt; G[ISR 中向 TX FIFO 写入一个或多个字节]</span><br><span class="line">    F --&gt; G</span><br><span class="line">    G --&gt; C</span><br><span class="line">    C --&gt; H[主机是否应答 ACK?]</span><br><span class="line">    H --&gt;|是| I[TX FIFO 是否还有数据?]</span><br><span class="line">    I --&gt;|是| C</span><br><span class="line">    I --&gt;|否| J[主机是否还需要更多数据?]</span><br><span class="line">    J --&gt;|是| A</span><br><span class="line">    J --&gt;|否| K[主机发送 NACK,传输结束]</span><br><span class="line">    H --&gt;|否| K</span><br><span class="line">    K --&gt; L[清空 TX FIFO,清除残留数据]</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-15-22-15.png"></p>
+<p><strong>关键点</strong>:</p>
+<ul>
+<li>软件可预先写入多个字节到TX FIFO</li>
+<li>从机自动连续发送,无需每次中断</li>
+<li>主机NACK后自动清空TX FIFO</li>
+</ul>
+<h2 id="控制器禁用流程"><a href="#控制器禁用流程" class="headerlink" title="控制器禁用流程"></a>控制器禁用流程</h2><h3 id="标准禁用流程"><a href="#标准禁用流程" class="headerlink" title="标准禁用流程"></a>标准禁用流程</h3><ol>
+<li><strong>定义轮询间隔</strong>: t_i2c_poll &#x3D; 最高I²C速率信号周期 × 10</li>
+<li><strong>定义超时参数</strong>: MAX_T_POLL_COUNT</li>
+<li><strong>阻塞新事务</strong>: 阻止软件发起新的I²C主机事务</li>
+<li><strong>初始化计数器</strong>: POLL_COUNT &#x3D; 0</li>
+<li><strong>发起禁用</strong>: 向IC_ENABLE[0]写入0</li>
+<li><strong>轮询状态</strong>: <ul>
+<li>读取IC_ENABLE_STATUS[0]</li>
+<li>POLL_COUNT++</li>
+<li>若POLL_COUNT &gt;&#x3D; MAX_T_POLL_COUNT,返回错误</li>
+</ul>
+</li>
+<li><strong>等待完成</strong>:<ul>
+<li>若IC_EN &#x3D; 1,休眠t_i2c_poll,回到步骤6</li>
+<li>若IC_EN &#x3D; 0,返回成功</li>
+</ul>
+</li>
+</ol>
+<h3 id="强制中止流程-ABORT"><a href="#强制中止流程-ABORT" class="headerlink" title="强制中止流程 (ABORT)"></a>强制中止流程 (ABORT)</h3><p>用于IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1且需立即禁用的情况:</p>
+<ol>
+<li><strong>停止填充Tx FIFO</strong></li>
+<li><strong>禁用DMA</strong> (可选): TDMAE置0</li>
+<li><strong>发起ABORT</strong>: 向IC_ENABLE[1]写入1</li>
+<li><strong>等待中断</strong>: 等待M_TX_ABRT中断</li>
+<li><strong>检查中止源</strong>: 读取IC_TX_ABRT_SOURCE,确认为ABRT_USER_ABRT</li>
+</ol>
+<h2 id="时钟配置流程"><a href="#时钟配置流程" class="headerlink" title="时钟配置流程"></a>时钟配置流程</h2><h3 id="Fast-Mode配置步骤"><a href="#Fast-Mode配置步骤" class="headerlink" title="Fast Mode配置步骤"></a>Fast Mode配置步骤</h3><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-19-34-47.png"></p>
+<ol>
+<li><strong>配置速率模式寄存器</strong></li>
+<li><strong>确保ic_clk ≥ 32 MHz</strong></li>
+<li><strong>配置IC_CON寄存器</strong>: 切换到Fast Mode或Fast Mode Plus</li>
+<li><strong>配置计数寄存器</strong>: <ul>
+<li>IC_FS_SCL_LCNT (低电平周期)</li>
+<li>IC_FS_SCL_HCNT (高电平周期)</li>
+</ul>
+</li>
+<li><strong>编程IC_FS_SPKLEN</strong>: 配置毛刺抑制时间</li>
+<li><strong>编程IC_SDA_SETUP</strong>: 满足最小数据建立时间</li>
+</ol>
+<h3 id="时钟配置示例"><a href="#时钟配置示例" class="headerlink" title="时钟配置示例"></a>时钟配置示例</h3><p><strong>场景</strong>: ic_clk &#x3D; 10 MHz, 目标I²C速率 &#x3D; 800 kbps</p>
+<p><strong>1. SPKLEN计算</strong>:</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">毛刺要求 <span class="operator">=</span> <span class="number">50</span> ns</span><br><span class="line"><span class="attribute">SPKLEN</span> <span class="operator">=</span> <span class="number">50</span>ns / <span class="number">100</span>ns - <span class="number">1</span> ≈ <span class="number">0</span> → 取最小值 <span class="number">1</span></span><br><span class="line">IC_FS_SPKLEN <span class="operator">=</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>2. LCNT&#x2F;HCNT计算</strong> (IC_CLK_FREQ_OPTIMIZATION &#x3D; 1):</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">SCL</span>低电平 ≈ <span class="number">600</span> ns (FM+规范最小值)</span><br><span class="line"><span class="attribute">IC_FS_SCL_LCNT</span> = <span class="number">600</span> / <span class="number">100</span> = <span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="attribute">SCL</span>高电平 ≈ <span class="number">600</span> ns</span><br><span class="line"><span class="attribute">IC_FS_SCL_HCNT</span> = <span class="number">600</span>/<span class="number">100</span> - SPKLEN - <span class="number">3</span> = <span class="number">6</span> - <span class="number">1</span> - <span class="number">3</span> = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 最终配置</strong>:</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">IC_FS_SPKLEN</span>    = <span class="number">1</span></span><br><span class="line"><span class="attr">IC_FS_SCL_LCNT</span>  = <span class="number">6</span></span><br><span class="line"><span class="attr">IC_FS_SCL_HCNT</span>  = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="DMA配置流程"><a href="#DMA配置流程" class="headerlink" title="DMA配置流程"></a>DMA配置流程</h2><h3 id="发送DMA配置"><a href="#发送DMA配置" class="headerlink" title="发送DMA配置"></a>发送DMA配置</h3><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-10-14-25-11.png"></p>
+<p><strong>1. 配置DMA控制器</strong>:</p>
+<ul>
+<li>BLOCK_TS: 总数据块大小</li>
+<li>DEST_MSIZE: 单次突发长度</li>
+</ul>
+<p><strong>2. 配置I²C DMA水位</strong>:</p>
+<ul>
+<li>IC_DMA_TDLR: 发送水位阈值</li>
+<li>最优配置: DEST_MSIZE &#x3D; FIFO_DEPTH - IC_DMA_TDLR</li>
+</ul>
+<p><strong>3. 使能发送DMA</strong>:</p>
+<ul>
+<li>IC_DMA_CR.TDMAE &#x3D; 1</li>
+</ul>
+<h3 id="接收DMA配置"><a href="#接收DMA配置" class="headerlink" title="接收DMA配置"></a>接收DMA配置</h3><p><strong>1. 配置DMA控制器</strong>:</p>
+<ul>
+<li>BLOCK_TS: 总数据块大小</li>
+<li>SRC_MSIZE: 单次突发长度</li>
+</ul>
+<p><strong>2. 配置I²C DMA水位</strong>:</p>
+<ul>
+<li>IC_DMA_RDLR: 接收水位阈值</li>
+<li>最优配置: SRC_MSIZE &#x3D; IC_DMA_RDLR + 1</li>
+</ul>
+<p><strong>3. 使能接收DMA</strong>:</p>
+<ul>
+<li>IC_DMA_CR.RDMAE &#x3D; 1</li>
+</ul>
+<h3 id="DMA水位选择策略"><a href="#DMA水位选择策略" class="headerlink" title="DMA水位选择策略"></a>DMA水位选择策略</h3><p><strong>高水位配置</strong> (TDLR大):</p>
+<ul>
+<li>优点: FIFO下溢风险低,传输可靠</li>
+<li>缺点: 突发次数多,总线利用率低</li>
+</ul>
+<p><strong>低水位配置</strong> (TDLR小):</p>
+<ul>
+<li>优点: 突发次数少,总线效率高</li>
+<li>缺点: FIFO下溢风险高</li>
+</ul>
+<p><strong>水线对比</strong>:</p>
+<p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-10-14-50-18.png"></p>
+<p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-10-14-53-29.png"></p>
+<h2 id="Bus-Clear流程"><a href="#Bus-Clear流程" class="headerlink" title="Bus Clear流程"></a>Bus Clear流程</h2><h3 id="SDA线被拉低恢复"><a href="#SDA线被拉低恢复" class="headerlink" title="SDA线被拉低恢复"></a>SDA线被拉低恢复</h3><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-17-52-03.png"></p>
+<ol>
+<li>主机最多发送9个SCL时钟脉冲</li>
+<li>同时尝试驱动SDA为高电平</li>
+<li>若SDA恢复为高,发送STOP条件</li>
+<li>若第9个时钟后SDA仍为低,需硬件复位</li>
+</ol>
+<h3 id="SCL线被拉低"><a href="#SCL线被拉低" class="headerlink" title="SCL线被拉低"></a>SCL线被拉低</h3><ul>
+<li><strong>唯一解决方案</strong>: 硬件复位整个I²C总线</li>
+<li>SCL被拉低后无法产生时钟,协议无法继续</li>
+</ul>
+<h2 id="Ultra-Fast-Mode配置"><a href="#Ultra-Fast-Mode配置" class="headerlink" title="Ultra-Fast Mode配置"></a>Ultra-Fast Mode配置</h2><p><img src="/2026/03/10/low-speed/i2c_controller_1/2026-03-09-19-40-09.png"></p>
+<p><strong>特点</strong>:</p>
+<ul>
+<li>单向传输: 仅支持主机写操作</li>
+<li>速率: DC ~ 5 MHz</li>
+<li>第9个时钟由主机强制驱动为高(NACK)</li>
+<li>使用推挽驱动器,非开漏</li>
+</ul>
+<p><strong>配置步骤</strong>:</p>
+<ol>
+<li>IC_ULTRA_FAST_MODE &#x3D; 1</li>
+<li>配置IC_UFM_SPKLEN</li>
+<li>禁用读操作(CMD位固定为0)</li>
+</ol>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>License</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/06/pcie/pcie_ep_demo/">2026-03-06</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E8%AF%A6%E8%A7%A3"><span class="toc-text">寄存器详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#IC-CON-%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_CON - 控制寄存器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E4%BD%8D%E5%9F%9F"><span class="toc-text">关键位域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E5%9C%B0%E5%9D%80%E6%9B%B4%E6%96%B0"><span class="toc-text">动态地址更新</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IC-TAR-%E7%9B%AE%E6%A0%87%E5%9C%B0%E5%9D%80%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_TAR - 目标地址寄存器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IC-DATA-CMD-%E6%95%B0%E6%8D%AE%E5%91%BD%E4%BB%A4%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_DATA_CMD - 数据命令寄存器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84"><span class="toc-text">寄存器结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#IC-EMPTYFIFO-HOLD-MASTER-EN-0"><span class="toc-text">IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#IC-EMPTYFIFO-HOLD-MASTER-EN-1"><span class="toc-text">IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IC-ENABLE-%E4%BD%BF%E8%83%BD%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_ENABLE - 使能寄存器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IC-ENABLE-STATUS-%E4%BD%BF%E8%83%BD%E7%8A%B6%E6%80%81%E5%AF%84%E5%AD%98%E5%99%A8-v2-03a"><span class="toc-text">IC_ENABLE_STATUS - 使能状态寄存器 (v2.03a+)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E9%92%9F%E9%85%8D%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%84"><span class="toc-text">时钟配置寄存器组</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IC-FS-SCL-LCNT-IC-FS-SCL-HCNT"><span class="toc-text">IC_FS_SCL_LCNT &#x2F; IC_FS_SCL_HCNT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IC-FS-SPKLEN-%E6%AF%9B%E5%88%BA%E6%8A%91%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_FS_SPKLEN - 毛刺抑制寄存器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IC-SDA-HOLD-SDA%E4%BF%9D%E6%8C%81%E6%97%B6%E9%97%B4%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_SDA_HOLD - SDA保持时间寄存器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DMA%E9%85%8D%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">DMA配置寄存器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IC-DMA-CR-DMA%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_DMA_CR - DMA控制寄存器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IC-DMA-TDLR-%E5%8F%91%E9%80%81DMA%E6%B0%B4%E4%BD%8D%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_DMA_TDLR - 发送DMA水位寄存器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IC-DMA-RDLR-%E6%8E%A5%E6%94%B6DMA%E6%B0%B4%E4%BD%8D%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">IC_DMA_RDLR - 接收DMA水位寄存器</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Programming-Flow-%E7%BC%96%E7%A8%8B%E6%B5%81%E7%A8%8B"><span class="toc-text">Programming Flow (编程流程)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E6%9C%BA%E6%A8%A1%E5%BC%8F%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="toc-text">主机模式初始化流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E6%A8%A1%E5%BC%8F%E5%88%9D%E5%A7%8B%E5%8C%96-I2C-DYNAMIC-TAR-UPDATE-0"><span class="toc-text">静态模式初始化 (I2C_DYNAMIC_TAR_UPDATE &#x3D; 0)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E6%A8%A1%E5%BC%8F%E5%88%9D%E5%A7%8B%E5%8C%96-I2C-DYNAMIC-TAR-UPDATE-1"><span class="toc-text">动态模式初始化 (I2C_DYNAMIC_TAR_UPDATE &#x3D; 1)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E6%B5%81%E7%A8%8B"><span class="toc-text">数据传输流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Master-Transmitter-%E4%B8%BB%E6%9C%BA%E5%8F%91%E9%80%81%E5%99%A8"><span class="toc-text">Master Transmitter (主机发送器)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#IC-EMPTYFIFO-HOLD-MASTER-EN-0-1"><span class="toc-text">IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#IC-EMPTYFIFO-HOLD-MASTER-EN-1-1"><span class="toc-text">IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Master-Receiver-%E4%B8%BB%E6%9C%BA%E6%8E%A5%E6%94%B6%E5%99%A8"><span class="toc-text">Master Receiver (主机接收器)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#IC-EMPTYFIFO-HOLD-MASTER-EN-0-2"><span class="toc-text">IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 0</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#IC-EMPTYFIFO-HOLD-MASTER-EN-1-2"><span class="toc-text">IC_EMPTYFIFO_HOLD_MASTER_EN &#x3D; 1</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RESTART%E6%9D%A1%E4%BB%B6%E7%94%9F%E6%88%90"><span class="toc-text">RESTART条件生成</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E6%9C%BA%E6%A8%A1%E5%BC%8F%E6%B5%81%E7%A8%8B"><span class="toc-text">从机模式流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Slave-Transmitter%E5%8D%95%E5%AD%97%E8%8A%82%E6%93%8D%E4%BD%9C"><span class="toc-text">Slave-Transmitter单字节操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Slave-Receiver%E5%8D%95%E5%AD%97%E8%8A%82%E6%93%8D%E4%BD%9C"><span class="toc-text">Slave-Receiver单字节操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Slave-Transmitter%E6%89%B9%E9%87%8F%E4%BC%A0%E8%BE%93"><span class="toc-text">Slave-Transmitter批量传输</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8%E7%A6%81%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="toc-text">控制器禁用流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%87%E5%87%86%E7%A6%81%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="toc-text">标准禁用流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%BA%E5%88%B6%E4%B8%AD%E6%AD%A2%E6%B5%81%E7%A8%8B-ABORT"><span class="toc-text">强制中止流程 (ABORT)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E9%92%9F%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B"><span class="toc-text">时钟配置流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Fast-Mode%E9%85%8D%E7%BD%AE%E6%AD%A5%E9%AA%A4"><span class="toc-text">Fast Mode配置步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%92%9F%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-text">时钟配置示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DMA%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B"><span class="toc-text">DMA配置流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E9%80%81DMA%E9%85%8D%E7%BD%AE"><span class="toc-text">发送DMA配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A5%E6%94%B6DMA%E9%85%8D%E7%BD%AE"><span class="toc-text">接收DMA配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DMA%E6%B0%B4%E4%BD%8D%E9%80%89%E6%8B%A9%E7%AD%96%E7%95%A5"><span class="toc-text">DMA水位选择策略</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bus-Clear%E6%B5%81%E7%A8%8B"><span class="toc-text">Bus Clear流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SDA%E7%BA%BF%E8%A2%AB%E6%8B%89%E4%BD%8E%E6%81%A2%E5%A4%8D"><span class="toc-text">SDA线被拉低恢复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SCL%E7%BA%BF%E8%A2%AB%E6%8B%89%E4%BD%8E"><span class="toc-text">SCL线被拉低</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ultra-Fast-Mode%E9%85%8D%E7%BD%AE"><span class="toc-text">Ultra-Fast Mode配置</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `Just`,
+      min: `minutes ago`,
+      hour: `hours ago`,
+      day: `days ago`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `Switched to Light Mode`,
+      dark: `Switched to Dark Mode`,
+      auto: `Switched to Auto Mode`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div></body></html>
