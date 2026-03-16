@@ -29,7 +29,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/2026-03-13-18-58-35.png">
 <meta property="article:published_time" content="2026-03-09T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-16T08:56:32.770Z">
+<meta property="article:modified_time" content="2026-03-16T09:09:55.809Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
@@ -50,7 +50,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-10T00:00:00+08:00","dateModified":"2026-03-16T16:56:32+08:00","datePublished":"2026-03-10T00:00:00+08:00","description":"","headline":"DW APB I2C Controller 第二篇","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-10T00:00:00+08:00","dateModified":"2026-03-16T17:09:55+08:00","datePublished":"2026-03-10T00:00:00+08:00","description":"","headline":"DW APB I2C Controller 第二篇","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/10/low-speed/i2c_controller_1/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -82,7 +82,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">embedded_tech</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-09T16:00:00.000Z">2026-03-10</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-16T08:56:32.770Z">2026-03-16</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-09T16:00:00.000Z">2026-03-10</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-16T09:09:55.809Z">2026-03-16</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -113,24 +113,7 @@
 <ol>
 <li>控制器使能&#x2F;禁用超时 (第64-84行)</li>
 </ol>
-<p>  static int dw_i2c_enable(struct i2c_regs *i2c_base, bool enable)<br>  {<br>      u32 ena &#x3D; enable ? IC_ENABLE_0B : 0;<br>      int timeout &#x3D; 100;</p>
-<pre><code>  do {
-      writel(ena, &amp;i2c_base-&gt;ic_enable);
-      if ((readl(&amp;i2c_base-&gt;ic_enable_status) &amp; IC_ENABLE_0B) == ena)
-          return 0;
-
-      /*
-       * Wait 10 times the signaling period of the highest I2C
-       * transfer supported by the driver (for 400KHz this is
-       * 25us) as described in the DesignWare I2C databook.
-       */
-      udelay(25);
-  } while (timeout--);
-  printf(&quot;timeout in %sabling I2C adapter\n&quot;, enable ? &quot;en&quot; : &quot;dis&quot;);
-
-  return -ETIMEDOUT;
-</code></pre>
-<p>  }</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">int</span> <span class="title">dw_i2c_enable</span><span class="params">(<span class="keyword">struct</span> i2c_regs *i2c_base, <span class="type">bool</span> enable)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    u32 ena = enable ? IC_ENABLE_0B : <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> timeout = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="built_in">writel</span>(ena, &amp;i2c_base-&gt;ic_enable);</span><br><span class="line">        <span class="keyword">if</span> ((<span class="built_in">readl</span>(&amp;i2c_base-&gt;ic_enable_status) &amp; IC_ENABLE_0B) == ena)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * Wait 10 times the signaling period of the highest I2C</span></span><br><span class="line"><span class="comment">         * transfer supported by the driver (for 400KHz this is</span></span><br><span class="line"><span class="comment">         * 25us) as described in the DesignWare I2C databook.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="built_in">udelay</span>(<span class="number">25</span>);</span><br><span class="line">    &#125; <span class="keyword">while</span> (timeout--);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;timeout in %sabling I2C adapter\n&quot;</span>, enable ? <span class="string">&quot;en&quot;</span> : <span class="string">&quot;dis&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> -ETIMEDOUT;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>  目的：使能&#x2F;禁用控制器时，硬件可能需要时间响应，通过轮询 ic_enable_status 寄存器确认状态变化。</p>
 <p>  机制：</p>
 <ul>
@@ -142,18 +125,7 @@
 <ol start="2">
 <li>等待总线空闲超时 (第208-221行)</li>
 </ol>
-<p>  static int i2c_wait_for_bb(struct i2c_regs *i2c_base)<br>  {<br>      unsigned long start_time_bb &#x3D; get_timer(0);</p>
-<pre><code>  while ((readl(&amp;i2c_base-&gt;ic_status) &amp; IC_STATUS_MA) ||
-         !(readl(&amp;i2c_base-&gt;ic_status) &amp; IC_STATUS_TFE)) {
-
-      /* Evaluate timeout */
-      if (get_timer(start_time_bb) &gt; (unsigned long)(I2C_BYTE_TO_BB))
-          return 1;
-  }
-
-  return 0;
-</code></pre>
-<p>  }</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">int</span> <span class="title">i2c_wait_for_bb</span><span class="params">(<span class="keyword">struct</span> i2c_regs *i2c_base)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> start_time_bb = <span class="built_in">get_timer</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> ((<span class="built_in">readl</span>(&amp;i2c_base-&gt;ic_status) &amp; IC_STATUS_MA) ||</span><br><span class="line">           !(<span class="built_in">readl</span>(&amp;i2c_base-&gt;ic_status) &amp; IC_STATUS_TFE)) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Evaluate timeout */</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">get_timer</span>(start_time_bb) &gt; (<span class="type">unsigned</span> <span class="type">long</span>)(I2C_BYTE_TO_BB))</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>  目的：等待总线从忙碌状态变为空闲。</p>
 <p>  检查条件：</p>
 <ul>
@@ -165,26 +137,7 @@
 <ol start="3">
 <li>等待停止条件超时 (第239-260行)</li>
 </ol>
-<p>  static int i2c_xfer_finish(struct i2c_regs *i2c_base)<br>  {<br>      ulong start_stop_det &#x3D; get_timer(0);</p>
-<pre><code>  while (1) {
-      if ((readl(&amp;i2c_base-&gt;ic_raw_intr_stat) &amp; IC_STOP_DET)) {
-          readl(&amp;i2c_base-&gt;ic_clr_stop_det);
-          break;
-      } else if (get_timer(start_stop_det) &gt; I2C_STOPDET_TO) {
-          break;
-      }
-  }
-
-  if (i2c_wait_for_bb(i2c_base)) {
-      printf(&quot;Timed out waiting for bus\n&quot;);
-      return 1;
-  }
-
-  i2c_flush_rxfifo(i2c_base);
-
-  return 0;
-</code></pre>
-<p>  }</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">int</span> <span class="title">i2c_xfer_finish</span><span class="params">(<span class="keyword">struct</span> i2c_regs *i2c_base)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ulong start_stop_det = <span class="built_in">get_timer</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> ((<span class="built_in">readl</span>(&amp;i2c_base-&gt;ic_raw_intr_stat) &amp; IC_STOP_DET)) &#123;</span><br><span class="line">            <span class="built_in">readl</span>(&amp;i2c_base-&gt;ic_clr_stop_det);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">get_timer</span>(start_stop_det) &gt; I2C_STOPDET_TO) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">i2c_wait_for_bb</span>(i2c_base)) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Timed out waiting for bus\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">i2c_flush_rxfifo</span>(i2c_base);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>  目的：等待 I2C 停止条件检测完成。</p>
 <p>  机制：</p>
 <ul>
@@ -196,17 +149,7 @@
 <ol start="4">
 <li>读操作字节超时 (第300-325行)</li>
 </ol>
-<p>  start_time_rx &#x3D; get_timer(0);<br>  while (len) {<br>      if (!active) {<br>          if (len &#x3D;&#x3D; 1)<br>              writel(IC_CMD | IC_STOP, &amp;i2c_base-&gt;ic_cmd_data);<br>          else<br>              writel(IC_CMD, &amp;i2c_base-&gt;ic_cmd_data);<br>          active &#x3D; 1;<br>      }</p>
-<pre><code>  if (readl(&amp;i2c_base-&gt;ic_status) &amp; IC_STATUS_RFNE) {
-      *buffer++ = (uchar)readl(&amp;i2c_base-&gt;ic_cmd_data);
-      len--;
-      start_time_rx = get_timer(0);  // 重置计时器
-      active = 0;
-  } else if (get_timer(start_time_rx) &gt; I2C_BYTE_TO) {
-      return 1;  // 超时返回错误
-  }
-</code></pre>
-<p>  }</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">start_time_rx = get_timer(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">while</span> (len) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!active) &#123;</span><br><span class="line">        <span class="keyword">if</span> (len == <span class="number">1</span>)</span><br><span class="line">            <span class="function"><span class="title">writel</span>(IC_CMD | IC_STOP, &amp;i2c_base-&gt;</span>ic_cmd_data);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="function"><span class="title">writel</span>(IC_CMD, &amp;i2c_base-&gt;</span>ic_cmd_data);</span><br><span class="line">        active = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">if</span> (readl(&amp;i2c_base-&gt;</span>ic_status) &amp; IC_STATUS_RFNE) &#123;</span><br><span class="line">        *<span class="function"><span class="title">buffer</span>++ = (uchar)readl(&amp;i2c_base-&gt;</span>ic_cmd_data);</span><br><span class="line">        len--;</span><br><span class="line">        start_time_rx = get_timer(<span class="number">0</span>);  <span class="comment">// 重置计时器</span></span><br><span class="line">        active = <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (get_timer(start_time_rx) &gt; I2C_BYTE_TO) &#123;</span><br><span class="line">        return <span class="number">1</span>;  <span class="comment">// 超时返回错误</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>  目的：读取每个字节时防止从机无响应。</p>
 <p>  机制：</p>
 <ul>
