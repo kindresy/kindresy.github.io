@@ -1,0 +1,951 @@
+
+<!DOCTYPE html><html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>axidma硬件介绍与软件实现 - 庐山东林</title>
+
+  
+    <meta name="description" content="通用特性核心时钟与通道配置​独立的核心、从接口和主接口时钟​Independent core, slave interface and master interface clocks最多支持 32 个通道​Up to 32 channels, one per source and destination pair, configurable in coreConsultant数据传输单向性​Dat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="axidma硬件介绍与软件实现">
+<meta property="og:url" content="https://kindresy.github.io/2026/03/17/dma/axidma/">
+<meta property="og:site_name" content="庐山东林">
+<meta property="og:description" content="通用特性核心时钟与通道配置​独立的核心、从接口和主接口时钟​Independent core, slave interface and master interface clocks最多支持 32 个通道​Up to 32 channels, one per source and destination pair, configurable in coreConsultant数据传输单向性​Dat">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-23-39.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-24-28.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-24-42.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-34-06.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-34-36.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-34-50.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-53-20.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-35-27.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-36-03.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-16-52-52.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-16-53-22.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-16-53-44.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-16-54-06.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-16-54-40.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-16-55-21.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-16-55-34.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-00-45.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-05-43.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-06-25.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-07-42.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-13-28.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-33-43.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-34-43.png">
+<meta property="og:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-19-28-31.png">
+<meta property="article:published_time" content="2026-03-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-18T11:34:45.950Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="life">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kindresy.github.io/2026/03/17/dma/axidma/2026-03-18-14-23-39.png">
+  
+  
+  
+  <meta name="keywords" content="life">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-17T00:00:00+08:00","dateModified":"2026-03-18T19:34:45+08:00","datePublished":"2026-03-17T00:00:00+08:00","description":"","headline":"axidma硬件介绍与软件实现","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/17/dma/axidma/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/17/dma/axidma/","keywords":"life","image":[]}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="Search"></form><div id="search-result"></div><div class="search-no-result">No Results!</div></div>
+
+
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a><a class="item title" href="/2026/03/16/life_record/%E8%84%91%E9%9B%BE%E4%BF%AE%E5%A4%8D/"><span class="title">脑雾修复</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/04/low-speed/i2c/"><span class="title">i2c_introduction</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/life-record/">life_record</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-16T16:00:00.000Z">2026-03-17</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-18T11:34:45.950Z">2026-03-18</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>axidma硬件介绍与软件实现</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h2 id="通用特性"><a href="#通用特性" class="headerlink" title="通用特性"></a>通用特性</h2><p>核心时钟与通道配置​<br>独立的核心、从接口和主接口时钟​<br>Independent core, slave interface and master interface clocks<br>最多支持 32 个通道​<br>Up to 32 channels, one per source and destination pair, configurable in coreConsultant<br>数据传输单向性​<br>Data transfers in one direction only (each channel is unidirectional)<br>最多两个 AXI 主接口​<br>Up to two AXI master interfaces, configurable in coreConsultant<br>用于多层支持（Two master interfaces for multilayer support）<br>多个 AXI 主接口通过允许外设直接连接不同 AXI 互连，提升总线性能（Multiple AXI masters increase bus performance by allowing direct connection of peripherals on different AXI interconnects）<br>支持不同 AMBA 层上的不同 ACLK（Support for different ACLK on different AMBA layers）<br>DMA 传输类型与内存接口​<br>支持多种 DMA 传输模式​<br>Memory-to-memory, memory-to-peripheral, peripheral-to-memory, and peripheral-to-peripheral DMA transfers<br>独立的外部内存接口（每通道）​<br>Separate external memory interface (per channel) to connect SRAM or Register File based memories to Channel FIFO<br>接口标准与配置​<br>AMBA 3 AXI &#x2F; AMBA 4 AXI 兼容的主接口​<br>AMBA 3 AXI&#x2F;AMBA 4 AXI-compliant master interface<br>AHB &#x2F; APB4 从接口用于编程 DMA 控制器​<br>AHB&#x2F;APB4 slave interface for programming the DMA controller<br>仅支持 SINGLE 传输（hburst &#x3D; 3’b000）（AHB slave interface supports only SINGLE transfers (hburst &#x3D; 3’b000)）<br>AXI 主接口数据总线宽度最高 512 位​<br>AXI master data bus width up to 512 bits (for both AXI master interfaces), configurable in coreConsultant<br>端序模式可静态或动态选择​       —&gt; 似乎有点强大，动态静态选择端序模式？<br>Endian mode can be selected statically or dynamically for AXI master interfaces, configurable in coreConsultant<br>动态选择端序的输入引脚​<br>Input pin to dynamically select endianness<br>高级功能与控制​<br>主接口链表访问端序的独立控制​<br>Independent control for endianness of linked list access on master interfaces, configurable in coreConsultant<br>可选的标识寄存器​<br>Optional identification register, configurable in coreConsultant<br>通道锁定支持​<br>Channel locking support<br>支持在不同传输层级上锁定主总线接口的内部通道仲裁（Supports locking of the internal channel arbitration for the master bus interface at different transfer hierarchy）<br>DMAC 状态指示输出​<br>DMAC status indication outputs<br>空闲&#x2F;忙指示（Idle&#x2F;busy indication）<br>DMA 保持功能​<br>DMA hold function       ——–&gt; 这个有点意思，重点聊一下<br>输出引脚指示 DMA 事务级别的最后写传输​<br>Output pin indicates the last write transfer at DMA transaction level<br>多级 DMA 传输层级​<br>Multiple levels of DMA transfer hierarchy</p>
+<h2 id="1-3-2-通道缓冲"><a href="#1-3-2-通道缓冲" class="headerlink" title="1.3.2 通道缓冲"></a>1.3.2 通道缓冲</h2><p>每个通道配备单个先进先出（FIFO）​<br>FIFO深度可在 coreConsultant中配置<br>自动打包&#x2F;解包数据以适配FIFO宽度</p>
+<h2 id="1-3-3-通道控制"><a href="#1-3-3-通道控制" class="headerlink" title="1.3.3 通道控制"></a>1.3.3 通道控制</h2><p>每个通道支持可编程传输类型（内存到内存、内存到外设、外设到内存、外设到外设）<br>支持单次或多次DMA事务​<br>每个通道支持可编程的多事务大小​<br>每个通道支持可编程的最大AMBA突发传输大小（可在 coreConsultant中配置）<br>通道禁用时无数据丢失​<br>通道挂起与恢复​<br>通道优先级可编程​<br>锁定不同传输层级下主总线接口的内部通道仲裁<br><strong>支持通过链表、连续地址、自动重载、影子寄存器方法实现可编程多块传输​<br>链表动态扩展​</strong><br>源（SRC）&#x2F;目的（DST）多块传输类型独立配置​<br>每个通道的源和目的各配备一个状态机​<br>数据和链表项（LLI）访问采用独立状态机​<br>控制信号（如缓存、保护）可按每个DMA块编程​<br>传输长度（块长度）可编程​<br>错误状态寄存器，便于在错误事件中进行调试</p>
+<h2 id="1-3-4-Flow-Control（流控制）"><a href="#1-3-4-Flow-Control（流控制）" class="headerlink" title="1.3.4 Flow Control（流控制）"></a>1.3.4 Flow Control（流控制）</h2><p>可编程的DMA传输级流控制​<br>若在DMA初始化前已知块传输大小，DMA控制器作为DMA块传输级的流控制器。<br>若在DMA初始化前未知块传输大小，源或目标外设作为不定长度（需求模式）DMA块传输的流控制器。</p>
+<h2 id="1-3-5-Handshaking-Interface（握手接口）"><a href="#1-3-5-Handshaking-Interface（握手接口）" class="headerlink" title="1.3.5 Handshaking Interface（握手接口）"></a>1.3.5 Handshaking Interface（握手接口）</h2><p>面向非内存外设的可编程软件和硬件握手接口​<br>最多支持<strong>64</strong>个硬件握手接口&#x2F;外设，可在coreConsultant中配置<br><strong>支持启用&#x2F;禁用单个握手接口</strong>​<br><strong>外设与通道之间的可编程映射；支持多对一映射</strong>（同一时间仅一个外设激活）<br>提供内存映射寄存器，用于在软件握手模式下控制DMA传输</p>
+<h2 id="1-3-6-Interrupt-Outputs（中断输出）"><a href="#1-3-6-Interrupt-Outputs（中断输出）" class="headerlink" title="1.3.6 Interrupt Outputs（中断输出）"></a>1.3.6 Interrupt Outputs（中断输出）</h2><p>支持合并中断输出和独立中断输出​<br>中断触发条件包括：<br><strong>DMA传输完成（DMA transfer completion）<br>块传输完成（Block transfer completion）</strong><br>单个或多个事务完成（Single or multiple transaction completion）<br>错误条件（Error condition）<br>通道挂起或禁用（Channel suspend or disable）<br>支持中断使能和屏蔽（Interrupt enabling and masking）</p>
+<p>以上是文档中“Flow Control”“Handshaking Interface”“Interrupt Outputs”章节的所有功能点，涵盖了流控制策略、握手接口的配置能力、中断输出的类型与触发条件等核心特性。</p>
+<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><p>文档中对DMA相关核心术语进行了定义（部分关键术语示例，结合上下文推测完整定义方向）：<br>Channel (通道)：DMA内用于管理源-目的地数据传输的独立单元，每个通道对应一对源和目标，最多支持32个通道，可配置。<br>Transaction (事务)：AXI总线上的单次数据传输操作，DMA通过多个事务完成一个块（Block）传输。<br>Burst (突发传输)：AXI总线中连续传输多个数据的模式，DMA支持配置突发长度（如AHB从接口的hburst &#x3D; 3’b000表示单事务突发）。<br>Flow Controller (流控制器)：在DMA块传输中负责控制数据流动的角色——若块大小已知，由DMA控制器自身作为流控制器；若块大小未知（需求模式），由源&#x2F;目标外设作为流控制器。<br>Handshaking Interface (握手接口)：用于DMA与外设之间同步数据传输的接口，分为软件握手（通过寄存器配置）和硬件握手（通过引脚交互），最多支持64个硬件握手接口，可配置外设与通道的映射关系。<br>Interrupt (中断)：DMA完成任务或出现异常时输出的信号，分为合并&#x2F;独立中断，触发条件包括传输完成、块完成、错误、通道挂起&#x2F;禁用等，支持中断使能和屏蔽。</p>
+<p>文档中对DMA相关核心术语的定义如下（按原文顺序）：<br>Transaction（事务）​<br>基本DMA传输单元，由硬件或软件握手接口决定。仅当<strong>传输发生在DW_axi_dmac与非内存外设之间</strong>时，事务才有意义。事务分为两类：<br>Single transaction（单事务）：长度为1，转换为INCR类型的AXI突发传输（burst length &#x3D; 1）。<br>Burst transaction（突发事务）：突发长度由程序配置到DW_axi_dmac中。突发事务会被转换为一系列AXI突发传输，其长度受程序控制，通常与源&#x2F;目标外设的FIFO大小相关，且属于DW_axi_dmac与源&#x2F;目标外设之间的传输。<br>Block（块）​</p>
+<p>DW_axi_dmac数据的一个集合，数据量由流控制器（flow controller）决定：<br>若传输发生在DW_axi_dmac与内存之间：块会被直接拆分为一系列突发事务（burst transactions）。<br>若传输发生在DW_axi_dmac与非内存外设之间：块会被拆分为一系列DW_axi_dmac事务，这些事务又会被转换为一系列AXI事务。<br>DMA transfer（DMA传输）​<br>软件控制DW_axi_dmac传输中的块数量。一旦DMA传输完成，硬件会自动禁用通道并可生成中断以通知“DMA传输完成”。通道随后可被重新配置以执行新的DMA传输。</p>
+<p>Single-block DMA transfer（单块DMA传输）：由一个块组成。</p>
+<p><strong>Multi-block DMA transfer</strong>（多块DMA传输）：由多个DMA块组成。多块DMA传输通过以下方式支持：<br>块链接（linked list chaining，启用LLI时）；</p>
+<ul>
+<li>自动重加载（auto-reloading）通道寄存器；</li>
+<li>影子寄存器（shadow registers）；</li>
+<li>连续块（contiguous blocks）。<br>源和目标可以独立选择使用哪种方法。</li>
+</ul>
+<p>Linked lists (block chaining)（链表&#x2F;块链接）​<br>链表指针（LLP）指向系统内存中下一个链表项（LLI）的位置。LLI是一组描述“下一个块（块描述符）”和“下一个LLI”的寄存器。DW_axi_dmac在块链接使能时，会在每个块的开始时获取LLI。LLI访问总是使用突发大小（arsize&#x2F;awsize），且该大小与数据总线宽度相同（不能更改或编程为其他值）。突发长度（awlen&#x2F;arlen）可根据数据总线宽度设置，以确保访问不会跨越一个完整的LLI结构（64字节）。若突发长度不受其他设置限制，DW_axi_dmac会将整个LLI（40字节）在一次AXI突发中传输。<br>Auto-reloading（自动重加载）​<br>DW_axi_dmac在每个块传输结束时，自动从影子寄存器的内容中重新加载通道寄存器。<br>Contiguous blocks（连续块）​<br>当地址选择“后续块是前一个块的延续”时，使用连续块模式。<br>Shadow register（影子寄存器）​<br>DW_axi_dmac在当前块传输进行时，自动将通道寄存器加载为“与下一个块传输对应的值”（这些值由软件在影子寄存器中预先编程）。<br>Channel locking（通道锁定）​<br>软件可将通道编程为“锁定AXI主接口的仲裁”，持续时间覆盖：<br>一次DMA传输；<br>一次块传输；<br>一次事务（单事务或突发事务）。</p>
+<h2 id="Functions"><a href="#Functions" class="headerlink" title="Functions"></a>Functions</h2><p><img src="/2026/03/17/dma/axidma/2026-03-18-14-23-39.png"></p>
+<h3 id="chennel-suspend-disable-abort"><a href="#chennel-suspend-disable-abort" class="headerlink" title="chennel suspend-disable-abort"></a>chennel suspend-disable-abort</h3><p><img src="/2026/03/17/dma/axidma/2026-03-18-14-24-28.png"></p>
+<p><img src="/2026/03/17/dma/axidma/2026-03-18-14-24-42.png"></p>
+<h3 id="multi-blocks-transfer-重点"><a href="#multi-blocks-transfer-重点" class="headerlink" title="multi blocks transfer(重点)"></a>multi blocks transfer(重点)</h3><p>4种多块传输模式：</p>
+<ul>
+<li>连续地址模式</li>
+<li>自动重载模式</li>
+<li>影子寄存器模式</li>
+<li>LLI模式</li>
+</ul>
+<h4 id="连续地址模式"><a href="#连续地址模式" class="headerlink" title="连续地址模式"></a>连续地址模式</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-14-34-06.png"></p>
+<h4 id="自动重载模式"><a href="#自动重载模式" class="headerlink" title="自动重载模式"></a>自动重载模式</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-14-34-36.png"></p>
+<h4 id="影子寄存器模式"><a href="#影子寄存器模式" class="headerlink" title="影子寄存器模式"></a>影子寄存器模式</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-14-34-50.png"></p>
+<p>影子寄存器的工作原理：<br>软件必须在一次block传输完毕前，配置SAR, DAR寄存器，以更新下一次传输的源和目的地址:</p>
+<p><img src="/2026/03/17/dma/axidma/2026-03-18-14-53-20.png"></p>
+<h4 id="LLI模式"><a href="#LLI模式" class="headerlink" title="LLI模式"></a>LLI模式</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-14-35-27.png"></p>
+<p><img src="/2026/03/17/dma/axidma/2026-03-18-14-36-03.png"></p>
+<h3 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h3><h4 id="中断类型"><a href="#中断类型" class="headerlink" title="中断类型"></a>中断类型</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-16-52-52.png"></p>
+<h4 id="中断生成机制"><a href="#中断生成机制" class="headerlink" title="中断生成机制"></a>中断生成机制</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-16-53-22.png"></p>
+<h4 id="中断寄存器映射"><a href="#中断寄存器映射" class="headerlink" title="中断寄存器映射"></a>中断寄存器映射</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-16-53-44.png"></p>
+<h4 id="中断处理流程"><a href="#中断处理流程" class="headerlink" title="中断处理流程"></a>中断处理流程</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-16-54-06.png"></p>
+<h4 id="错误处理流程"><a href="#错误处理流程" class="headerlink" title="错误处理流程"></a>错误处理流程</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-16-54-40.png"></p>
+<h4 id="中断输出配置-中断位定义"><a href="#中断输出配置-中断位定义" class="headerlink" title="中断输出配置 &amp; 中断位定义"></a>中断输出配置 &amp; 中断位定义</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-16-55-21.png"></p>
+<h4 id="实际代码实现"><a href="#实际代码实现" class="headerlink" title="实际代码实现"></a>实际代码实现</h4><figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">void axidma_irq_handler1(unsigned <span class="keyword">int</span> irq_id)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	unsigned <span class="keyword">int</span> base;</span><br><span class="line">	unsigned <span class="keyword">int</span> ch_base;</span><br><span class="line">	unsigned <span class="keyword">int</span> val;</span><br><span class="line"></span><br><span class="line">	<span class="regexp">//prin</span>tf(<span class="string">&quot;<span class="variable">%s</span> <span class="variable">%d</span>\n&quot;</span>,__func__, irq_id);</span><br><span class="line">	base = AXIDMA1_BASE_ADDR + (axidma_handler1.irq_id -AXIDMA1_IRQ_NUM)* <span class="number">0x10000</span>;</span><br><span class="line"></span><br><span class="line">	<span class="regexp">//in</span>tc_disable_normal_ir<span class="string">q(axidma_handler1.irq_id)</span>;</span><br><span class="line"></span><br><span class="line">	val = axidma_reg_read(base + DMAC_COMMON_INTSTATUS);</span><br><span class="line">	axidma_reg_write(base + DMAC_COMMON_INTCLEAR, val);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">1</span>;i&lt;<span class="number">9</span>;i++)</span><br><span class="line">	&#123;</span><br><span class="line">		ch_base = base + <span class="number">0x100</span> + (i-<span class="number">1</span>) * <span class="number">0x100</span>;</span><br><span class="line">		val = axidma_reg_read(ch_base + CH_INTSTATUS);</span><br><span class="line">		axidma_reg_write(ch_base + CH_INTCLEAR, val);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	g_interrupt_done = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-16-55-34.png"></p>
+<h3 id="ECC特性"><a href="#ECC特性" class="headerlink" title="ECC特性"></a>ECC特性</h3><h2 id="berametal-implement"><a href="#berametal-implement" class="headerlink" title="berametal implement"></a>berametal implement</h2><h3 id="LLI"><a href="#LLI" class="headerlink" title="LLI"></a>LLI</h3><h4 id="描述符说明-结构实现"><a href="#描述符说明-结构实现" class="headerlink" title="描述符说明 &amp; 结构实现"></a>描述符说明 &amp; 结构实现</h4><p><img src="/2026/03/17/dma/axidma/2026-03-18-19-00-45.png"></p>
+<h4 id="核心配置函数实现"><a href="#核心配置函数实现" class="headerlink" title="核心配置函数实现"></a>核心配置函数实现</h4><p>原型：<br><img src="/2026/03/17/dma/axidma/2026-03-18-19-05-43.png"><br>实现：<br><img src="/2026/03/17/dma/axidma/2026-03-18-19-06-25.png"></p>
+<p>关键寄存器配置：</p>
+<ol>
+<li>MULTIBLK_TYPE</li>
+<li>CH_CTL_H</li>
+</ol>
+<p><img src="/2026/03/17/dma/axidma/2026-03-18-19-07-42.png"></p>
+<h4 id="测试用例"><a href="#测试用例" class="headerlink" title="测试用例"></a>测试用例</h4><ul>
+<li>基础LLI测试 — 2段链表</li>
+<li>基础LLI测试 — 5段链表</li>
+<li>多 SG 列表测试</li>
+<li>多通道 + 优先级 + LLI测试</li>
+<li>压力测试</li>
+</ul>
+<p><img src="/2026/03/17/dma/axidma/2026-03-18-19-13-28.png"></p>
+<h5 id="多-SG-列表测试"><a href="#多-SG-列表测试" class="headerlink" title="多 SG 列表测试"></a>多 SG 列表测试</h5><p>该测试用例主要特点在与：SRC&#x2F;DST的地址都不连续:</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">dmac_memcpy_lli_func05</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> id, <span class="type">unsigned</span> <span class="type">int</span> chann, <span class="type">unsigned</span> <span class="type">int</span> width)</span></span></span><br><span class="line"><span class="function"></span>&#123;	</span><br><span class="line">	<span class="type">int</span> i,n;</span><br><span class="line">	</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> base;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> ch_base;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> error_flg;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">axidma_config</span> config;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> transfer_width=<span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">switch</span>(width)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">			transfer_width = <span class="number">8</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">			transfer_width = <span class="number">16</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">			transfer_width = <span class="number">32</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">			transfer_width = <span class="number">64</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">			transfer_width = <span class="number">128</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="comment">//for(i=0;i&lt;0x800;i++)</span></span><br><span class="line">	<span class="comment">//	*(unsigned char *)(0x200000000+i) = i;</span></span><br><span class="line">	</span><br><span class="line">	config.id = id;</span><br><span class="line">	config.chann = chann;</span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)</span><br><span class="line">	&#123;</span><br><span class="line">		config.len[i] = <span class="number">0x1000</span>;</span><br><span class="line">		config.src_addr[i] = <span class="number">0x210000000</span> + i*config.len[i]*<span class="number">2</span>;</span><br><span class="line">		config.dst_addr[i] = <span class="number">0x210700000</span> + i*config.len[i]*<span class="number">2</span>;</span><br><span class="line">		<span class="built_in">memset</span>((<span class="type">unsigned</span> <span class="type">char</span> *)config.src_addr[i], i<span class="number">+1</span>, <span class="number">0x1000</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	config.nums = <span class="number">10</span>;</span><br><span class="line">	config.width = width;</span><br><span class="line">	config.prior = <span class="number">1</span>;</span><br><span class="line">	config.intr_en = <span class="number">1</span>;</span><br><span class="line">	__axidma_config(config, desc1);</span><br><span class="line">	<span class="built_in">dmac_start</span>(id,chann);</span><br><span class="line">	</span><br><span class="line">	base = AXIDMA1_BASE_ADDR + (config.id <span class="number">-1</span>)* <span class="number">0x10000</span>;</span><br><span class="line">	ch_base = base + <span class="number">0x100</span> + (config.chann <span class="number">-1</span>) * <span class="number">0x100</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		val = <span class="built_in">axidma_reg_read</span>(ch_base + CH_INTSTATUS);</span><br><span class="line">		<span class="comment">//printf(&quot;CH_INTSTATUS:0x%x=0x%x in %s\n&quot;,ch_base + CH_INTSTATUS, val, __func__);</span></span><br><span class="line">		<span class="keyword">if</span>((val &amp; <span class="number">0x3</span>) == <span class="number">0x3</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span>(n=<span class="number">0</span>;n&lt;<span class="number">10</span>;n++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;config.len[n] * transfer_width/<span class="number">8</span>;i++)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span>(*(<span class="type">unsigned</span> <span class="type">char</span> *)(config.src_addr[n]+i) != *(<span class="type">unsigned</span> <span class="type">char</span> *)(config.dst_addr[n]+i))</span><br><span class="line">			&#123;</span><br><span class="line">				error_flg++;</span><br><span class="line">				<span class="built_in">printf</span>(<span class="string">&quot;n=%d, i=%d, src_addr=0x%x != dst_addr=0x%x\n&quot;</span>,n, i, *(<span class="type">unsigned</span> <span class="type">char</span> *)(config.src_addr[n]+i), *(<span class="type">unsigned</span> <span class="type">char</span> *)(config.dst_addr[n]+i));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(error_flg == <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="内存布局图示"><a href="#内存布局图示" class="headerlink" title="内存布局图示"></a>内存布局图示</h5><p><img src="/2026/03/17/dma/axidma/2026-03-18-19-33-43.png"></p>
+<h5 id="静态描述符数组"><a href="#静态描述符数组" class="headerlink" title="静态描述符数组"></a>静态描述符数组</h5><p><img src="/2026/03/17/dma/axidma/2026-03-18-19-34-43.png"></p>
+<h5 id="软硬件执行流程图"><a href="#软硬件执行流程图" class="headerlink" title="软硬件执行流程图"></a>软硬件执行流程图</h5><p><img src="/2026/03/17/dma/axidma/2026-03-18-19-28-31.png"></p>
+<h2 id="关键参数"><a href="#关键参数" class="headerlink" title="关键参数"></a>关键参数</h2></article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>License</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/16/AI/plugins/">plugins</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E7%89%B9%E6%80%A7"><span class="toc-text">通用特性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-2-%E9%80%9A%E9%81%93%E7%BC%93%E5%86%B2"><span class="toc-text">1.3.2 通道缓冲</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-3-%E9%80%9A%E9%81%93%E6%8E%A7%E5%88%B6"><span class="toc-text">1.3.3 通道控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-4-Flow-Control%EF%BC%88%E6%B5%81%E6%8E%A7%E5%88%B6%EF%BC%89"><span class="toc-text">1.3.4 Flow Control（流控制）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-5-Handshaking-Interface%EF%BC%88%E6%8F%A1%E6%89%8B%E6%8E%A5%E5%8F%A3%EF%BC%89"><span class="toc-text">1.3.5 Handshaking Interface（握手接口）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-6-Interrupt-Outputs%EF%BC%88%E4%B8%AD%E6%96%AD%E8%BE%93%E5%87%BA%EF%BC%89"><span class="toc-text">1.3.6 Interrupt Outputs（中断输出）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AF%E8%AF%AD"><span class="toc-text">术语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Functions"><span class="toc-text">Functions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#chennel-suspend-disable-abort"><span class="toc-text">chennel suspend-disable-abort</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#multi-blocks-transfer-%E9%87%8D%E7%82%B9"><span class="toc-text">multi blocks transfer(重点)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9E%E7%BB%AD%E5%9C%B0%E5%9D%80%E6%A8%A1%E5%BC%8F"><span class="toc-text">连续地址模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E9%87%8D%E8%BD%BD%E6%A8%A1%E5%BC%8F"><span class="toc-text">自动重载模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BD%B1%E5%AD%90%E5%AF%84%E5%AD%98%E5%99%A8%E6%A8%A1%E5%BC%8F"><span class="toc-text">影子寄存器模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LLI%E6%A8%A1%E5%BC%8F"><span class="toc-text">LLI模式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD"><span class="toc-text">中断</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E7%B1%BB%E5%9E%8B"><span class="toc-text">中断类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E7%94%9F%E6%88%90%E6%9C%BA%E5%88%B6"><span class="toc-text">中断生成机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%AF%84%E5%AD%98%E5%99%A8%E6%98%A0%E5%B0%84"><span class="toc-text">中断寄存器映射</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="toc-text">中断处理流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="toc-text">错误处理流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E8%BE%93%E5%87%BA%E9%85%8D%E7%BD%AE-%E4%B8%AD%E6%96%AD%E4%BD%8D%E5%AE%9A%E4%B9%89"><span class="toc-text">中断输出配置 &amp; 中断位定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-text">实际代码实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-text">最佳实践</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ECC%E7%89%B9%E6%80%A7"><span class="toc-text">ECC特性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#berametal-implement"><span class="toc-text">berametal implement</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#LLI"><span class="toc-text">LLI</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%AF%B4%E6%98%8E-%E7%BB%93%E6%9E%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">描述符说明 &amp; 结构实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE%E5%87%BD%E6%95%B0%E5%AE%9E%E7%8E%B0"><span class="toc-text">核心配置函数实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="toc-text">测试用例</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%9A-SG-%E5%88%97%E8%A1%A8%E6%B5%8B%E8%AF%95"><span class="toc-text">多 SG 列表测试</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%E5%9B%BE%E7%A4%BA"><span class="toc-text">内存布局图示</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E6%8F%8F%E8%BF%B0%E7%AC%A6%E6%95%B0%E7%BB%84"><span class="toc-text">静态描述符数组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BD%AF%E7%A1%AC%E4%BB%B6%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-text">软硬件执行流程图</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%8F%82%E6%95%B0"><span class="toc-text">关键参数</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `Just`,
+      min: `minutes ago`,
+      hour: `hours ago`,
+      day: `days ago`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `Switched to Light Mode`,
+      dark: `Switched to Dark Mode`,
+      auto: `Switched to Auto Mode`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div></body></html>
