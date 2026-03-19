@@ -28,7 +28,7 @@
 <meta property="og:description" content="简介本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag Linux DMA Engine Overview What is DMA Engine?    The DMA Engine is a Linux kernel subsystem that provides a standardized framework for DMA">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-03-18T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-19T09:36:09.138Z">
+<meta property="article:modified_time" content="2026-03-19T10:59:14.698Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="dma">
 <meta property="article:tag" content="linux">
@@ -48,7 +48,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-19T00:00:00+08:00","dateModified":"2026-03-19T17:36:09+08:00","datePublished":"2026-03-19T00:00:00+08:00","description":"","headline":"Linux DMA Engine Overview","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/19/dma/linux_dma/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/19/dma/linux_dma/","keywords":"linux, dma","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-19T00:00:00+08:00","dateModified":"2026-03-19T18:59:14+08:00","datePublished":"2026-03-19T00:00:00+08:00","description":"","headline":"Linux DMA Engine Overview","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/19/dma/linux_dma/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/19/dma/linux_dma/","keywords":"linux, dma","image":[]}</script>
   
 </head>
 <body>
@@ -67,7 +67,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a><a class="item title" href="/2026/03/16/life_record/%E8%84%91%E9%9B%BE%E4%BF%AE%E5%A4%8D/"><span class="title">脑雾修复</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/04/low-speed/i2c/"><span class="title">i2c_introduction</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/19/dma/linux_dma%20copy/"><span class="title">Linux DMA Engine Overview1</span></a><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a><a class="item title" href="/2026/03/16/life_record/%E8%84%91%E9%9B%BE%E4%BF%AE%E5%A4%8D/"><span class="title">脑雾修复</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -80,7 +80,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/dma/">dma</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-18T16:00:00.000Z">2026-03-19</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-19T09:36:09.138Z">2026-03-19</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-18T16:00:00.000Z">2026-03-19</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-19T10:59:14.698Z">2026-03-19</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -253,6 +253,316 @@
 
 
 <p>  Summary: DMA_PREP_FENCE ensures memory ordering by acting as a barrier - all previous DMA&#x2F;memory operations must complete before this transfer starts. Essential for data pipelines where transfer order matters.</p>
+<h1 id="the-provider-for-cyclic-api"><a href="#the-provider-for-cyclic-api" class="headerlink" title="the provider for cyclic api"></a>the provider for cyclic api</h1><p>❯ you really a expert in dma field, so i have some more profund questions:</p>
+<ol>
+<li>the api like dmaengine_prep_dma_cyclic is consumer api, the corresponeding provider api is platform-related</li>
+</ol>
+<p>● You’re asking excellent architectural questions! Let me clarify the consumer vs provider API split in the DMA Engine framework.</p>
+<p>  DMA Engine API Layers</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────────────┐</span><br><span class="line">│                    Consumer Side                        │</span><br><span class="line">│  (Device drivers that USE DMA: <span class="selector-tag">audio</span>, network, spi...)  │</span><br><span class="line">│                                                         │</span><br><span class="line">│  <span class="built_in">dmaengine_prep_dma_cyclic</span>()  ← You are here           │</span><br><span class="line">│  <span class="built_in">dma_request_chan</span>()                                     │</span><br><span class="line">│  <span class="built_in">dmaengine_submit</span>()                                     │</span><br><span class="line">│  <span class="built_in">dma_async_issue_pending</span>()                              │</span><br><span class="line">└─────────────────────────────────────────────────────────┘</span><br><span class="line">                          │</span><br><span class="line">                          ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────┐</span><br><span class="line">│                    DMA Engine Core                      │</span><br><span class="line">│  (Generic framework: dmaengine<span class="selector-class">.c</span>, dma_cookie<span class="selector-class">.c</span>...)      │</span><br><span class="line">│                                                         │</span><br><span class="line">│  - Channel allocation/allocation                        │</span><br><span class="line">│  - Cookie management                                    │</span><br><span class="line">│  - Descriptor chaining                                  │</span><br><span class="line">│  - Capability negotiation                               │</span><br><span class="line">└─────────────────────────────────────────────────────────┘</span><br><span class="line">                          │</span><br><span class="line">                          ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────┐</span><br><span class="line">│                    Provider Side                        │</span><br><span class="line">│  (DMA Controller Drivers: platform-specific)            │</span><br><span class="line">│                                                         │</span><br><span class="line">│  device_prep_dma_cyclic  ← Provider implements this    │</span><br><span class="line">│  device_tx_submit                                        │</span><br><span class="line">│  device_issue_pending                                    │</span><br><span class="line">│  device_terminate_all                                    │</span><br><span class="line">└─────────────────────────────────────────────────────────┘</span><br><span class="line">                          │</span><br><span class="line">                          ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────┐</span><br><span class="line">│                 DMA Hardware (SoC)                      │</span><br><span class="line">│  (PL330, DesignWare, STM32-DMA, <span class="selector-tag">i</span><span class="selector-class">.MX-SDMA</span>...)           │</span><br><span class="line">└─────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<hr>
+<ol>
+<li>Consumer API (Generic, Platform-Independent)</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// include/linux/dmaengine.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* Request a channel */</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">dma_chan</span> *<span class="built_in">dma_request_chan</span>(<span class="keyword">struct</span> device *dev, <span class="type">const</span> <span class="type">char</span> *name);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Prepare cyclic transfer */</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *</span><br><span class="line"><span class="built_in">dmaengine_prep_dma_cyclic</span>(<span class="keyword">struct</span> dma_chan *chan,</span><br><span class="line">                          <span class="type">dma_addr_t</span> buf_addr,</span><br><span class="line">                          <span class="type">size_t</span> buf_len,</span><br><span class="line">                          <span class="type">size_t</span> period_len,</span><br><span class="line">                          <span class="keyword">enum</span> dma_transfer_direction direction,</span><br><span class="line">                          <span class="type">unsigned</span> <span class="type">long</span> flags);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Submit and start */</span></span><br><span class="line"><span class="function"><span class="type">dma_cookie_t</span> <span class="title">dmaengine_submit</span><span class="params">(<span class="keyword">struct</span> dma_async_tx_descriptor *tx)</span></span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">dma_async_issue_pending</span><span class="params">(<span class="keyword">struct</span> dma_chan *chan)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Check completion */</span></span><br><span class="line"><span class="function"><span class="keyword">enum</span> dma_status <span class="title">dma_async_is_tx_complete</span><span class="params">(<span class="keyword">struct</span> dma_chan *chan,</span></span></span><br><span class="line"><span class="params"><span class="function">                                         <span class="type">dma_cookie_t</span> cookie,</span></span></span><br><span class="line"><span class="params"><span class="function">                                         <span class="type">dma_cookie_t</span> *last,</span></span></span><br><span class="line"><span class="params"><span class="function">                                         <span class="type">dma_cookie_t</span> *used)</span></span>;</span><br><span class="line"><span class="comment">/* Terminate */</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">dmaengine_terminate_all</span><span class="params">(<span class="keyword">struct</span> dma_chan *chan)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>  Location: drivers&#x2F;dma&#x2F;dmaengine.c</p>
+<p>  Characteristics:</p>
+<ul>
+<li>Same API across all platforms</li>
+<li>Device drivers (ALSA, network, SPI) use these</li>
+<li>Never touches hardware registers directly</li>
+</ul>
+<hr>
+<ol>
+<li>Provider API (Platform-Specific, Hardware Operations)</li>
+</ol>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// include/linux/dmaengine.h - struct dma_device</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">dma_device</span> &#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">list_head</span> global_node;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">device</span> *dev;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* === Provider MUST implement these callbacks === */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Channel operations</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">dma_chan</span> *(*device_channel_allocate)(<span class="keyword">struct</span> dma_device *dev);</span><br><span class="line">    <span class="built_in">int</span> (*device_free_channel)(<span class="keyword">struct</span> dma_chan *chan);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Transfer preparation - THE KEY PROVIDER APIs</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *(*device_prep_dma_cyclic)(</span><br><span class="line">        <span class="keyword">struct</span> dma_chan *chan,</span><br><span class="line">        <span class="type">dma_addr_t</span> buf_addr,</span><br><span class="line">        <span class="type">size_t</span> buf_len,</span><br><span class="line">        <span class="type">size_t</span> period_len,</span><br><span class="line">        <span class="keyword">enum</span> dma_transfer_direction direction,</span><br><span class="line">        <span class="type">unsigned</span> <span class="type">long</span> flags,</span><br><span class="line">        <span class="type">void</span> *context);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *(*device_prep_dma_memcpy)(</span><br><span class="line">        <span class="keyword">struct</span> dma_chan *chan,</span><br><span class="line">        <span class="type">dma_addr_t</span> dest,</span><br><span class="line">        <span class="type">dma_addr_t</span> src,</span><br><span class="line">        <span class="type">size_t</span> len,</span><br><span class="line">        <span class="type">unsigned</span> <span class="type">long</span> flags);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Submit transaction</span></span><br><span class="line">    <span class="built_in">dma_cookie_t</span> (*device_tx_submit)(<span class="keyword">struct</span> dma_async_tx_descriptor *tx);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start transfers</span></span><br><span class="line">    <span class="built_in">void</span> (*device_issue_pending)(<span class="keyword">struct</span> dma_chan *chan);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Control/Status</span></span><br><span class="line">    <span class="built_in">int</span> (*device_config)(<span class="keyword">struct</span> dma_chan *chan,</span><br><span class="line">                         <span class="keyword">struct</span> dma_slave_config *config);</span><br><span class="line">    <span class="built_in">int</span> (*device_terminate_all)(<span class="keyword">struct</span> dma_chan *chan);</span><br><span class="line">    <span class="function"><span class="keyword">enum</span> <span class="title">dma_status</span> <span class="params">(*device_tx_status)</span><span class="params">(<span class="keyword">struct</span> dma_chan *chan,</span></span></span><br><span class="line"><span class="params"><span class="function">                                        <span class="type">dma_cookie_t</span> cookie,</span></span></span><br><span class="line"><span class="params"><span class="function">                                        <span class="keyword">struct</span> dma_tx_state *txstate)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* ... many more callbacks ... */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>  Location: Implemented in each DMA controller driver</p>
+<p>  Examples:</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────┬─────────────────────────────────┐</span><br><span class="line">│ Provider Driver │            File Path            │</span><br><span class="line">├─────────────────┼─────────────────────────────────┤</span><br><span class="line">│ ARM PL330       │ drivers/dma/pl330<span class="selector-class">.c</span>             │</span><br><span class="line">├─────────────────┼─────────────────────────────────┤</span><br><span class="line">│ DesignWare      │ drivers/dma/dw/core<span class="selector-class">.c</span>           │</span><br><span class="line">├─────────────────┼─────────────────────────────────┤</span><br><span class="line">│ STM32 DMA       │ drivers/dma/stm32-dma<span class="selector-class">.c</span>         │</span><br><span class="line">├─────────────────┼─────────────────────────────────┤</span><br><span class="line">│ <span class="selector-tag">i</span><span class="selector-class">.MX</span> SDMA       │ drivers/dma/imx-sdma<span class="selector-class">.c</span>          │</span><br><span class="line">├─────────────────┼─────────────────────────────────┤</span><br><span class="line">│ Xilinx AXI DMA  │ drivers/dma/xilinx/xilinx_dma<span class="selector-class">.c</span> │</span><br><span class="line">└─────────────────┴─────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="3">
+<li>Example: How dmaengine_prep_dma_cyclic() Calls Provider</li>
+</ol>
+<p>  &#x2F;&#x2F; Consumer calls this (drivers&#x2F;dma&#x2F;dmaengine.c)</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">struct dm<span class="built_in">a_async</span>_tx_descriptor *</span><br><span class="line">dmaengine_prep_dm<span class="built_in">a_cyclic</span>(struct dm<span class="built_in">a_chan</span> *chan,</span><br><span class="line">                          dm<span class="built_in">a_addr</span>_t buf_addr,</span><br><span class="line">                          size_t buf_len,</span><br><span class="line">                          size_t period_len,</span><br><span class="line">                          enum dm<span class="built_in">a_transfer</span>_direction direction,</span><br><span class="line">                          unsigned long flags)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* Sanity checks */</span></span><br><span class="line">    if (!chan || !chan-&gt;device)</span><br><span class="line">        <span class="keyword">return</span> NULL<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Check capability */</span></span><br><span class="line">    if (!dm<span class="built_in">a_chan</span>_has_cap(chan, DM<span class="built_in">A_SLAVE</span>))</span><br><span class="line">        <span class="keyword">return</span> NULL<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* === CALL PROVIDER IMPLEMENTATION === */</span></span><br><span class="line">    <span class="keyword">return</span> chan-&gt;device-&gt;device_prep_dm<span class="built_in">a_cyclic</span>(</span><br><span class="line"><span class="built_in">        chan,</span> buf_addr, buf_len, period_len,</span><br><span class="line"><span class="built_in">        direction,</span> flags, NULL)<span class="comment">;</span></span><br><span class="line">&#125;</span><br><span class="line">EXPORT_SYMBOL_GPL(dmaengine_prep_dm<span class="built_in">a_cyclic</span>)<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="4">
+<li>Provider Implementation Example (PL330)</li>
+</ol>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// drivers/dma/pl330.c</span></span><br><span class="line"></span><br><span class="line">static struct dma_async_tx_descriptor *</span><br><span class="line">pl330_prep_dma_cyclic(struct dma_chan *chan,</span><br><span class="line">                      dma_addr_t buf_addr,</span><br><span class="line">                      size_t buf_len,</span><br><span class="line">                      size_t period_len,</span><br><span class="line">                      enum dma_transfer_direction direction,</span><br><span class="line">                      unsigned long flags,</span><br><span class="line">                      void *context)</span><br><span class="line">&#123;</span><br><span class="line">    struct pl330_chan *pch = to_pl330_chan(chan);</span><br><span class="line">    struct pl330_desc *desc;</span><br><span class="line">    struct pl330_xfer *xfer;</span><br><span class="line">    int num_periods = buf_len / period_len;</span><br><span class="line">    int i;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Allocate descriptor chain */</span></span><br><span class="line">    desc = pl330_get_desc(pch);</span><br><span class="line">    <span class="keyword">if</span> (!desc)</span><br><span class="line">        return NULL;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Build cyclic descriptor chain */</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; num_periods; i++) &#123;</span><br><span class="line">        <span class="function"><span class="title">xfer</span> = &amp;desc-&gt;</span>tx.xfers[i];</span><br><span class="line">        <span class="function"><span class="title">xfer</span>-&gt;</span>src_addr = (direction == DMA_MEM_TO_DEV) ?</span><br><span class="line">                         <span class="function"><span class="title">buf_addr</span> + (i * period_len) : pch-&gt;</span>fifo_addr;</span><br><span class="line">        <span class="function"><span class="title">xfer</span>-&gt;</span>dst_addr = (direction == DMA_MEM_TO_DEV) ?</span><br><span class="line">                         <span class="function"><span class="title">pch</span>-&gt;</span>fifo_addr : buf_addr + (i * period_len);</span><br><span class="line">        <span class="function"><span class="title">xfer</span>-&gt;</span>bytes = period_len;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Mark as cyclic - last descriptor loops back to first */</span></span><br><span class="line">    <span class="function"><span class="title">desc</span>-&gt;</span>tx.cyclic = <span class="literal">true</span>;</span><br><span class="line">    <span class="function"><span class="title">desc</span>-&gt;</span>tx.<span class="keyword">loop</span> = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Set callback at period boundaries */</span></span><br><span class="line">    <span class="function"><span class="title">desc</span>-&gt;</span>tx.callback = NULL;  <span class="comment">/* Will be set by consumer */</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">return</span> &amp;desc-&gt;</span>tx.desc;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/* Register with DMA Engine Core */</span></span><br><span class="line">static int pl330_probe(struct amba_device *adev, ...)</span><br><span class="line">&#123;</span><br><span class="line">    struct pl330_dmac *pl330 = ...;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Setup provider callbacks */</span></span><br><span class="line">    <span class="function"><span class="title">pl330</span>-&gt;</span>dmac.device_prep_dma_cyclic = pl330_prep_dma_cyclic;</span><br><span class="line">    <span class="function"><span class="title">pl330</span>-&gt;</span>dmac.device_tx_submit = pl330_tx_submit;</span><br><span class="line">    <span class="function"><span class="title">pl330</span>-&gt;</span>dmac.device_issue_pending = pl330_issue_pending;</span><br><span class="line">    <span class="function"><span class="title">pl330</span>-&gt;</span>dmac.device_config = pl330_config;</span><br><span class="line">    <span class="function"><span class="title">pl330</span>-&gt;</span>dmac.device_terminate_all = pl330_terminate_all;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Register with framework */</span></span><br><span class="line">    <span class="function"><span class="title">dma_async_device_register</span>(&amp;pl330-&gt;</span>dmac);</span><br><span class="line"></span><br><span class="line">    return <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<ol start="5">
+<li>Complete Flow Diagram</li>
+</ol>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────────────────────┐</span><br><span class="line">│  Consumer Driver (e.g., ASoC Audio)                             │</span><br><span class="line">│                                                                 │</span><br><span class="line">│  <span class="built_in">dmaengine_prep_dma_cyclic</span>(chan, buf, len, period, ...)         │</span><br><span class="line">│                          │                                      │</span><br><span class="line">└──────────────────────────┼──────────────────────────────────────┘</span><br><span class="line">                           │ Consumer API</span><br><span class="line">                           ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────────┐</span><br><span class="line">│  DMA Engine Core (drivers/dma/dmaengine.c)                      │</span><br><span class="line">│                                                                 │</span><br><span class="line">│  <span class="built_in">dmaengine_prep_dma_cyclic</span>() &#123;                                  │</span><br><span class="line">│      <span class="comment">/* Generic checks */</span>                                       │</span><br><span class="line">│      return chan-&gt;device-&gt;<span class="built_in">device_prep_dma_cyclic</span>(...);  <span class="comment">/* → */</span> │</span><br><span class="line">│  &#125;                                                              │</span><br><span class="line">└──────────────────────────┼──────────────────────────────────────┘</span><br><span class="line">                           │ Provider Callback</span><br><span class="line">                           ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────────┐</span><br><span class="line">│  Provider Driver (e.g., pl330.c, stm32-dma.c)                   │</span><br><span class="line">│                                                                 │</span><br><span class="line">│  <span class="built_in">pl330_prep_dma_cyclic</span>() &#123;                                      │</span><br><span class="line">│      <span class="comment">/* Hardware-specific: */</span>                                   │</span><br><span class="line">│      - Allocate HW descriptors                                  │</span><br><span class="line">│      - Program burst size, <span class="attribute">width</span>                                │</span><br><span class="line">│      - Build descriptor chain                                   │</span><br><span class="line">│      - Set up interrupts                                        │</span><br><span class="line">│      return &amp;desc-&gt;async_tx;                                    │</span><br><span class="line">│  &#125;                                                              │</span><br><span class="line">└──────────────────────────┼──────────────────────────────────────┘</span><br><span class="line">                           │</span><br><span class="line">                           ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────────┐</span><br><span class="line">│  DMA Hardware Registers                                         │</span><br><span class="line">│                                                                 │</span><br><span class="line">│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐               │</span><br><span class="line">│  │  SAR    │ │  DAR    │  │  LLCR   │ │  CTRL   │  (PL330)    │</span><br><span class="line">│  │ <span class="number">0</span>x1000  │ │ <span class="number">0</span>x2000  │ │ <span class="number">0</span>x100   │ │ <span class="number">0</span>x0B    │              │</span><br><span class="line">│  └─────────┘ └─────────┘ └─────────┘ └─────────┘              │</span><br><span class="line">└─────────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<hr>
+<ol start="6">
+<li>Summary Table</li>
+</ol>
+<figure class="highlight delphi"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────┬────────────────────────────────────────┬─────────────────────────────────┐</span><br><span class="line">│      Aspect      │              Consumer API              │          Provider API           │</span><br><span class="line">├──────────────────┼────────────────────────────────────────┼─────────────────────────────────┤</span><br><span class="line">│ Who <span class="keyword">uses</span>         │ Device drivers (ASoC, SPI, network)    │ DMA controller driver authors   │</span><br><span class="line">├──────────────────┼────────────────────────────────────────┼─────────────────────────────────┤</span><br><span class="line">│ Location         │ drivers/dma/dmaengine.c                │ drivers/dma/&lt;controller&gt;.c      │</span><br><span class="line">├──────────────────┼────────────────────────────────────────┼─────────────────────────────────┤</span><br><span class="line">│ <span class="keyword">Platform</span>         │ <span class="keyword">Generic</span> (same everywhere)              │ Hardware-specific               │</span><br><span class="line">├──────────────────┼────────────────────────────────────────┼─────────────────────────────────┤</span><br><span class="line">│ Key functions    │ dmaengine_prep_*(), dma_request_chan() │ device_prep_*, device_tx_submit │</span><br><span class="line">├──────────────────┼────────────────────────────────────────┼─────────────────────────────────┤</span><br><span class="line">│ Touches hardware │ No                                     │ Yes (<span class="keyword">register</span> programming)      │</span><br><span class="line">├──────────────────┼────────────────────────────────────────┼─────────────────────────────────┤</span><br><span class="line">│ Complexity       │ Simple, high-level                     │ Complex, hardware details       │</span><br><span class="line">└──────────────────┴────────────────────────────────────────┴─────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<hr>
+<p>  Your understanding is correct: dmaengine_prep_dma_cyclic() is the consumer-facing API. The provider implements device_prep_dma_cyclic callback which is hardware&#x2F;platform-specific. The DMA Engine Core bridges these two layers.</p>
+<p>  What’s your next question about the DMA architecture?</p>
+<h1 id="talk-about-dma-provider-common-infrastructure"><a href="#talk-about-dma-provider-common-infrastructure" class="headerlink" title="talk about dma provider common infrastructure"></a>talk about dma provider common infrastructure</h1><p> so maybe there are some common logics for “Allocate HW descriptors” between the different hareware&#x2F;platform implements?</p>
+<p>● Yes! Excellent observation! There are common patterns and even shared helper code for descriptor allocation across different DMA controllers.</p>
+<p>  Common Descriptor Allocation Patterns</p>
+<ol>
+<li>Generic Descriptor Management (DMA Engine Core)</li>
+</ol>
+<p>  The DMA Engine Core provides the base infrastructure:</p>
+<p>  &#x2F;&#x2F; include&#x2F;linux&#x2F;dmaengine.h<br>  struct dma_async_tx_descriptor {<br>      dma_cookie_t cookie;<br>      enum dma_ctrl_flags flags;<br>      struct list_head tx_list;<br>      struct dma_chan *chan;</p>
+<pre><code>  /* Callbacks */
+  void (*callback)(void *callback_param);
+  void *callback_param;
+
+  /* Dependency tracking */
+  struct dma_async_tx_descriptor *dep;
+  struct list_head dependents;
+</code></pre>
+<p>  };</p>
+<p>  &#x2F;&#x2F; drivers&#x2F;dma&#x2F;dmaengine.c - Common allocation<br>  static void dma_async_tx_descriptor_init(struct dma_async_tx_descriptor *tx,<br>                                           struct dma_chan *chan)<br>  {<br>      tx-&gt;chan &#x3D; chan;<br>      tx-&gt;flags &#x3D; 0;<br>      tx-&gt;cookie &#x3D; 0;<br>      INIT_LIST_HEAD(&amp;tx-&gt;tx_list);<br>      INIT_LIST_HEAD(&amp;tx-&gt;dependents);<br>  }</p>
+<ol start="2">
+<li>Common Pattern: Embedded Descriptor Structure</li>
+</ol>
+<p>  Most DMA controller drivers use this pattern:</p>
+<p>  &#x2F;* &#x3D;&#x3D;&#x3D; COMMON PATTERN ACROSS DRIVERS &#x3D;&#x3D;&#x3D; *&#x2F;</p>
+<p>  struct my_dma_desc {<br>      &#x2F;* Embedded generic descriptor - MUST be first *&#x2F;<br>      struct dma_async_tx_descriptor async_tx;</p>
+<pre><code>  /* Driver-specific fields */
+  struct list_head node;      /* Link to free/active list */
+  struct my_dma_hw_desc *hw;  /* Hardware descriptor in DMA memory */
+  dma_addr_t hw_addr;         /* DMA address of hw descriptor */
+  struct my_dma_chan *chan;   /* Back pointer to channel */
+  int cycles;                 /* For cyclic transfers */
+  /* ... */
+</code></pre>
+<p>  };</p>
+<p>  &#x2F;* Common allocation helper *&#x2F;<br>  static struct my_dma_desc *my_dma_alloc_desc(struct my_dma_chan *my_chan)<br>  {<br>      struct my_dma_desc *desc;</p>
+<pre><code>  /* Get from pre-allocated pool (common optimization) */
+  if (!list_empty(&amp;my_chan-&gt;free_descs)) {
+      desc = list_first_entry(&amp;my_chan-&gt;free_descs,
+                              struct my_dma_desc, node);
+      list_del(&amp;desc-&gt;node);
+      goto found;
+  }
+
+  /* Allocate new if pool empty */
+  desc = kzalloc(sizeof(*desc), GFP_NOWAIT);
+  if (!desc)
+      return NULL;
+
+  /* Initialize generic part */
+  dma_async_tx_descriptor_init(&amp;desc-&gt;async_tx, &amp;my_chan-&gt;chan);
+
+  /* Set driver-specific callbacks */
+  desc-&gt;async_tx.tx_submit = my_dma_tx_submit;
+  desc-&gt;async_tx.callback = NULL;
+</code></pre>
+<p>  found:<br>      desc-&gt;chan &#x3D; my_chan;<br>      return desc;<br>  }</p>
+<ol start="3">
+<li>Real Example: DesignWare DMA (drivers&#x2F;dma&#x2F;dw&#x2F;core.c)</li>
+</ol>
+<p>  &#x2F;* Hardware descriptor structure *&#x2F;<br>  struct dw_desc {<br>      struct dw_lli <em>lli;         &#x2F;</em> Linked List Item (HW format) <em>&#x2F;<br>      dma_addr_t lli_phys;        &#x2F;</em> Physical addr of LLI <em>&#x2F;<br>      size_t len;                 &#x2F;</em> Transfer length <em>&#x2F;<br>      struct list_head desc_node; &#x2F;</em> Chain to other descriptors *&#x2F;</p>
+<pre><code>  /* Embed generic descriptor */
+  struct dma_async_tx_descriptor tx_desc;
+</code></pre>
+<p>  };</p>
+<p>  &#x2F;* Channel structure <em>&#x2F;<br>  struct dw_dma_chan {<br>      struct dma_chan chan;       &#x2F;</em> Generic channel <em>&#x2F;<br>      struct list_head free_desc_list;  &#x2F;</em> Pool of free descriptors <em>&#x2F;<br>      struct list_head active_list;     &#x2F;</em> Active descriptors <em>&#x2F;<br>      struct list_head queue;           &#x2F;</em> Queued descriptors <em>&#x2F;<br>      spinlock_t lock;<br>      &#x2F;</em> … *&#x2F;<br>  };</p>
+<p>  &#x2F;* Common descriptor allocation *&#x2F;<br>  static struct dw_desc *dw_dma_get_desc(struct dw_dma_chan *dwc)<br>  {<br>      struct dw_desc *desc;</p>
+<pre><code>  /* Try to get from free list first (NO kmalloc!) */
+  if (!list_empty(&amp;dwc-&gt;free_desc_list)) {
+      desc = list_first_entry(&amp;dwc-&gt;free_desc_list,
+                              struct dw_desc, desc_node);
+      list_del(&amp;desc-&gt;desc_node);
+      memset(desc-&gt;lli, 0, sizeof(struct dw_lli));  /* Clear HW part */
+      return desc;
+  }
+
+  /* Allocate new descriptor + hardware LLI */
+  desc = kzalloc(sizeof(struct dw_desc), GFP_NOWAIT);
+  if (!desc)
+      return NULL;
+
+  /* Allocate hardware descriptor in DMA-coherent memory */
+  desc-&gt;lli = dma_alloc_coherent(dwc-&gt;chan.device-&gt;dev,
+                                  sizeof(struct dw_lli),
+                                  &amp;desc-&gt;lli_phys,
+                                  GFP_NOWAIT);
+  if (!desc-&gt;lli) {
+      kfree(desc);
+      return NULL;
+  }
+
+  /* Initialize generic part */
+  dma_async_tx_descriptor_init(&amp;desc-&gt;tx_desc, &amp;dwc-&gt;chan);
+  desc-&gt;tx_desc.tx_submit = dw_dma_tx_submit;
+
+  return desc;
+</code></pre>
+<p>  }</p>
+<p>  &#x2F;* Common descriptor free (return to pool) *&#x2F;<br>  static void dw_dma_desc_free(struct dw_desc *desc)<br>  {<br>      list_add_tail(&amp;desc-&gt;desc_node, &amp;desc-&gt;chan-&gt;free_desc_list);<br>  }</p>
+<ol start="4">
+<li>Real Example: STM32 DMA (drivers&#x2F;dma&#x2F;stm32-dma.c)</li>
+</ol>
+<p>  &#x2F;* Hardware descriptor (STM32 format) <em>&#x2F;<br>  struct stm32_dma_desc {<br>      struct dma_async_tx_descriptor desc;<br>      struct list_head node;<br>      u32 chan_config;            &#x2F;</em> Channel config register value *&#x2F;<br>      struct stm32_dma_sg_req <em>sg_req;  &#x2F;</em> Scatter-gather list <em>&#x2F;<br>      int num_sgs;                &#x2F;</em> Number of SG entries *&#x2F;<br>  };</p>
+<p>  &#x2F;* Common cyclic descriptor allocation *&#x2F;<br>  static struct stm32_dma_desc *<br>  stm32_dma_alloc_cyclic_desc(struct stm32_dma_chan *chan,<br>                              dma_addr_t buf_addr,<br>                              size_t buf_len,<br>                              size_t period_len)<br>  {<br>      struct stm32_dma_desc *desc;<br>      int num_periods &#x3D; buf_len &#x2F; period_len;<br>      int i;</p>
+<pre><code>  desc = kzalloc(sizeof(*desc), GFP_NOWAIT);
+  if (!desc)
+      return NULL;
+
+  /* Allocate SG entries for each period */
+  desc-&gt;sg_req = kcalloc(num_periods, sizeof(*desc-&gt;sg_req), GFP_NOWAIT);
+  if (!desc-&gt;sg_req) {
+      kfree(desc);
+      return NULL;
+  }
+
+  desc-&gt;num_sgs = num_periods;
+
+  /* Build descriptor chain - COMMON PATTERN */
+  for (i = 0; i &lt; num_periods; i++) {
+      struct stm32_dma_sg_req *sg = &amp;desc-&gt;sg_req[i];
+
+      /* Calculate period address */
+      sg-&gt;dma_config.dma_periph_data = chan-&gt;config.dst_addr;
+      sg-&gt;dma_config.dma_memory_data = buf_addr + (i * period_len);
+      sg-&gt;dma_config.dma_size = period_len;
+
+      /* Setup hardware register values */
+      sg-&gt;dma_config.dma_cfg = chan-&gt;config.channel_cfg;
+  }
+
+  /* Mark as cyclic */
+  dma_async_tx_descriptor_init(&amp;desc-&gt;desc, &amp;chan-&gt;chan);
+  desc-&gt;desc.tx_submit = stm32_dma_tx_submit;
+
+  return desc;
+</code></pre>
+<p>  }</p>
+<ol start="5">
+<li>Real Example: PL330 (drivers&#x2F;dma&#x2F;pl330.c)</li>
+</ol>
+<p>  &#x2F;* Hardware instruction format (PL330 uses instruction-based DMA) *&#x2F;<br>  struct pl330_instr {<br>      u8 opcode;<br>      u32 operands[2];<br>  };</p>
+<p>  struct pl330_desc {<br>      struct dma_async_tx_descriptor tx;<br>      struct list_head node;</p>
+<pre><code>  /* Instruction buffer (PL330 executes instructions) */
+  struct pl330_instr *mc;     /* Microcode buffer */
+  dma_addr_t mc_dma;          /* DMA address of microcode */
+  size_t mc_len;              /* Microcode length */
+
+  struct pl330_xfer {
+      dma_addr_t src_addr;
+      dma_addr_t dst_addr;
+      size_t bytes;
+  } *xfers;
+
+  int num_xfers;
+  bool cyclic;
+</code></pre>
+<p>  };</p>
+<p>  &#x2F;* Common descriptor allocation *&#x2F;<br>  static struct pl330_desc *pl330_get_desc(struct pl330_chan *pch)<br>  {<br>      struct pl330_desc *desc;</p>
+<pre><code>  /* Get from channel&#39;s descriptor pool */
+  desc = kzalloc(sizeof(*desc), GFP_NOWAIT);
+  if (!desc)
+      return NULL;
+
+  /* Allocate microcode buffer in DMA-coherent memory */
+  desc-&gt;mc = dma_alloc_coherent(pch-&gt;dmac-&gt;ddma.dev,
+                                 PL330_MC_BUFFER_SIZE,
+                                 &amp;desc-&gt;mc_dma,
+                                 GFP_NOWAIT);
+  if (!desc-&gt;mc) {
+      kfree(desc);
+      return NULL;
+  }
+
+  dma_async_tx_descriptor_init(&amp;desc-&gt;tx, &amp;pch-&gt;chan);
+  desc-&gt;tx.tx_submit = pl330_tx_submit;
+
+  return desc;
+</code></pre>
+<p>  }</p>
+<ol start="6">
+<li>Common Infrastructure: DMA Descriptor Pools</li>
+</ol>
+<p>  Many drivers use pre-allocated pools to avoid kmalloc in atomic context:</p>
+<p>  &#x2F;* COMMON PATTERN: Descriptor pool management *&#x2F;</p>
+<p>  static int dma_descriptor_pool_init(struct dma_chan *chan, int num_descs)<br>  {<br>      struct my_dma_chan *my_chan &#x3D; to_my_chan(chan);<br>      int i;</p>
+<pre><code>  INIT_LIST_HEAD(&amp;my_chan-&gt;free_descs);
+
+  for (i = 0; i &lt; num_descs; i++) {
+      struct my_dma_desc *desc = kzalloc(sizeof(*desc), GFP_KERNEL);
+      if (!desc)
+          goto cleanup;
+
+      /* Pre-allocate hardware descriptors too */
+      desc-&gt;hw = dma_alloc_coherent(chan-&gt;device-&gt;dev,
+                                     sizeof(struct my_hw_desc),
+                                     &amp;desc-&gt;hw_addr,
+                                     GFP_KERNEL);
+      if (!desc-&gt;hw) {
+          kfree(desc);
+          goto cleanup;
+      }
+
+      dma_async_tx_descriptor_init(&amp;desc-&gt;async_tx, chan);
+      list_add_tail(&amp;desc-&gt;node, &amp;my_chan-&gt;free_descs);
+  }
+
+  return 0;
+</code></pre>
+<p>  cleanup:<br>      &#x2F;* Free all allocated descriptors *&#x2F;<br>      &#x2F;&#x2F; …<br>  }</p>
+<ol start="7">
+<li>Common Helpers in DMA Engine Core</li>
+</ol>
+<p>  &#x2F;&#x2F; drivers&#x2F;dma&#x2F;dma-mapping.h - Common helpers</p>
+<p>  &#x2F;* Virtual DMA (vdma) - Common descriptor management *&#x2F;<br>  struct virt_dma_desc {<br>      struct dma_async_tx_descriptor tx;<br>      struct list_head node;<br>      u32 flags;<br>  };</p>
+<p>  struct virt_dma_chan {<br>      struct dma_chan chan;<br>      struct list_head desc_issued;<br>      struct list_head desc_completed;<br>      spinlock_t lock;<br>  };</p>
+<p>  &#x2F;* Common helper functions *&#x2F;<br>  void vdma_desc_get(struct virt_dma_desc *vd);<br>  void vdma_desc_put(struct virt_dma_desc *vd);<br>  void vdma_desc_free(struct virt_dma_desc *vd);</p>
+<p>  &#x2F;* Used by many drivers: pl08x, mmp_pdma, bcm2835-dma, etc. *&#x2F;</p>
+<ol start="8">
+<li>Summary: Common Logic Across All Drivers<br>  ┌────────────────────────────────┬────────────────────────────────────────┬──────────────────┐<br>  │         Common Pattern         │                Purpose                 │     Example      │</li>
+</ol>
+<p>  ├────────────────────────────────┼────────────────────────────────────────┼──────────────────┤<br>  │ Embed dma_async_tx_descriptor  │ Generic callback&#x2F;cookie handling       │ All drivers      │<br>  ├────────────────────────────────┼────────────────────────────────────────┼──────────────────┤<br>  │ Descriptor pooling             │ Avoid kmalloc in atomic context        │ dw, pl330, stm32 │<br>  ├────────────────────────────────┼────────────────────────────────────────┼──────────────────┤<br>  │ DMA-coherent allocation        │ Hardware descriptors accessible by DMA │ All drivers      │<br>  ├────────────────────────────────┼────────────────────────────────────────┼──────────────────┤<br>  │ List-based chaining            │ Link descriptors together              │ All drivers      │<br>  ├────────────────────────────────┼────────────────────────────────────────┼──────────────────┤<br>  │ Free list management           │ Reuse descriptors after completion     │ Most drivers     │<br>  ├────────────────────────────────┼────────────────────────────────────────┼──────────────────┤<br>  │ dma_async_tx_descriptor_init() │ Initialize generic part                │ All drivers      │<br>  └────────────────────────────────┴────────────────────────────────────────┴──────────────────┘<br>  9. Typical Cyclic Descriptor Flow (Common Across Drivers)</p>
+<p>  &#x2F;* &#x3D;&#x3D;&#x3D; THIS PATTERN IS NEARLY IDENTICAL ACROSS DRIVERS &#x3D;&#x3D;&#x3D; *&#x2F;</p>
+<p>  static struct dma_async_tx_descriptor *<br>  xxx_prep_dma_cyclic(struct dma_chan *chan,<br>                      dma_addr_t buf_addr,<br>                      size_t buf_len,<br>                      size_t period_len,<br>                      enum dma_transfer_direction dir,<br>                      unsigned long flags)<br>  {<br>      struct xxx_chan *xxx_chan &#x3D; to_xxx_chan(chan);<br>      struct xxx_desc *desc;<br>      int num_periods &#x3D; buf_len &#x2F; period_len;<br>      int i;</p>
+<pre><code>  /* 1. Allocate descriptor */
+  desc = xxx_alloc_desc(xxx_chan);
+  if (!desc)
+      return NULL;
+
+  /* 2. Allocate per-period entries */
+  desc-&gt;periods = kcalloc(num_periods, sizeof(*desc-&gt;periods), GFP_NOWAIT);
+
+  /* 3. Build descriptor chain - SAME PATTERN */
+  for (i = 0; i &lt; num_periods; i++) {
+      desc-&gt;periods[i].addr = buf_addr + (i * period_len);
+      desc-&gt;periods[i].len = period_len;
+      /* Setup hardware-specific registers */
+  }
+
+  /* 4. Mark as cyclic */
+  desc-&gt;cyclic = true;
+  desc-&gt;num_periods = num_periods;
+
+  /* 5. Initialize generic descriptor */
+  dma_async_tx_descriptor_init(&amp;desc-&gt;async_tx, chan);
+  desc-&gt;async_tx.tx_submit = xxx_tx_submit;
+
+  return &amp;desc-&gt;async_tx;
+</code></pre>
+<p>  }</p>
+<hr>
+<p>  Yes! While hardware differs, the descriptor allocation patterns are remarkably similar:</p>
+<ol>
+<li>Embed dma_async_tx_descriptor for generic handling</li>
+<li>Use descriptor pools to avoid atomic allocations</li>
+<li>Allocate hardware descriptors in DMA-coherent memory</li>
+<li>Use linked lists for chaining</li>
+<li>Return descriptors to free pool after completion</li>
+</ol>
+<p>  The DMA Engine Core provides dma_async_tx_descriptor_init() and the virt_dma helpers specifically to share this common logic!</p>
 </article>
 <div class="article-footer">
     <section id="license">
@@ -264,7 +574,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/17/dma/axidma/">axidma硬件介绍与软件实现</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/19/dma/linux_dma%20copy/">Linux DMA Engine Overview1</a></div></section></div>
 
 
 
@@ -278,7 +588,7 @@
 
 
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-DMA-Engine-Overview"><span class="toc-text">Linux DMA Engine Overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-CYCLIC"><span class="toc-text">DMA_CYCLIC</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dmaengine-prep-dma-cyclic"><span class="toc-text">dmaengine_prep_dma_cyclic</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-PREP-FENCE"><span class="toc-text">DMA_PREP_FENCE</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#code-segments"><span class="toc-text">code segments</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-DMA-Engine-Overview"><span class="toc-text">Linux DMA Engine Overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-CYCLIC"><span class="toc-text">DMA_CYCLIC</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dmaengine-prep-dma-cyclic"><span class="toc-text">dmaengine_prep_dma_cyclic</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-PREP-FENCE"><span class="toc-text">DMA_PREP_FENCE</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#code-segments"><span class="toc-text">code segments</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#the-provider-for-cyclic-api"><span class="toc-text">the provider for cyclic api</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#talk-about-dma-provider-common-infrastructure"><span class="toc-text">talk about dma provider common infrastructure</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
