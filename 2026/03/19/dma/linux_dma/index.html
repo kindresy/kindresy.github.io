@@ -1,0 +1,1118 @@
+
+<!DOCTYPE html><html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>Linujx DMA Engine Overview - 庐山东林</title>
+
+  
+    <meta name="description" content="简介本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag Linux DMA Engine Overview What is DMA Engine?    The DMA Engine is a Linux kernel subsystem that provides a standardized framework for DMA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linujx DMA Engine Overview">
+<meta property="og:url" content="https://kindresy.github.io/2026/03/19/dma/linux_dma/">
+<meta property="og:site_name" content="庐山东林">
+<meta property="og:description" content="简介本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag Linux DMA Engine Overview What is DMA Engine?    The DMA Engine is a Linux kernel subsystem that provides a standardized framework for DMA">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-03-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-19T09:29:13.196Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="dma">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  <meta name="keywords" content="linux,dma">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-19T00:00:00+08:00","dateModified":"2026-03-19T17:29:13+08:00","datePublished":"2026-03-19T00:00:00+08:00","description":"","headline":"Linujx DMA Engine Overview","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/19/dma/linux_dma/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/19/dma/linux_dma/","keywords":"linux, dma","image":[]}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="Search"></form><div id="search-result"></div><div class="search-no-result">No Results!</div></div>
+
+
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">Recent Update</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linujx DMA Engine Overview</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a><a class="item title" href="/2026/03/16/life_record/%E8%84%91%E9%9B%BE%E4%BF%AE%E5%A4%8D/"><span class="title">脑雾修复</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/04/low-speed/i2c/"><span class="title">i2c_introduction</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">Home</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">Blog</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/dma/">dma</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">Posted on: <time datetime="2026-03-18T16:00:00.000Z">2026-03-19</time></span><span class="sep updated"></span><span class="text updated">Updated on: <time datetime="2026-03-19T09:29:13.196Z">2026-03-19</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Linujx DMA Engine Overview</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag</p>
+<h1 id="Linux-DMA-Engine-Overview"><a href="#Linux-DMA-Engine-Overview" class="headerlink" title="Linux DMA Engine Overview"></a>Linux DMA Engine Overview</h1><ol>
+<li>What is DMA Engine?</li>
+</ol>
+<p>  The DMA Engine is a Linux kernel subsystem that provides a standardized framework for DMA (Direct Memory Access) controllers. It allows device drivers to offload memory copy, memset, and scatter-gather operations to dedicated DMA hardware without CPU intervention.</p>
+<ol start="2">
+<li>Architecture Components</li>
+</ol>
+<p>  +——————+     +——————+<br>  |   Client Driver  |     |   Client Driver  |<br>  +——————+     +——————+<br>             |                     |<br>             v                     v<br>  +——————————————+<br>  |           DMA Engine Core                |<br>  |  (dmaengine.c, dma_cookie.c, etc.)       |<br>  +——————————————+<br>             |<br>             v<br>  +——————————————+<br>  |         DMA Controller Driver            |<br>  |    (Hardware-specific implementation)    |<br>  +——————————————+<br>             |<br>             v<br>  +——————————————+<br>  |           DMA Hardware                   |<br>  +——————————————+</p>
+<ol start="3">
+<li>Key Data Structures</li>
+</ol>
+<p>  &#x2F;&#x2F; Main DMA channel structure<br>  struct dma_chan {<br>      struct dma_device *device;<br>      void *private;<br>      int chan_id;<br>      struct kobject kobj;<br>      &#x2F;&#x2F; …<br>  };</p>
+<p>  &#x2F;&#x2F; DMA device (controller) structure<br>  struct dma_device {<br>      unsigned int chancnt;<br>      struct list_head channels;<br>      struct list_head global_node;<br>      dma_cap_mask_t cap_mask;<br>      struct device *dev;<br>      &#x2F;&#x2F; Callback operations<br>      struct dma_async_tx_descriptor *(*device_prep_dma_memcpy)(…);<br>      int (*device_tx_submit)(struct dma_async_tx_descriptor *tx);<br>      &#x2F;&#x2F; …<br>  };</p>
+<p>  &#x2F;&#x2F; Async transaction descriptor<br>  struct dma_async_tx_descriptor {<br>      dma_cookie_t cookie;<br>      enum dma_ctrl_flags flags;<br>      struct dma_chan *chan;<br>      void (*callback)(void *callback_param);<br>      void *callback_param;<br>      &#x2F;&#x2F; …<br>  };</p>
+<ol start="4">
+<li>Key APIs</li>
+</ol>
+<p>  For Client Drivers:<br>  ┌─────────────────────────────┬────────────────────────────────┐<br>  │             API             │            Purpose             │<br>  ├─────────────────────────────┼────────────────────────────────┤<br>  │ dma_request_chan()          │ Request a DMA channel          │<br>  ├─────────────────────────────┼────────────────────────────────┤<br>  │ dma_release_channel()       │ Release a DMA channel          │<br>  ├─────────────────────────────┼────────────────────────────────┤<br>  │ dmaengine_prep_dma_memcpy() │ Prepare a memcpy transaction   │<br>  ├─────────────────────────────┼────────────────────────────────┤<br>  │ dmaengine_submit()          │ Submit transaction to hardware │<br>  ├─────────────────────────────┼────────────────────────────────┤<br>  │ dma_async_issue_pending()   │ Start pending transactions     │<br>  ├─────────────────────────────┼────────────────────────────────┤<br>  │ dma_async_is_tx_complete()  │ Check transaction status       │<br>  └─────────────────────────────┴────────────────────────────────┘<br>  For DMA Controller Drivers:<br>  ┌───────────────────────────────┬───────────────────────┐<br>  │              API              │        Purpose        │<br>  ├───────────────────────────────┼───────────────────────┤<br>  │ dma_async_device_register()   │ Register DMA device   │<br>  ├───────────────────────────────┼───────────────────────┤<br>  │ dma_async_device_unregister() │ Unregister DMA device │<br>  ├───────────────────────────────┼───────────────────────┤<br>  │ dma_channel_register()        │ Register a channel    │<br>  └───────────────────────────────┴───────────────────────┘<br>  5. How It Works - Typical Flow</p>
+<p>  &#x2F;&#x2F; Step 1: Request channel<br>  struct dma_chan *chan &#x3D; dma_request_chan(dev, “rx”);</p>
+<p>  &#x2F;&#x2F; Step 2: Prepare transaction<br>  struct dma_async_tx_descriptor *tx;<br>  tx &#x3D; dmaengine_prep_dma_memcpy(chan, dst_addr, src_addr,<br>                                  len, DMA_CTRL_ACK);</p>
+<p>  &#x2F;&#x2F; Step 3: Set callback (optional)<br>  tx-&gt;callback &#x3D; my_callback;<br>  tx-&gt;callback_param &#x3D; my_data;</p>
+<p>  &#x2F;&#x2F; Step 4: Submit transaction<br>  dma_cookie_t cookie &#x3D; dmaengine_submit(tx);</p>
+<p>  &#x2F;&#x2F; Step 5: Issue pending transactions<br>  dma_async_issue_pending(chan);</p>
+<p>  &#x2F;&#x2F; Step 6: Wait for completion (polling or callback)<br>  enum dma_status status &#x3D; dma_async_is_tx_complete(chan, cookie, …);</p>
+<p>  &#x2F;&#x2F; Step 7: Release channel when done<br>  dma_release_channel(chan);</p>
+<ol start="6">
+<li>DMA Capabilities</li>
+</ol>
+<p>  The DMA Engine supports multiple capabilities:</p>
+<ul>
+<li>DMA_MEMCPY - Memory to memory copy</li>
+<li>DMA_MEMSET - Memory fill&#x2F;set</li>
+<li>DMA_SLAVE - Slave&#x2F;device DMA (peripheral to memory)</li>
+<li>DMA_CYCLIC - Cyclic DMA for streaming (audio, etc.)</li>
+<li>DMA_XOR - XOR operations (RAID)</li>
+<li>DMA_PQ - P+Q calculations (RAID6)</li>
+</ul>
+<ol start="7">
+<li>Transfer Directions (for Slave DMA)</li>
+</ol>
+<ul>
+<li>DMA_MEM_TO_MEM - Memory to memory</li>
+<li>DMA_MEM_TO_DEV - Memory to device</li>
+<li>DMA_DEV_TO_MEM - Device to memory</li>
+<li>DMA_DEV_TO_DEV - Device to device</li>
+</ul>
+<h1 id="DMA-CYCLIC"><a href="#DMA-CYCLIC" class="headerlink" title="DMA_CYCLIC"></a>DMA_CYCLIC</h1><p>● DMA_CYCLIC - Cyclic DMA for Streaming</p>
+<p>  What is Cyclic DMA?</p>
+<p>  Cyclic DMA is a special DMA mode where the DMA controller automatically loops through a series of buffer descriptors in a circular fashion, continuously transferring data without CPU intervention after the initial setup.</p>
+<p>  Key Characteristics<br>  ┌──────────────────────┬─────────────────────────────────────────┐<br>  │       Feature        │               Description               │<br>  ├──────────────────────┼─────────────────────────────────────────┤<br>  │ Circular Buffer      │ Descriptors form a ring&#x2F;loop            │<br>  ├──────────────────────┼─────────────────────────────────────────┤<br>  │ Continuous Operation │ Runs indefinitely until stopped         │<br>  ├──────────────────────┼─────────────────────────────────────────┤<br>  │ Periodic Callbacks   │ Can interrupt at segment boundaries     │<br>  ├──────────────────────┼─────────────────────────────────────────┤<br>  │ No Resubmission      │ No need to constantly requeue transfers │<br>  └──────────────────────┴─────────────────────────────────────────┘<br>  Architecture</p>
+<pre><code>   ┌─────────────────────────────────────────┐
+   │                                         │
+   ▼                                         │
+</code></pre>
+<p>  ┌─────────┐    ┌─────────┐    ┌─────────┐      │<br>  │ Segment │───▶│ Segment │───▶│ Segment │──────┘<br>  │    0    │    │    1    │    │    2    │<br>  │ (period)│    │ (period)│    │ (period)│<br>  └─────────┘    └─────────┘    └─────────┘<br>        │              │              │<br>        ▼              ▼              ▼<br>     IRQ?           IRQ?           IRQ?<br>    (optional)    (optional)    (optional)</p>
+<p>  Typical Use Cases</p>
+<ol>
+<li>Audio Playback (I2S, S&#x2F;PDIF)<br>- Continuous stream of audio samples to DAC<br>- Each period generates an interrupt for ALSA to refill next period</li>
+<li>Audio Capture<br>- Continuous stream from ADC to memory<br>- Each period notifies application to consume data</li>
+<li>Serial Communication (UART, SPI)<br>- Continuous RX&#x2F;TX ring buffers</li>
+<li>PWM Generation<br>- Cyclic waveform patterns</li>
+</ol>
+<p>  How It Works - Audio Playback Example</p>
+<p>  Application → ALSA → ASoC → DMA Engine → DMA Hardware → I2S → Codec → Speakers<br>                      ↓<br>                Periodic IRQ<br>                      ↓<br>                Refill next period</p>
+<p>  API Usage</p>
+<p>  &#x2F;&#x2F; Step 1: Request DMA channel<br>  struct dma_chan *chan &#x3D; dma_request_chan(dev, “tx”);</p>
+<p>  &#x2F;&#x2F; Step 2: Configure slave parameters<br>  struct dma_slave_config cfg &#x3D; {0};<br>  cfg.direction &#x3D; DMA_MEM_TO_DEV;<br>  cfg.dst_addr &#x3D; i2s_fifo_addr;<br>  cfg.dst_addr_width &#x3D; DMA_SLAVE_BUSWIDTH_2_BYTES;<br>  cfg.src_maxburst &#x3D; 4;  &#x2F;&#x2F; Burst size<br>  dmaengine_slave_config(chan, &amp;cfg);</p>
+<p>  &#x2F;&#x2F; Step 3: Prepare cyclic transfer<br>  &#x2F;&#x2F; Buffer: physically contiguous, divided into periods<br>  dma_addr_t buf_addr &#x3D; dma_map_single(dev, buf, buf_size, DMA_TO_DEVICE);</p>
+<p>  struct dma_async_tx_descriptor *desc;<br>  desc &#x3D; dmaengine_prep_dma_cyclic(<br>      chan,           &#x2F;&#x2F; DMA channel<br>      buf_addr,       &#x2F;&#x2F; Buffer DMA address<br>      buf_size,       &#x2F;&#x2F; Total buffer size<br>      period_size,    &#x2F;&#x2F; Size of each period (segment)<br>      DMA_MEM_TO_DEV, &#x2F;&#x2F; Direction<br>      DMA_CTRL_ACK    &#x2F;&#x2F; Flags<br>  );</p>
+<p>  &#x2F;&#x2F; Step 4: Set callback (called at each period boundary)<br>  desc-&gt;callback &#x3D; audio_period_callback;<br>  desc-&gt;callback_param &#x3D; substream;  &#x2F;&#x2F; ALSA substream</p>
+<p>  &#x2F;&#x2F; Step 5: Submit and start<br>  dma_cookie_t cookie &#x3D; dmaengine_submit(desc);<br>  dma_async_issue_pending(chan);</p>
+<p>  &#x2F;&#x2F; DMA now runs continuously, calling callback every period_size bytes</p>
+<p>  &#x2F;&#x2F; Step 6: To stop<br>  dmaengine_terminate_all(chan);  &#x2F;&#x2F; or dmaengine_terminate_sync(chan)</p>
+<p>  &#x2F;&#x2F; Step 7: Release<br>  dma_release_channel(chan);</p>
+<p>  Callback Behavior</p>
+<p>  static void audio_period_callback(void *param)<br>  {<br>      struct snd_pcm_substream *substream &#x3D; param;</p>
+<pre><code>  // Called at each period boundary
+  // ALSA updates its hardware pointer
+  snd_pcm_period_elapsed(substream);
+
+  // No need to resubmit - DMA continues to next period automatically
+</code></pre>
+<p>  }</p>
+<p>  Buffer Layout Example</p>
+<p>  For a 4-period audio buffer:</p>
+<p>  Time ─────────────────────────────────────▶</p>
+<p>  Buffer:  [ Period 0 ][ Period 1 ][ Period 2 ][ Period 3 ]<br>                │          │          │          │<br>                ▼          ▼          ▼          ▼<br>  IRQ:         ●──────────●──────────●──────────●──────────▶</p>
+<p>  DMA Head:    ───────────────────────► (wraps to Period 0)</p>
+<p>  Key Differences: Cyclic vs. Scatter-Gather<br>  ┌──────────────┬──────────────────────────┬────────────────────────────┐<br>  │    Aspect    │        Cyclic DMA        │     Scatter-Gather DMA     │<br>  ├──────────────┼──────────────────────────┼────────────────────────────┤<br>  │ Pattern      │ Circular, repeating      │ Linear, one-shot           │<br>  ├──────────────┼──────────────────────────┼────────────────────────────┤<br>  │ Duration     │ Continuous until stopped │ Single transfer            │<br>  ├──────────────┼──────────────────────────┼────────────────────────────┤<br>  │ CPU Overhead │ Very low (no resubmit)   │ Higher (resubmit needed)   │<br>  ├──────────────┼──────────────────────────┼────────────────────────────┤<br>  │ Use Case     │ Streaming (audio, UART)  │ Block transfers (file I&#x2F;O) │<br>  ├──────────────┼──────────────────────────┼────────────────────────────┤<br>  │ Interrupts   │ Periodic (optional)      │ End-of-transfer            │<br>  └──────────────┴──────────────────────────┴────────────────────────────┘<br>  Important Considerations</p>
+<ol>
+<li>Buffer Must Be DMA-Coherent<br>  &#x2F;&#x2F; Use coherent allocation for cyclic buffers<br>  void *buf &#x3D; dma_alloc_coherent(dev, size, &amp;dma_handle, GFP_KERNEL);</li>
+<li>Period Size Matters<br>- Smaller periods &#x3D; more frequent interrupts &#x3D; lower latency but higher CPU<br>- Larger periods &#x3D; fewer interrupts &#x3D; higher latency but less CPU overhead</li>
+<li>No Rewind<br>- Once started, cyclic DMA flows forward continuously<br>- To “rewind”, you must terminate and restart</li>
+<li>Memory Must Be Contiguous<br>- Cyclic DMA typically requires physically contiguous buffer<br>- Cannot use standard dma_map_sg() with scattered pages</li>
+</ol>
+<p>  ALSA Integration Example</p>
+<p>  &#x2F;&#x2F; In ASoC PCM driver<br>  static int snd_soc_pcm_lib_hw_params(struct snd_pcm_substream *substream,<br>                                       struct snd_pcm_hw_params *params)<br>  {<br>      struct snd_soc_pcm_runtime *rtd &#x3D; substream-&gt;private_data;<br>      struct snd_dma_buffer *dma_buf &#x3D; &amp;substream-&gt;dma_buffer;</p>
+<pre><code>  // Allocate DMA buffer
+  dma_buf-&gt;area = dma_alloc_coherent(rtd-&gt;card-&gt;dev,
+                                      params_buffer_bytes(params),
+                                      &amp;dma_buf-&gt;addr,
+                                      GFP_KERNEL);
+  dma_buf-&gt;bytes = params_buffer_bytes(params);
+
+  return 0;
+</code></pre>
+<p>  }</p>
+<p>  static int snd_soc_pcm_lib_trigger(struct snd_pcm_substream *substream, int cmd)<br>  {<br>      switch (cmd) {<br>      case SNDRV_PCM_TRIGGER_START:<br>          dma_async_issue_pending(chan);<br>          break;<br>      case SNDRV_PCM_TRIGGER_STOP:<br>          dmaengine_terminate_all(chan);<br>          break;<br>      }<br>      return 0;<br>  }</p>
+<p>  Common DMA Controller Drivers Supporting Cyclic</p>
+<ul>
+<li>dw_dmac - DesignWare DMA</li>
+<li>pl330 - ARM PrimeCell PL330</li>
+<li>imx-sdma - i.MX SDMA</li>
+<li>omap-dma - OMAP DMA</li>
+<li>stm32-dma - STM32 DMA</li>
+<li>xilinx-dma - Xilinx AXI DMA</li>
+</ul>
+<hr>
+<p>  Want me to explain any specific aspect in more detail, such as the hardware implementation or how to debug cyclic DMA issues?</p>
+<p>✻ Cooked for 52s</p>
+<p>❯ the code you showed to me:<br>  ⎿  Interrupted · What should Claude do instead?</p>
+<p>❯ the code you showed to me:<br>  dma_addr_t buf_addr &#x3D; dma_map_single(dev, buf, buf_size, DMA_TO_DEVICE);</p>
+<p>  struct dma_async_tx_descriptor *desc;<br>  desc &#x3D; dmaengine_prep_dma_cyclic(<br>  chan,           &#x2F;&#x2F; DMA channel<br>  buf_addr,       &#x2F;&#x2F; Buffer DMA address<br>  buf_size,       &#x2F;&#x2F; Total buffer size<br>  period_size,    &#x2F;&#x2F; Size of each period (segment)<br>  DMA_MEM_TO_DEV, &#x2F;&#x2F; Direction<br>  DMA_CTRL_ACK    &#x2F;&#x2F; Flags<br>  );</p>
+<h1 id="dmaengine-prep-dma-cyclic"><a href="#dmaengine-prep-dma-cyclic" class="headerlink" title="dmaengine_prep_dma_cyclic"></a>dmaengine_prep_dma_cyclic</h1><p>  how to understand the dmaengine_prep_dma_cyclic? this api will split the continous memory which from addr “buf_addr”<br>  start, into each segment in length of “period” ?</p>
+<p>● Yes, exactly! Let me clarify how dmaengine_prep_dma_cyclic() works:</p>
+<p>  Understanding dmaengine_prep_dma_cyclic()</p>
+<p>  What It Does</p>
+<p>  Continuous Buffer (buf_size bytes)<br>  ┌─────────────────────────────────────────────────────────┐<br>  │                                                         │<br>  ▼                                                         │<br>  buf_addr                                                  │<br>  ┌─────────────┬─────────────┬─────────────┬─────────────┐ │<br>  │  Period 0   │  Period 1   │  Period 2   │  Period 3   │ │<br>  │ (period_sz) │ (period_sz) │ (period_sz) │ (period_sz) │ │<br>  └─────────────┴─────────────┴─────────────┴─────────────┘ │<br>            ▲                                               │<br>            └────────────── wraps around ───────────────────┘</p>
+<p>  How the Memory is Split</p>
+<p>  &#x2F;&#x2F; Example values<br>  buf_size    &#x3D; 4096 bytes   &#x2F;&#x2F; Total buffer<br>  period_size &#x3D; 1024 bytes   &#x2F;&#x2F; Each segment<br>  &#x2F;&#x2F; Result: 4 periods (4096 &#x2F; 1024 &#x3D; 4)</p>
+<p>  &#x2F;&#x2F; Internally, the DMA engine driver creates descriptors like:<br>  struct dma_cyclic_desc {<br>      &#x2F;&#x2F; Period 0: buf_addr + 0<br>      &#x2F;&#x2F; Period 1: buf_addr + period_size<br>      &#x2F;&#x2F; Period 2: buf_addr + 2 * period_size<br>      &#x2F;&#x2F; Period 3: buf_addr + 3 * period_size<br>      &#x2F;&#x2F; Then wraps back to Period 0<br>  };</p>
+<p>  What Happens Inside the API</p>
+<p>  desc &#x3D; dmaengine_prep_dma_cyclic(<br>      chan,<br>      buf_addr,       &#x2F;&#x2F; Start of entire buffer<br>      buf_size,       &#x2F;&#x2F; Total: 4096 bytes<br>      period_size,    &#x2F;&#x2F; Each period: 1024 bytes<br>      DMA_MEM_TO_DEV,<br>      DMA_CTRL_ACK<br>  );</p>
+<p>  Internally, the DMA subsystem:</p>
+<ol>
+<li>Calculates number of periods: num_periods &#x3D; buf_size &#x2F; period_size</li>
+<li>Creates a chain of DMA descriptors (one per period)</li>
+<li>Links the last descriptor back to the first (circular)</li>
+<li>Each descriptor transfers period_size bytes</li>
+<li>Returns a single “master” descriptor to represent the whole cyclic transfer</li>
+</ol>
+<p>  Descriptor Chain Structure</p>
+<p>  &#x2F;&#x2F; Conceptual internal structure:<br>  struct dma_async_tx_descriptor {<br>      struct dma_cyclic_chunk {<br>          dma_addr_t addr &#x3D; buf_addr + 0;           &#x2F;&#x2F; Period 0<br>          u32 len &#x3D; period_size;<br>          struct dma_cyclic_chunk *next &#x3D; &chunk1;<br>      } chunk0;</p>
+<pre><code>  struct dma_cyclic_chunk {
+      dma_addr_t addr = buf_addr + 1024;        // Period 1
+      u32 len = period_size;
+      struct dma_cyclic_chunk *next = &amp;chunk2;
+  } chunk1;
+
+  struct dma_cyclic_chunk {
+      dma_addr_t addr = buf_addr + 2048;        // Period 2
+      u32 len = period_size;
+      struct dma_cyclic_chunk *next = &amp;chunk3;
+  } chunk2;
+
+  struct dma_cyclic_chunk {
+      dma_addr_t addr = buf_addr + 3072;        // Period 3
+      u32 len = period_size;
+      struct dma_cyclic_chunk *next = &amp;chunk0;  // ← WRAPS BACK!
+  } chunk3;
+</code></pre>
+<p>  };</p>
+<p>  Important Constraints</p>
+<p>  &#x2F;&#x2F; buf_size MUST be a multiple of period_size<br>  buf_size % period_size &#x3D;&#x3D; 0;  &#x2F;&#x2F; e.g., 4096 % 1024 &#x3D; 0</p>
+<p>  &#x2F;&#x2F; If not, the API may fail or behave incorrectly</p>
+<p>  Callback Timing</p>
+<p>  desc-&gt;callback &#x3D; audio_period_callback;</p>
+<p>  &#x2F;&#x2F; Callback fires at EACH period boundary:<br>  &#x2F;&#x2F;<br>  &#x2F;&#x2F; Time ──────────────────────────────────────────▶<br>  &#x2F;&#x2F;<br>  &#x2F;&#x2F; DMA:   [P0][P1][P2][P3][P0][P1][P2][P3][P0]…<br>  &#x2F;&#x2F;         │   │   │   │   │   │   │   │   │<br>  &#x2F;&#x2F; IRQ:   ●───●───●───●───●───●───●───●───●───▶<br>  &#x2F;&#x2F;<br>  &#x2F;&#x2F; Each ● &#x3D; callback invoked</p>
+<p>  Visual Summary</p>
+<p>  dmaengine_prep_dma_cyclic() takes:</p>
+<pre><code>  buf_addr ──▶ [||||||||||||||||]  (contiguous memory)
+                 │      │
+                 │      └── period_size
+                 │
+                 └── buf_size (total)
+</code></pre>
+<p>  And creates internally:</p>
+<pre><code>  ┌──────────────────────────────────────┐
+  │  [P0]──▶[P1]──▶[P2]──▶[P3]──┐        │
+  │   ▲                        │        │
+  │   └────────────────────────┘ (loop) │
+  │                                      │
+  │  Each period = period_size bytes     │
+  │  Callback at each period boundary    │
+  └──────────────────────────────────────┘
+</code></pre>
+<p>  Your Understanding is Correct</p>
+<p>  this api will split the continous memory which from addr “buf_addr” start, into each segment in length of “period” ?</p>
+<p>  Yes! The API:</p>
+<ol>
+<li>Takes one contiguous buffer starting at buf_addr</li>
+<li>Logically divides it into buf_size &#x2F; period_size segments</li>
+<li>Creates a circular descriptor chain where each segment transfers period_size bytes</li>
+<li>The hardware automatically loops through all segments forever (until terminated)</li>
+</ol>
+<h1 id="DMA-PREP-FENCE"><a href="#DMA-PREP-FENCE" class="headerlink" title="DMA_PREP_FENCE"></a>DMA_PREP_FENCE</h1><p>tell me about flag “DMA_PREP_FENCE”</p>
+<p>● DMA_PREP_FENCE Flag</p>
+<p>  What It Does</p>
+<p>  DMA_PREP_FENCE is a flag used with dmaengine_prep_*() functions to <strong>enforce memory ordering constraints</strong>. It tells the DMA engine to act as a memory barrier (fence) that ensures all previous memory operations are completed before this DMA transaction begins.</p>
+<p>  The Flag Definition</p>
+<p>  &#x2F;&#x2F; In include&#x2F;linux&#x2F;dmaengine.h<br>  #define DMA_PREP_FENCE  (1 &lt;&lt; 4)</p>
+<p>  &#x2F;&#x2F; Used in the flags parameter:<br>  desc &#x3D; dmaengine_prep_dma_memcpy(chan, dst, src, len,<br>                                    DMA_CTRL_ACK | DMA_PREP_FENCE);</p>
+<p>  Why It’s Needed - The Problem</p>
+<p>  Without DMA_PREP_FENCE, DMA transactions may be reordered for performance:</p>
+<p>  CPU writes to memory:<br>  ┌─────────────┐<br>  │ Write A     │<br>  │ Write B     │<br>  │ Write C     │<br>  └─────────────┘<br>       │<br>       ▼<br>  DMA Engine Queue (without fence):<br>  ┌─────────────┐<br>  │ Transfer C  │  ← May execute first!<br>  │ Transfer A  │<br>  │ Transfer B  │<br>  └─────────────┘</p>
+<p>  With DMA_PREP_FENCE:</p>
+<p>  DMA Engine Queue (with fence):<br>  ┌─────────────┐<br>  │ Transfer A  │  ← Must complete first<br>  ├─────────────┤<br>  │ FENCE       │  ← Memory barrier<br>  ├─────────────┤<br>  │ Transfer B  │  ← Waits for all prior ops<br>  │ Transfer C  │<br>  └─────────────┘</p>
+<p>  Typical Use Cases</p>
+<ol>
+<li>Synchronization Between DMA Channels</li>
+</ol>
+<p>  &#x2F;&#x2F; Channel 1: DMA memcpy<br>  struct dma_async_tx_descriptor *tx1;<br>  tx1 &#x3D; dmaengine_prep_dma_memcpy(chan1, dst1, src1, len, DMA_CTRL_ACK);<br>  dmaengine_submit(tx1);</p>
+<p>  &#x2F;&#x2F; Channel 2: Must wait for channel 1 to complete<br>  struct dma_async_tx_descriptor *tx2;<br>  tx2 &#x3D; dmaengine_prep_dma_memcpy(chan2, dst2, dst1, len,<br>                                   DMA_CTRL_ACK | DMA_PREP_FENCE);<br>  tx2-&gt;dep &#x3D; tx1;  &#x2F;&#x2F; Dependency on tx1<br>  dmaengine_submit(tx2);</p>
+<ol start="2">
+<li>Coherent Data Processing Pipeline</li>
+</ol>
+<p>  &#x2F;&#x2F; Step 1: DMA from device to buffer<br>  desc1 &#x3D; dmaengine_prep_dma_single(chan, buf, dev_addr, len,<br>                                     DMA_DEV_TO_MEM, 0);</p>
+<p>  &#x2F;&#x2F; Step 2: CPU or DMA processes data (e.g., crypto, checksum)<br>  &#x2F;&#x2F; …</p>
+<p>  &#x2F;&#x2F; Step 3: DMA from buffer to device - MUST wait for step 2<br>  desc2 &#x3D; dmaengine_prep_dma_single(chan, dev_addr, buf, len,<br>                                     DMA_MEM_TO_DEV,<br>                                     DMA_CTRL_ACK | DMA_PREP_FENCE);</p>
+<p>  How It Works Internally</p>
+<p>  &#x2F;&#x2F; Conceptual implementation in DMA controller driver</p>
+<p>  static struct dma_async_tx_descriptor *<br>  my_dma_prep_dma_memcpy(struct dma_chan *chan,<br>                         dma_addr_t dest, dma_addr_t src,<br>                         size_t len, unsigned long flags)<br>  {<br>      struct my_dma_desc *desc &#x3D; to_my_desc(chan);</p>
+<pre><code>  // Allocate hardware descriptor
+  desc-&gt;hw_desc.src = src;
+  desc-&gt;hw_desc.dst = dest;
+  desc-&gt;hw_desc.len = len;
+
+  if (flags &amp; DMA_PREP_FENCE) {
+      // Set hardware fence bit
+      desc-&gt;hw_desc.ctrl |= MY_DMA_CTRL_FENCE;
+
+      // Or wait for previous descriptors to complete
+      my_dma_wait_for_pending(chan);
+  }
+
+  return &amp;desc-&gt;async_tx;
+</code></pre>
+<p>  }</p>
+<p>  Relationship with Other Flags<br>  ┌────────────────────┬────────────────────────────────────────────┐<br>  │        Flag        │                  Purpose                   │<br>  ├────────────────────┼────────────────────────────────────────────┤<br>  │ DMA_CTRL_ACK       │ Acknowledge transaction completion         │<br>  ├────────────────────┼────────────────────────────────────────────┤<br>  │ DMA_PREP_FENCE     │ Insert memory barrier before this transfer │<br>  ├────────────────────┼────────────────────────────────────────────┤<br>  │ DMA_PREP_LOAD_EOT  │ Load descriptor at End Of Transfer         │<br>  ├────────────────────┼────────────────────────────────────────────┤<br>  │ DMA_PREP_INTERRUPT │ Generate interrupt on completion           │<br>  ├────────────────────┼────────────────────────────────────────────┤<br>  │ DMA_CTRL_REUSE     │ Allow descriptor reuse                     │<br>  └────────────────────┴────────────────────────────────────────────┘<br>  Example: Chained Transfers with Fence</p>
+<p>  &#x2F;&#x2F; Transfer 1: No fence, can be reordered<br>  desc1 &#x3D; dmaengine_prep_dma_memcpy(chan, dst1, src1, len, DMA_CTRL_ACK);<br>  cookie1 &#x3D; dmaengine_submit(desc1);</p>
+<p>  &#x2F;&#x2F; Transfer 2: No fence, can be reordered<br>  desc2 &#x3D; dmaengine_prep_dma_memcpy(chan, dst2, src2, len, DMA_CTRL_ACK);<br>  cookie2 &#x3D; dmaengine_submit(desc2);</p>
+<p>  &#x2F;&#x2F; Transfer 3: FENCE - must wait for desc1 and desc2 to complete<br>  desc3 &#x3D; dmaengine_prep_dma_memcpy(chan, dst3, src3, len,<br>                                     DMA_CTRL_ACK | DMA_PREP_FENCE);<br>  desc3-&gt;dependency &#x3D; desc2;  &#x2F;&#x2F; Explicit dependency<br>  cookie3 &#x3D; dmaengine_submit(desc3);</p>
+<p>  dma_async_issue_pending(chan);</p>
+<p>  Hardware Support</p>
+<p>  Not all DMA controllers support DMA_PREP_FENCE. Check the driver:</p>
+<p>  &#x2F;&#x2F; In DMA controller driver’s capability check<br>  if (dma_dev-&gt;cap_mask &amp; DMA_CAP_FENCE) {<br>      &#x2F;&#x2F; Hardware supports fencing<br>  } else {<br>      &#x2F;&#x2F; Fence flag ignored, software must handle ordering<br>  }</p>
+<p>  Common Controllers Supporting Fence<br>  ┌───────────────────┬───────────────────┐<br>  │    Controller     │   Fence Support   │<br>  ├───────────────────┼───────────────────┤<br>  │ ARM PL330         │ Yes (via SEV&#x2F;WFE) │<br>  ├───────────────────┼───────────────────┤<br>  │ DesignWare DW_DMA │ Yes               │<br>  ├───────────────────┼───────────────────┤<br>  │ Xilinx AXI DMA    │ Yes (via SYNC)    │<br>  ├───────────────────┼───────────────────┤<br>  │ Intel IDMA        │ Yes               │<br>  ├───────────────────┼───────────────────┤<br>  │ STM32 DMA         │ Limited           │<br>  └───────────────────┴───────────────────┘<br>  Alternative: Explicit Dependencies</p>
+<p>  If hardware doesn’t support DMA_PREP_FENCE, use explicit dependencies:</p>
+<p>  &#x2F;&#x2F; Instead of DMA_PREP_FENCE, chain descriptors<br>  desc1 &#x3D; dmaengine_prep_dma_memcpy(…);<br>  desc2 &#x3D; dmaengine_prep_dma_memcpy(…);</p>
+<p>  &#x2F;&#x2F; Link them explicitly<br>  desc2-&gt;dep &#x3D; desc1;  &#x2F;&#x2F; desc2 waits for desc1</p>
+<p>  dmaengine_submit(desc1);<br>  dmaengine_submit(desc2);</p>
+<hr>
+<h1 id="code-segments"><a href="#code-segments" class="headerlink" title="code segments"></a>code segments</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> &#123;</span><br><span class="line">	<span class="type">dma_cookie_t</span> cookie;</span><br><span class="line">	<span class="keyword">enum</span> <span class="title class_">dma_ctrl_flags</span> flags; <span class="comment">/* not a &#x27;long&#x27; to pack with cookie */</span></span><br><span class="line">	<span class="type">dma_addr_t</span> phys;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dma_chan</span> *chan;</span><br><span class="line">	<span class="built_in">dma_cookie_t</span> (*tx_submit)(<span class="keyword">struct</span> dma_async_tx_descriptor *tx);</span><br><span class="line">	<span class="built_in">int</span> (*desc_free)(<span class="keyword">struct</span> dma_async_tx_descriptor *tx);</span><br><span class="line">	dma_async_tx_callback callback;</span><br><span class="line">	dma_async_tx_callback_result callback_result;</span><br><span class="line">	<span class="type">void</span> *callback_param;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dmaengine_unmap_data</span> *unmap;</span><br><span class="line">	<span class="keyword">enum</span> <span class="title class_">dma_desc_metadata_mode</span> desc_metadata_mode;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dma_descriptor_metadata_ops</span> *metadata_ops;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_ASYNC_TX_ENABLE_CHANNEL_SWITCH</span></span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *next;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *parent;</span><br><span class="line">	<span class="type">spinlock_t</span> lock;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *<span class="built_in">txd_next</span>(<span class="keyword">struct</span> dma_async_tx_descriptor *txd)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> txd-&gt;next;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * dma_run_dependencies - process dependent operations on the target channel</span></span><br><span class="line"><span class="comment"> * @tx:		transaction with dependencies</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Helper routine for DMA drivers to process (start) dependent operations</span></span><br><span class="line"><span class="comment"> * on their target channel.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">dma_run_dependencies</span><span class="params">(<span class="keyword">struct</span> dma_async_tx_descriptor *tx)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *dep = <span class="built_in">txd_next</span>(tx);</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dma_async_tx_descriptor</span> *dep_next;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">dma_chan</span> *chan;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!dep)</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* we&#x27;ll submit tx-&gt;next now, so clear the link */</span></span><br><span class="line">	<span class="built_in">txd_clear_next</span>(tx);</span><br><span class="line">	chan = dep-&gt;chan;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* keep submitting up until a channel switch is detected</span></span><br><span class="line"><span class="comment">	 * in that case we will be called again as a result of</span></span><br><span class="line"><span class="comment">	 * processing the interrupt from async_tx_channel_switch</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">for</span> (; dep; dep = dep_next) &#123;</span><br><span class="line">		<span class="built_in">txd_lock</span>(dep);</span><br><span class="line">		<span class="built_in">txd_clear_parent</span>(dep);</span><br><span class="line">		dep_next = <span class="built_in">txd_next</span>(dep);</span><br><span class="line">		<span class="keyword">if</span> (dep_next &amp;&amp; dep_next-&gt;chan == chan)</span><br><span class="line">			<span class="built_in">txd_clear_next</span>(dep); <span class="comment">/* -&gt;next will be submitted */</span></span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			dep_next = <span class="literal">NULL</span>; <span class="comment">/* submit current dep and terminate */</span></span><br><span class="line">		<span class="built_in">txd_unlock</span>(dep);</span><br><span class="line"></span><br><span class="line">		dep-&gt;<span class="built_in">tx_submit</span>(dep);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	chan-&gt;device-&gt;<span class="built_in">device_issue_pending</span>(chan);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">EXPORT_SYMBOL_GPL</span>(dma_run_dependencies);</span><br></pre></td></tr></table></figure>
+
+
+<p>  Summary: DMA_PREP_FENCE ensures memory ordering by acting as a barrier - all previous DMA&#x2F;memory operations must complete before this transfer starts. Essential for data pipelines where transfer order matters.</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>License</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">Older</div><a href="/2026/03/17/dma/axidma/">axidma硬件介绍与软件实现</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">On This Page</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-DMA-Engine-Overview"><span class="toc-text">Linux DMA Engine Overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-CYCLIC"><span class="toc-text">DMA_CYCLIC</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dmaengine-prep-dma-cyclic"><span class="toc-text">dmaengine_prep_dma_cyclic</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DMA-PREP-FENCE"><span class="toc-text">DMA_PREP_FENCE</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#code-segments"><span class="toc-text">code segments</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>Scroll to Top</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `Just`,
+      min: `minutes ago`,
+      hour: `hours ago`,
+      day: `days ago`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `Switched to Light Mode`,
+      dark: `Switched to Dark Mode`,
+      auto: `Switched to Auto Mode`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div></body></html>
