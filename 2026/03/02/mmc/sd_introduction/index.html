@@ -23,40 +23,40 @@
     <meta name="description" content="写在前面学习SD&#x2F;SDIO&#x2F;EMMC的第一步，首先是搞清楚他们之间的区别，摸清不同的技术路线之间的差异  SDIO 设备(WIFI, BT, GPS等)，SDCard和eMMc都挂在SDHCI控制器下, 三者都“共用同一物理总线接口”,   但协议栈、用途、封装完全不同:    维度 SD 卡 SDIO 卡 eMMC    官方全称 Secure Digital Memory">
 <meta property="og:type" content="article">
 <meta property="og:title" content="sd_introduction">
-<meta property="og:url" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/">
+<meta property="og:url" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/">
 <meta property="og:site_name" content="搴愬北涓滄灄">
 <meta property="og:description" content="写在前面学习SD&#x2F;SDIO&#x2F;EMMC的第一步，首先是搞清楚他们之间的区别，摸清不同的技术路线之间的差异  SDIO 设备(WIFI, BT, GPS等)，SDCard和eMMc都挂在SDHCI控制器下, 三者都“共用同一物理总线接口”,   但协议栈、用途、封装完全不同:    维度 SD 卡 SDIO 卡 eMMC    官方全称 Secure Digital Memory">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302172304674.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302172504252.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302172607342.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302172700585.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302172746752.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302173025521.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302173038098.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302173046917.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302173056827.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302173110913.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302173209304.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302184834266.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302184929005.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302185850404.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302190019913.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302191030253.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302191104499.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302191118025.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302191140331.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302191418091.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302191628683.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302192102670.png">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302192219999.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302172304674.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302172504252.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302172607342.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302172700585.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302172746752.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302173025521.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302173038098.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302173046917.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302173056827.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302173110913.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302173209304.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302184834266.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302184929005.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302185850404.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302190019913.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302191030253.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302191104499.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302191118025.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302191140331.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302191418091.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302191628683.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302192102670.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302192219999.png">
 <meta property="article:published_time" content="2026-03-01T16:00:00.000Z">
 <meta property="article:modified_time" content="2026-03-02T12:43:22.336Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kindresy.github.io/2026/03/02/mmc/sd_introduction/image-20260302172304674.png">
+<meta name="twitter:image" content="https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/image-20260302172304674.png">
   
   
   
@@ -72,7 +72,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-02T00:00:00+08:00","dateModified":"2026-03-02T20:43:22+08:00","datePublished":"2026-03-02T00:00:00+08:00","description":"","headline":"sd_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/02/mmc/sd_introduction/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/02/mmc/sd_introduction/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-02T00:00:00+08:00","dateModified":"2026-03-02T20:43:22+08:00","datePublished":"2026-03-02T00:00:00+08:00","description":"","headline":"sd_introduction","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/03/02/mmc/sd_introduction/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -91,7 +91,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/AI/claude_fix_exp/"><span class="title">claude使用经验</span></a><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/axidma-basics/"><span class="title">AXIDMA：从参数配置到数据校验</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/AI/claude_fix_exp/"><span class="title">claude使用经验</span></a><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">

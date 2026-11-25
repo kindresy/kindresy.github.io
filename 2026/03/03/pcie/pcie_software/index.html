@@ -23,18 +23,18 @@
     <meta name="description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
 <meta property="og:type" content="article">
 <meta property="og:title" content="pcie software">
-<meta property="og:url" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/">
+<meta property="og:url" content="https://www.coffepattern.top/2026/03/03/pcie/pcie_software/">
 <meta property="og:site_name" content="搴愬北涓滄灄">
 <meta property="og:description" content="简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与AI加速卡的场景，来介绍RC如何枚举EP，RC如何访问EP，EP如何访问RC。当然还包括这些事务发生之前的，RC与EP之间的内存映射配置过程等。我觉得，这篇文章的命">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/image.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/03/03/pcie/pcie_software/image.png">
 <meta property="article:published_time" content="2026-03-02T16:00:00.000Z">
 <meta property="article:modified_time" content="2026-03-03T09:52:37.970Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="embedded">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://kindresy.github.io/2026/03/03/pcie/pcie_software/image.png">
+<meta name="twitter:image" content="https://www.coffepattern.top/2026/03/03/pcie/pcie_software/image.png">
   
   
   
@@ -50,7 +50,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-03T00:00:00+08:00","dateModified":"2026-03-03T17:52:37+08:00","datePublished":"2026-03-03T00:00:00+08:00","description":"","headline":"pcie software","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/03/pcie/pcie_software/","keywords":"embedded, Linux","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-03T00:00:00+08:00","dateModified":"2026-03-03T17:52:37+08:00","datePublished":"2026-03-03T00:00:00+08:00","description":"","headline":"pcie software","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/03/03/pcie/pcie_software/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/03/03/pcie/pcie_software/","keywords":"embedded, Linux","image":[]}</script>
   
 </head>
 <body>
@@ -69,7 +69,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/AI/claude_fix_exp/"><span class="title">claude使用经验</span></a><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/axidma-basics/"><span class="title">AXIDMA：从参数配置到数据校验</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/AI/claude_fix_exp/"><span class="title">claude使用经验</span></a><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">

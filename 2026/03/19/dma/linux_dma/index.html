@@ -23,7 +23,7 @@
     <meta name="description" content="简介本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag。讨论dma framework，以及provider驱动之间的一些共性。 Linux DMA Engine Overview What is DMA Engine?    The DMA Engine is a Linux kernel subsystem that prov">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux DMA Engine Overview">
-<meta property="og:url" content="https://kindresy.github.io/2026/03/19/dma/linux_dma/">
+<meta property="og:url" content="https://www.coffepattern.top/2026/03/19/dma/linux_dma/">
 <meta property="og:site_name" content="搴愬北涓滄灄">
 <meta property="og:description" content="简介本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag。讨论dma framework，以及provider驱动之间的一些共性。 Linux DMA Engine Overview What is DMA Engine?    The DMA Engine is a Linux kernel subsystem that prov">
 <meta property="og:locale" content="zh_CN">
@@ -36,7 +36,7 @@
   
   
   
-  <meta name="keywords" content="linux,dma">
+  <meta name="keywords" content="dma,linux">
 
   <!-- feed -->
   
@@ -48,7 +48,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-19T00:00:00+08:00","dateModified":"2026-03-19T19:22:57+08:00","datePublished":"2026-03-19T00:00:00+08:00","description":"","headline":"Linux DMA Engine Overview","mainEntityOfPage":{"@type":"WebPage","@id":"https://kindresy.github.io/2026/03/19/dma/linux_dma/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://kindresy.github.io/2026/03/19/dma/linux_dma/","keywords":"linux, dma","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-19T00:00:00+08:00","dateModified":"2026-03-19T19:22:57+08:00","datePublished":"2026-03-19T00:00:00+08:00","description":"","headline":"Linux DMA Engine Overview","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/03/19/dma/linux_dma/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/03/19/dma/linux_dma/","keywords":"dma, linux","image":[]}</script>
   
 </head>
 <body>
@@ -67,7 +67,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/AI/claude_fix_exp/"><span class="title">claude使用经验</span></a><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/axidma-basics/"><span class="title">AXIDMA：从参数配置到数据校验</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/17/dma/axidma/"><span class="title">axidma硬件介绍与软件实现</span></a><a class="item title" href="/2026/03/06/low-speed/i2c_controller/"><span class="title">DW APB I2C Controller</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/AI/claude_fix_exp/"><span class="title">claude使用经验</span></a><a class="item title" href="/2026/03/19/dma/linux_dma/"><span class="title">Linux DMA Engine Overview</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
