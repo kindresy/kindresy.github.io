@@ -1,0 +1,2038 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>MIPI I3C Basic v1.1.1 组内分享 - 搴愬北涓滄灄</title>
+
+  
+    <meta name="description" content="从 SDR、动态地址和 CCC 开始，梳理 I3C 协议，并记录 AST2600 QEMU 与 Linux 驱动调试过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MIPI I3C Basic v1.1.1 组内分享">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/">
+<meta property="og:site_name" content="搴愬北涓滄灄">
+<meta property="og:description" content="从 SDR、动态地址和 CCC 开始，梳理 I3C 协议，并记录 AST2600 QEMU 与 Linux 驱动调试过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig01-sensor-interface-block.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig02-i3c-i2c-spi-comparison.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig03-sdr-private-read.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig09-example-direct-ccc.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig10-example-broadcast-ccc.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig11-example-hdr-ddr.png">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig12-example-hdr-bt.png">
+<meta property="article:published_time" content="2026-11-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-25T08:21:08.541Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="ccc">
+<meta property="article:tag" content="daa">
+<meta property="article:tag" content="hot-join">
+<meta property="article:tag" content="i3c">
+<meta property="article:tag" content="ibi">
+<meta property="article:tag" content="protocol">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.coffepattern.top/2026/11/25/i3c-basic-spec/images/fig01-sensor-interface-block.png">
+  
+  
+  
+  <meta name="keywords" content="protocol,i3c,daa,ccc,ibi,hot-join">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-25T00:00:00+08:00","dateModified":"2026-11-25T16:21:08+08:00","datePublished":"2026-11-25T00:00:00+08:00","description":"\n面向嵌入式、OS、固件、驱动开发同学。目标不是逐条翻译规范，而是把 I3C Basic 的协议模型、驱动实现边界、bring-up 调试重点讲清楚。\n","headline":"MIPI I3C Basic v1.1.1 组内分享","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/25/i3c-basic-spec/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/25/i3c-basic-spec/","keywords":"protocol, i3c, daa, ccc, ibi, hot-join","image":[]}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/06/pcie/pcie_ep_demo/"><span class="title">PCIe 加速卡驱动：结构与工作流程</span></a><a class="item title" href="/2026/03/23/pcie/pcie_fw/"><span class="title">PCIe Endpoint 固件初始化实例</span></a><a class="item title" href="/2026/03/03/pcie/pcie_introduction/"><span class="title">pcie_introduction</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/">I3C</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-24T16:00:00.000Z">2026-11-25</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-25T08:21:08.541Z">2026-11-25</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>MIPI I3C Basic v1.1.1 组内分享</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><blockquote>
+<p>面向嵌入式、OS、固件、驱动开发同学。目标不是逐条翻译规范，而是把 I3C Basic 的协议模型、驱动实现边界、bring-up 调试重点讲清楚。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="0-分享目标和阅读地图"><a href="#0-分享目标和阅读地图" class="headerlink" title="0. 分享目标和阅读地图"></a>0. 分享目标和阅读地图</h2><p>这份文档整理自当前目录下的 I3C Basic v1.1.1 规范全文、中文转写稿、章节讲解笔记，以及本地 PDF 中的总线架构和协议波形图。建议分享时按下面主线推进：</p>
+<ol>
+<li>为什么 I3C 不是“更快的 I2C”</li>
+<li>I3C 总线上的角色和状态</li>
+<li>SDR 模式：所有管理能力的基础控制面</li>
+<li>动态地址分配、CCC、IBI、Hot-Join 四个核心机制</li>
+<li>HDR 模式：高速数据面</li>
+<li>驱动实现、调试和验证关注点</li>
+</ol>
+<p><strong>I3C 用两根线保留 I2C 的多点低成本优势，同时把地址管理、中断、热加入、多 Controller、低功耗和高速传输变成协议内能力。</strong></p>
+<h2 id="1-背景：I3C-要解决什么问题"><a href="#1-背景：I3C-要解决什么问题" class="headerlink" title="1. 背景：I3C 要解决什么问题"></a>1. 背景：I3C 要解决什么问题</h2><p>传统移动终端、IoT、板级管理和传感器子系统里，I2C、SPI、UART 往往混用。真正让硬件系统复杂的不是主数据接口本身，而是每个外设旁边附带的 <code>INT</code>、<code>EN</code>、<code>RESET</code>、<code>SLEEP</code>、<code>CS</code> 等 side-band 信号。传感器数量一多，SoC GPIO、封装 pin、PCB 层数和电源管理复杂度都会上升。</p>
+<p><img src="/2026/11/25/i3c-basic-spec/images/fig01-sensor-interface-block.png" alt="I3C 用带内能力替代 side-band 信号"></p>
+<p>I3C 的基本设计目标可以归纳成四点：</p>
+<table>
+<thead>
+<tr>
+<th>目标</th>
+<th>I3C 的做法</th>
+<th>对驱动&#x2F;系统的影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>少引脚</td>
+<td>仍然只用 SCL&#x2F;SDA 两根线</td>
+<td>中断、热加入、控制命令进入协议内</td>
+</tr>
+<tr>
+<td>更高速</td>
+<td>SCL 多数时间 push-pull，SDA 数据阶段可 push-pull；SDR 到 12.5 MHz，HDR 更高</td>
+<td>不能再按纯 I2C open-drain 模型写控制器</td>
+</tr>
+<tr>
+<td>更低功耗</td>
+<td>减少 open-drain 上拉电流和无效切换</td>
+<td>需要正确管理 Activity State、事件使能、总线空闲</td>
+</tr>
+<tr>
+<td>更可管理</td>
+<td>动态地址、CCC、IBI、Hot-Join、多 Controller</td>
+<td>初始化和状态机明显比 I2C 复杂</td>
+</tr>
+</tbody></table>
+<p>与 I2C&#x2F;SPI 的高层对比如下：</p>
+<p><img src="/2026/11/25/i3c-basic-spec/images/fig02-i3c-i2c-spi-comparison.png" alt="I3C &#x2F; I2C &#x2F; SPI 接口对比"></p>
+<p>要注意：I3C 兼容的是 <strong>Legacy I2C Target</strong>，不是 I2C Controller。I3C 总线上不能再挂一个传统 I2C Master 参与仲裁。</p>
+<h2 id="2-I3C-的总线心智模型"><a href="#2-I3C-的总线心智模型" class="headerlink" title="2. I3C 的总线心智模型"></a>2. I3C 的总线心智模型</h2><p>I3C 仍然是两线、多点、共享总线，但协议中心从“I2C 风格的主从读写”升级为“当前 Controller 管理一组 Target 的总线系统”。</p>
+<pre class="mermaid">
+flowchart LR
+    PC[Primary Controller] --&gt; BUS[(I3C Bus)]
+    SC[Secondary Controller&lt;br/&gt;平时作为 Target] --&gt; BUS
+    T1[I3C Target] --&gt; BUS
+    T2[SDR-only Target] --&gt; BUS
+    I2C[Legacy I2C Target&lt;br/&gt;可选] --&gt; BUS
+
+    BUS --&gt; SCL[SCL]
+    BUS --&gt; SDA[SDA]
+</pre>
+
+<h3 id="2-1-术语变化"><a href="#2-1-术语变化" class="headerlink" title="2.1 术语变化"></a>2.1 术语变化</h3><p>MIPI 新版文档推荐使用 <code>Controller/Target</code> 替代 <code>Master/Slave</code>。在驱动代码和旧 IP 文档里仍可能看到 master&#x2F;slave，但理解时应映射成：</p>
+<table>
+<thead>
+<tr>
+<th>旧术语</th>
+<th>新术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Master</td>
+<td>Controller</td>
+<td>控制总线、发 SCL、发起 transfer 的设备</td>
+</tr>
+<tr>
+<td>Slave</td>
+<td>Target</td>
+<td>响应地址、CCC、读写请求的设备</td>
+</tr>
+<tr>
+<td>Current Master</td>
+<td>Active Controller</td>
+<td>当前真正控制总线的 Controller</td>
+</tr>
+<tr>
+<td>Main Master</td>
+<td>Primary Controller</td>
+<td>初始化和配置总线的 Controller</td>
+</tr>
+<tr>
+<td>Secondary Master</td>
+<td>Secondary Controller</td>
+<td>有 Controller 能力，但平时作为 Target</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-同一时刻只有一个-Active-Controller"><a href="#2-2-同一时刻只有一个-Active-Controller" class="headerlink" title="2.2 同一时刻只有一个 Active Controller"></a>2.2 同一时刻只有一个 Active Controller</h3><p>I3C 支持多 Controller，但不等价于多个 Controller 同时开车。规则是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Primary Controller 负责初始配置</span><br><span class="line">Secondary Controller 平时作为 Target 存在</span><br><span class="line">需要接管时发 Controller Role Request</span><br><span class="line">Active Controller 批准后进行 Controller Role Handoff</span><br><span class="line">任意时刻总线上只有一个 Active Controller</span><br></pre></td></tr></table></figure>
+
+<p>这对驱动框架很关键：I3C host controller driver 不只是传输引擎，还要维护“当前总线拥有者、目标设备表、事件使能、动态地址、IBI 队列、Hot-Join 状态”等总线管理状态。</p>
+<h2 id="3-总线配置：Pure、Mixed-Fast、Mixed-Slow"><a href="#3-总线配置：Pure、Mixed-Fast、Mixed-Slow" class="headerlink" title="3. 总线配置：Pure、Mixed Fast、Mixed Slow"></a>3. 总线配置：Pure、Mixed Fast、Mixed Slow</h2><p>I3C 的性能和兼容性强依赖总线拓扑。</p>
+<table>
+<thead>
+<tr>
+<th>总线类型</th>
+<th>设备组成</th>
+<th>关键约束</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pure Bus</td>
+<td>只有 I3C 设备</td>
+<td>最容易发挥 I3C 高速能力</td>
+</tr>
+<tr>
+<td>Mixed Fast Bus</td>
+<td>I3C + 带 50 ns spike filter 的 Legacy I2C Target</td>
+<td>I3C 可用短 SCL high 让 I2C Target 看不见部分 I3C 流量</td>
+</tr>
+<tr>
+<td>Mixed Slow&#x2F;Limited Bus</td>
+<td>I3C + 不满足 fast mixed 条件的 Legacy I2C Target</td>
+<td>时钟、HDR、部分优化受限最多</td>
+</tr>
+</tbody></table>
+<p>驱动 bring-up 时必须回答三个问题：</p>
+<ol>
+<li>总线上有没有 Legacy I2C Target？</li>
+<li>Legacy I2C Target 的地址是否与 I3C 保留地址或动态地址策略冲突？</li>
+<li>Legacy I2C Target 是否具备 50 ns spike filter，能否进入 Mixed Fast Bus？</li>
+</ol>
+<h2 id="4-I3C-的地址空间"><a href="#4-I3C-的地址空间" class="headerlink" title="4. I3C 的地址空间"></a>4. I3C 的地址空间</h2><p>I3C 仍使用 7-bit 地址，但地址语义比 I2C 更严格。</p>
+<table>
+<thead>
+<tr>
+<th>地址</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>7&#39;h00</code>、<code>7&#39;h01</code></td>
+<td>保留</td>
+</tr>
+<tr>
+<td><code>7&#39;h02</code></td>
+<td>Hot-Join 地址</td>
+</tr>
+<tr>
+<td><code>7&#39;h7E</code></td>
+<td>I3C Broadcast Address，CCC 和模式入口核心地址</td>
+</tr>
+<tr>
+<td><code>7&#39;h7F</code></td>
+<td>保留</td>
+</tr>
+<tr>
+<td><code>7&#39;h3E</code>、<code>7&#39;h5E</code>、<code>7&#39;h6E</code>、<code>7&#39;h76</code>、<code>7&#39;h7A</code>、<code>7&#39;h7C</code></td>
+<td>与 <code>7&#39;h7E</code> 单 bit 接近，限制用于提升广播地址错误检测</td>
+</tr>
+<tr>
+<td>其他非冲突地址</td>
+<td>可作为 I3C 动态地址，仍需避开板上 Legacy I2C 静态地址</td>
+</tr>
+</tbody></table>
+<p>**工程建议：需要发 IBI 或可能成为 Secondary Controller 的设备，优先分配较低动态地址。**原因是 START 后地址仲裁时，低地址更容易赢；IBI 优先级也和动态地址有关。</p>
+<h2 id="5-SDR：I3C-的基础控制面"><a href="#5-SDR：I3C-的基础控制面" class="headerlink" title="5. SDR：I3C 的基础控制面"></a>5. SDR：I3C 的基础控制面</h2><p>I3C 上电和绝大多数管理动作都从 SDR 开始。即使后续要跑 HDR-DDR 或 HDR-BT，也必须先通过 SDR 完成初始化、能力发现和 Enter HDR CCC。</p>
+<pre class="mermaid">
+flowchart TD
+    Power[Power On / Reset] --&gt; SDR[SDR Mode]
+    SDR --&gt; DAA[Dynamic Address Assignment]
+    SDR --&gt; CCC[CCC Management]
+    SDR --&gt; IBI[IBI / Hot-Join / Role Request]
+    SDR --&gt; Private[Private Read / Write]
+    SDR --&gt; EnterHDR[ENTHDRx CCC]
+    EnterHDR --&gt; HDR[HDR Transfer Window]
+    HDR --&gt; Exit[HDR Exit Pattern]
+    Exit --&gt; SDR
+</pre>
+
+<h3 id="5-1-SDR-的外形像-I2C，但第-9-bit-语义不同"><a href="#5-1-SDR-的外形像-I2C，但第-9-bit-语义不同" class="headerlink" title="5.1 SDR 的外形像 I2C，但第 9 bit 语义不同"></a>5.1 SDR 的外形像 I2C，但第 9 bit 语义不同</h3><p>SDR 的基本帧仍然是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">START -&gt; Address/Header -&gt; ACK/NACK -&gt; Data Words -&gt; STOP</span><br></pre></td></tr></table></figure>
+
+<p>但数据 word 的第 9 bit 已经不是传统 I2C ACK。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>I2C 第 9 bit</th>
+<th>I3C SDR 第 9 bit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Controller 写 Target</td>
+<td>Target ACK&#x2F;NACK</td>
+<td>Controller 发送 parity T-bit</td>
+</tr>
+<tr>
+<td>Controller 读 Target</td>
+<td>Controller ACK&#x2F;NACK</td>
+<td>Target 发送 T-bit：继续或结束</td>
+</tr>
+<tr>
+<td>地址阶段</td>
+<td>Target ACK&#x2F;NACK</td>
+<td>仍是 ACK&#x2F;NACK，open-drain 语义</td>
+</tr>
+</tbody></table>
+<p>下面这张规范图清楚展示了 I3C 私有读写里 T-bit 的位置。注意图例里写数据 T-bit 是 parity，读数据 T-bit 是 End-of-Data。</p>
+<p><img src="/2026/11/25/i3c-basic-spec/images/fig03-sdr-private-read.png" alt="I3C 私有读写格式和 T-bit 语义"></p>
+<h3 id="5-2-写传输：T-bit-是奇校验"><a href="#5-2-写传输：T-bit-是奇校验" class="headerlink" title="5.2 写传输：T-bit 是奇校验"></a>5.2 写传输：T-bit 是奇校验</h3><p>Controller 写 Target 时：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Target Dynamic Address + W + ACK</span><br><span class="line">Data[7:0] + T</span><br><span class="line">Data[7:0] + T</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>T</code> 是 8-bit data 的奇校验位。用伪代码表达：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Odd parity over 8-bit data plus T-bit. */</span></span><br><span class="line">t_bit = parity_even(data) ? <span class="number">1</span> : <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>调波形时不要把写数据后的第 9 bit 当成 Target ACK。如果控制器 IP 或逻辑分析仪还按 I2C 解码，会出现“每个字节 ACK 异常”的误判。</p>
+<h3 id="5-3-读传输：Target-也能结束读"><a href="#5-3-读传输：Target-也能结束读" class="headerlink" title="5.3 读传输：Target 也能结束读"></a>5.3 读传输：Target 也能结束读</h3><p>Controller 读 Target 时：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Target Dynamic Address + R + ACK</span><br><span class="line">Target Data[7:0] + T</span><br><span class="line">Target Data[7:0] + T</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>读数据的 T-bit 由 Target 驱动：</p>
+<table>
+<thead>
+<tr>
+<th>T-bit</th>
+<th>语义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>1</code></td>
+<td>Target 表示可以继续读</td>
+</tr>
+<tr>
+<td><code>0</code></td>
+<td>Target 表示本次 read message 到此结束</td>
+</tr>
+</tbody></table>
+<p>这正是 I3C 和 I2C 的一个关键差异：I2C 读传输只能由 Master 通过 NACK 结束；I3C SDR 读传输里 Target 可以通过 <code>T=0</code> 主动结束。Controller 仍然可以在 Target 表示继续时提前中止，但要按 I3C 的总线接管时序执行。</p>
+<h3 id="5-4-START-后-Header-可以仲裁"><a href="#5-4-START-后-Header-可以仲裁" class="headerlink" title="5.4 START 后 Header 可以仲裁"></a>5.4 START 后 Header 可以仲裁</h3><p>I3C 的 START 后 Header 不是简单的 Controller 地址输出，因为 Target 也可能趁 Bus Available 时发起事件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IBI               Target 请求中断</span><br><span class="line">Hot-Join          新设备请求加入总线</span><br><span class="line">Controller Role   Secondary Controller 请求接管</span><br></pre></td></tr></table></figure>
+
+<p>仲裁仍基于 open-drain 规则：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">发送 0：主动拉低 SDA</span><br><span class="line">发送 1：释放 SDA 并观察</span><br><span class="line">如果自己发送 1 但看到 SDA 为 0，说明输掉仲裁</span><br></pre></td></tr></table></figure>
+
+<p>Repeated START 后的 Header 通常不再用于这种事件仲裁，Address&#x2F;RnW 可 push-pull 发送，ACK&#x2F;NACK 仍保留 open-drain 语义。</p>
+<h2 id="6-动态地址分配-DAA"><a href="#6-动态地址分配-DAA" class="headerlink" title="6. 动态地址分配 DAA"></a>6. 动态地址分配 DAA</h2><p>I3C 最重要的管理能力之一是 Dynamic Address Assignment。它解决的是 I2C 静态地址冲突、设备发现困难和上电配置硬编码的问题。</p>
+<h3 id="6-1-DAA-的输入信息"><a href="#6-1-DAA-的输入信息" class="headerlink" title="6.1 DAA 的输入信息"></a>6.1 DAA 的输入信息</h3><p>每个参与 DAA 的 I3C Target 需要能提供可仲裁、可识别的身份信息。典型核心是 48-bit Provisioned ID：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MIPI Manufacturer ID</td>
+<td>厂商标识</td>
+</tr>
+<tr>
+<td>ID Type Selector</td>
+<td>区分随机值或厂商固定值</td>
+</tr>
+<tr>
+<td>Part ID</td>
+<td>器件型号或部件标识</td>
+</tr>
+<tr>
+<td>Instance ID</td>
+<td>多实例区分</td>
+</tr>
+<tr>
+<td>Extra &#x2F; Vendor bits</td>
+<td>厂商自定义</td>
+</tr>
+</tbody></table>
+<p>实际驱动不应假设“地址固定等于某个设备”。正确做法是通过 DAA 后的设备表、PID&#x2F;BCR&#x2F;DCR 和板级描述共同建立枚举关系。</p>
+<h3 id="6-2-典型初始化流程"><a href="#6-2-典型初始化流程" class="headerlink" title="6.2 典型初始化流程"></a>6.2 典型初始化流程</h3><pre class="mermaid">
+sequenceDiagram
+    participant C as Primary Controller
+    participant T as Unassigned Targets
+
+    C-&gt;&gt;T: Bus reset / bus condition setup
+    C-&gt;&gt;T: Broadcast CCC RSTDAA (optional)
+    C-&gt;&gt;T: Broadcast CCC ENTDAA
+    C-&gt;&gt;T: Repeated START + 7'h7E/R
+    T--&gt;&gt;C: Targets arbitrate by Provisioned ID
+    C-&gt;&gt;T: Assign one Dynamic Address
+    T--&gt;&gt;C: Winner ACKs assigned address
+    C-&gt;&gt;T: Repeat until all unassigned Targets are done
+    C-&gt;&gt;T: GETBCR / GETDCR / GETPID / GETMXDS as needed
+</pre>
+
+<h3 id="6-3-DAA-的驱动实现要点"><a href="#6-3-DAA-的驱动实现要点" class="headerlink" title="6.3 DAA 的驱动实现要点"></a>6.3 DAA 的驱动实现要点</h3><ol>
+<li>DAA 不是一次性“扫地址”，而是通过 Target 身份仲裁逐个分配动态地址。</li>
+<li>分配策略要避开 <code>7&#39;h7E</code> 及相关保留&#x2F;限制地址，也要避开 Legacy I2C 静态地址。</li>
+<li>如果设备需要较高 IBI 优先级，可以在地址分配策略上给它更低动态地址。</li>
+<li>DAA 完成后要读取 BCR&#x2F;DCR&#x2F;PID 等能力信息，建立软件设备表。</li>
+<li>每次总线 reset、Target reset、Controller crash recovery 后，都要重新评估动态地址是否仍有效。</li>
+</ol>
+<h2 id="7-CCC：I3C-的总线管理命令通道"><a href="#7-CCC：I3C-的总线管理命令通道" class="headerlink" title="7. CCC：I3C 的总线管理命令通道"></a>7. CCC：I3C 的总线管理命令通道</h2><p>CCC 是 Common Command Code。可以把它理解成 I3C 的“协议内控制面命令集”。很多 I3C 能力都不是私有寄存器访问，而是 CCC。</p>
+<h3 id="7-1-Broadcast-CCC-和-Direct-CCC"><a href="#7-1-Broadcast-CCC-和-Direct-CCC" class="headerlink" title="7.1 Broadcast CCC 和 Direct CCC"></a>7.1 Broadcast CCC 和 Direct CCC</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>地址入口</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Broadcast CCC</td>
+<td><code>7&#39;h7E + W</code></td>
+<td>面向所有 I3C Target，例如 <code>ENTDAA</code>、<code>RSTDAA</code>、<code>ENTHDRx</code></td>
+</tr>
+<tr>
+<td>Direct CCC</td>
+<td>先 <code>7&#39;h7E + W</code> 发 CCC，再用目标动态地址访问</td>
+<td>面向某个 Target，例如 <code>GETPID</code>、<code>GETBCR</code>、<code>GETDCR</code></td>
+</tr>
+</tbody></table>
+<p>Direct CCC 的典型结构如下：</p>
+<p><img src="/2026/11/25/i3c-basic-spec/images/fig09-example-direct-ccc.png" alt="Direct CCC GETPID 示例"></p>
+<p>Broadcast CCC 的典型结构如下：</p>
+<p><img src="/2026/11/25/i3c-basic-spec/images/fig10-example-broadcast-ccc.png" alt="Broadcast CCC SETMRL 示例"></p>
+<h3 id="7-2-常用-CCC-分类"><a href="#7-2-常用-CCC-分类" class="headerlink" title="7.2 常用 CCC 分类"></a>7.2 常用 CCC 分类</h3><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>代表命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>地址管理</td>
+<td><code>ENTDAA</code>、<code>RSTDAA</code>、<code>SETDASA</code>、<code>SETNEWDA</code></td>
+<td>动态地址分配和变更</td>
+</tr>
+<tr>
+<td>事件管理</td>
+<td><code>ENEC</code>、<code>DISEC</code></td>
+<td>使能&#x2F;禁用 IBI、Hot-Join、Controller Role Request</td>
+</tr>
+<tr>
+<td>能力查询</td>
+<td><code>GETPID</code>、<code>GETBCR</code>、<code>GETDCR</code>、<code>GETMXDS</code>、<code>GETCAPS</code></td>
+<td>枚举 Target 能力</td>
+</tr>
+<tr>
+<td>传输限制</td>
+<td><code>SETMWL</code>、<code>SETMRL</code>、<code>GETMWL</code>、<code>GETMRL</code></td>
+<td>最大读写长度</td>
+</tr>
+<tr>
+<td>HDR 入口</td>
+<td><code>ENTHDR0</code>、<code>ENTHDR3</code> 等</td>
+<td>从 SDR 进入 HDR 模式</td>
+</tr>
+<tr>
+<td>多 Controller</td>
+<td><code>GETACCCR</code>、<code>DEFTGTS</code></td>
+<td>Controller role handoff 和 Target 表同步</td>
+</tr>
+<tr>
+<td>复位&#x2F;恢复</td>
+<td><code>RSTACT</code>、Target Reset Pattern</td>
+<td>Target reset 和恢复</td>
+</tr>
+</tbody></table>
+<h3 id="7-3-CCC-的实现边界"><a href="#7-3-CCC-的实现边界" class="headerlink" title="7.3 CCC 的实现边界"></a>7.3 CCC 的实现边界</h3><p>驱动里容易犯的错误是把 CCC 当成普通 write&#x2F;read transfer。CCC 需要单独建模，原因是：</p>
+<ol>
+<li>CCC 入口通常固定从 <code>7&#39;h7E</code> 开始。</li>
+<li>Direct CCC 可能包含“先广播命令码，再 repeated START 到目标地址”的复合帧。</li>
+<li>不同 CCC 的 payload 长度、方向、是否 broadcast&#x2F;direct 都不一样。</li>
+<li>某些 CCC 会改变总线全局状态，例如 DAA、HDR 入口、事件使能。</li>
+<li>HDR 模式下可用 CCC 是受限集合，不应假设 SDR CCC 都能在 HDR 中使用。</li>
+</ol>
+<h2 id="8-IBI：带内中断"><a href="#8-IBI：带内中断" class="headerlink" title="8. IBI：带内中断"></a>8. IBI：带内中断</h2><p>IBI 是 In-Band Interrupt。它的价值是去掉每个 Target 的外部中断引脚，让 Target 通过 I3C 总线本身请求 Controller 服务。</p>
+<h3 id="8-1-IBI-基本流程"><a href="#8-1-IBI-基本流程" class="headerlink" title="8.1 IBI 基本流程"></a>8.1 IBI 基本流程</h3><pre class="mermaid">
+sequenceDiagram
+    participant T as I3C Target
+    participant C as Active Controller
+
+    T-&gt;&gt;T: Wait for Bus Available
+    T-&gt;&gt;C: START-like request / Address arbitration
+    T-&gt;&gt;C: Dynamic Address + R
+    C--&gt;&gt;T: ACK or NACK
+    alt ACK
+        T-&gt;&gt;C: Mandatory Data Byte (if enabled/required)
+        T-&gt;&gt;C: Optional payload
+        C-&gt;&gt;T: End IBI, continue normal traffic
+    else NACK
+        T-&gt;&gt;T: IBI rejected, retry policy depends on event state
+    end
+</pre>
+
+<p>IBI 的优先级通常由动态地址仲裁体现：动态地址越低，越容易赢得 START 后仲裁。因此中断密集或时延敏感的 Target，地址分配策略上应放在低地址区域。</p>
+<h3 id="8-2-Mandatory-Data-Byte"><a href="#8-2-Mandatory-Data-Byte" class="headerlink" title="8.2 Mandatory Data Byte"></a>8.2 Mandatory Data Byte</h3><p>部分 Target 的 IBI 带 Mandatory Data Byte，用来告诉 Controller 中断类型或目标内部状态。驱动里要先根据 BCR&#x2F;设备能力判断 IBI 是否带 MDB，不能所有 IBI 都按同一个长度处理。</p>
+<h3 id="8-3-IBI-调试重点"><a href="#8-3-IBI-调试重点" class="headerlink" title="8.3 IBI 调试重点"></a>8.3 IBI 调试重点</h3><ol>
+<li>是否通过 <code>ENEC</code> 使能了 Target event？</li>
+<li>Target 的动态地址是否过高，导致多 IBI 仲裁时优先级不符合预期？</li>
+<li>Controller NACK IBI 后，软件是否错误地认为中断已经被处理？</li>
+<li>IBI payload 长度和 MDB 解析是否匹配设备 BCR&#x2F;私有协议？</li>
+<li>当前是否处在 HDR transfer window 中？IBI 通常依赖 SDR 管理事件，不能随意插入 HDR 内部。</li>
+</ol>
+<h2 id="9-Hot-Join：运行中加入总线"><a href="#9-Hot-Join：运行中加入总线" class="headerlink" title="9. Hot-Join：运行中加入总线"></a>9. Hot-Join：运行中加入总线</h2><p>Hot-Join 允许 Target 在总线已经初始化后请求加入。例如设备刚上电、模块热插入、或者某个电源域后启动。</p>
+<pre class="mermaid">
+sequenceDiagram
+    participant T as Hot-Join Target
+    participant C as Active Controller
+
+    T-&gt;&gt;T: Wait for Bus Idle
+    T-&gt;&gt;C: Hot-Join request using 7'h02
+    C--&gt;&gt;T: ACK or NACK
+    alt ACK and accepted
+        C-&gt;&gt;T: ENTDAA
+        C-&gt;&gt;T: Assign Dynamic Address
+        C-&gt;&gt;T: Query BCR/DCR/PID
+    else NACK or disabled
+        T-&gt;&gt;T: Wait and retry according to rules
+    end
+</pre>
+
+<p>Hot-Join 对软件框架的影响很直接：I3C bus 不能被看作“probe 时固定完成枚举”的静态总线。驱动需要支持运行时新增 Target、重新分配动态地址、更新设备表，并避免在 transfer 进行中破坏当前 frame。</p>
+<h2 id="10-Controller-Role-Handoff"><a href="#10-Controller-Role-Handoff" class="headerlink" title="10. Controller Role Handoff"></a>10. Controller Role Handoff</h2><p>多 Controller 是 I3C 的高级能力。Secondary Controller 平时作为 Target，必要时通过 Controller Role Request 请求成为 Active Controller。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Secondary Controller 发起 Role Request</span><br><span class="line">Active Controller 识别并决定是否允许</span><br><span class="line">Active Controller 通过 CCC/流程同步目标列表和总线配置</span><br><span class="line">总线控制权交给 Secondary Controller</span><br><span class="line">Secondary Controller 完成事务后归还或继续按规则管理</span><br></pre></td></tr></table></figure>
+
+<p>驱动实现时至少要区分：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>软件含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>本控制器是 Primary Controller</td>
+<td>负责初始化、DAA、默认总线管理</td>
+</tr>
+<tr>
+<td>本控制器是 Active Controller</td>
+<td>可以发起当前 transfer</td>
+</tr>
+<tr>
+<td>本控制器是 Secondary Controller&#x2F;Target</td>
+<td>不能直接抢 SCL，需要按 role request 流程</td>
+</tr>
+<tr>
+<td>Handoff in progress</td>
+<td>需要冻结普通 transfer 队列，避免总线状态错乱</td>
+</tr>
+</tbody></table>
+<p>如果 SoC&#x2F;系统永远只有一个 Controller，可以先把 role handoff 作为 unsupported capability 明确屏蔽，但不能让硬件误响应相关事件。</p>
+<h2 id="11-HDR：高速数据面"><a href="#11-HDR：高速数据面" class="headerlink" title="11. HDR：高速数据面"></a>11. HDR：高速数据面</h2><p>HDR 是 High Data Rate。它不是替代 SDR 的新总线初始化模式，而是 <strong>从 SDR 进入、在专用窗口内传输、再退出回 SDR</strong> 的高速数据面。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SDR:</span><br><span class="line">  START -&gt; 7&#x27;h7E + W -&gt; ENTHDRx + T</span><br><span class="line"></span><br><span class="line">HDR:</span><br><span class="line">  HDR command/header</span><br><span class="line">  HDR data</span><br><span class="line">  CRC / parity</span><br><span class="line">  HDR Restart 或 HDR Exit</span><br><span class="line"></span><br><span class="line">SDR:</span><br><span class="line">  STOP 或继续 SDR traffic</span><br></pre></td></tr></table></figure>
+
+<p>I3C Basic v1.1.1 中最需要关注的是：</p>
+<table>
+<thead>
+<tr>
+<th>HDR 模式</th>
+<th>入口 CCC</th>
+<th>核心模型</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HDR-DDR</td>
+<td><code>ENTHDR0</code></td>
+<td>双沿传输，Command&#x2F;Data&#x2F;CRC Word</td>
+<td>中等长度高速读写</td>
+</tr>
+<tr>
+<td>HDR-BT</td>
+<td><code>ENTHDR3</code></td>
+<td>Bulk Transport，Header&#x2F;Data Block&#x2F;CRC Block</td>
+<td>大块数据搬运，适合 FIFO&#x2F;DMA 模型</td>
+</tr>
+</tbody></table>
+<p>完整 I3C 规范里的 HDR-TSP&#x2F;HDR-TSL 不属于 I3C Basic 支持范围。</p>
+<h3 id="11-1-HDR-DDR"><a href="#11-1-HDR-DDR" class="headerlink" title="11.1 HDR-DDR"></a>11.1 HDR-DDR</h3><p>HDR-DDR 的关键点：</p>
+<ol>
+<li>通过 SDR <code>ENTHDR0</code> 进入。</li>
+<li>SDA 在 SCL 的上升沿和下降沿都承载数据。</li>
+<li>传输单位是 HDR-DDR Word，包含 preamble、data、parity&#x2F;CRC 等结构。</li>
+<li>可用 HDR Restart 继续下一笔 HDR transfer，也可用 HDR Exit 回到 SDR。</li>
+</ol>
+<p><img src="/2026/11/25/i3c-basic-spec/images/fig11-example-hdr-ddr.png" alt="HDR-DDR 典型读传输"></p>
+<p>驱动实现上，HDR-DDR 不能复用普通 SDR byte FIFO 模型。它更接近“word command + data word stream + CRC”的专用传输模式。</p>
+<h3 id="11-2-HDR-BT"><a href="#11-2-HDR-BT" class="headerlink" title="11.2 HDR-BT"></a>11.2 HDR-BT</h3><p>HDR-BT 是 Bulk Transport，面向更大的数据块：</p>
+<ol>
+<li>通过 SDR <code>ENTHDR3</code> 进入。</li>
+<li>先发送 Header Block，描述方向、地址、控制信息、lane 等。</li>
+<li>后续是一个或多个 Data Block。</li>
+<li>结尾使用 CRC Block。</li>
+<li>可支持多 lane 模型，适合高吞吐搬运。</li>
+</ol>
+<p><img src="/2026/11/25/i3c-basic-spec/images/fig12-example-hdr-bt.png" alt="HDR-BT 典型读传输"></p>
+<p>驱动视角下，HDR-BT 更适合与 DMA、FIFO watermark、burst 长度、缓存一致性策略一起设计。不要把它理解成“更快的 SDR read&#x2F;write”。</p>
+<h3 id="11-3-HDR-和事件的关系"><a href="#11-3-HDR-和事件的关系" class="headerlink" title="11.3 HDR 和事件的关系"></a>11.3 HDR 和事件的关系</h3><p>IBI、Hot-Join、Controller Role Request 本质上是 SDR 管理事件。进入 HDR 后，Target 即使不支持当前 HDR 模式，也必须能识别 HDR Exit Pattern，至少能等总线回到 SDR。实现上要注意：</p>
+<ol>
+<li>不要在 HDR 中执行 DAA。</li>
+<li>不要假设 Target 可在 HDR 内随时发 IBI。</li>
+<li>进入 HDR 前要确认目标 Target 支持对应 HDR 模式。</li>
+<li>HDR 异常退出后要恢复到可预测 SDR 状态，必要时做 bus recovery。</li>
+</ol>
+<h2 id="12-错误检测和恢复"><a href="#12-错误检测和恢复" class="headerlink" title="12. 错误检测和恢复"></a>12. 错误检测和恢复</h2><p>I3C 的错误处理比 I2C 更系统。SDR 写数据有 parity，HDR 有 parity&#x2F;CRC，Controller 和 Target 对不同错误有不同恢复责任。</p>
+<p>常见错误类别可以按工程视角归纳：</p>
+<table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>可能原因</th>
+<th>软件处理方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Parity 错误</td>
+<td>SDR 写数据 T-bit 错、采样边沿异常、信号完整性问题</td>
+<td>记录目标地址和 byte offset，必要时重试</td>
+</tr>
+<tr>
+<td>CRC 错误</td>
+<td>HDR 数据错误、lane 配置错误、时序&#x2F;电气问题</td>
+<td>丢弃当前 HDR transfer，回到 SDR 后恢复</td>
+</tr>
+<tr>
+<td>NACK</td>
+<td>Target 不存在、不支持 CCC、忙、错误状态</td>
+<td>区分地址 NACK、CCC NACK、data NACK</td>
+</tr>
+<tr>
+<td>SDA stuck</td>
+<td>Target 未释放 SDA、reset 中断、上电时序异常</td>
+<td>执行控制器 bus recovery 或 Target reset</td>
+</tr>
+<tr>
+<td>DAA collision&#x2F;失败</td>
+<td>PID 冲突、Target 实现异常、地址分配冲突</td>
+<td>重试 DAA，必要时隔离设备</td>
+</tr>
+<tr>
+<td>IBI storm</td>
+<td>Target 事件未清、MDB 解析错误、驱动未处理源状态</td>
+<td>禁用事件、读取状态、清中断后再使能</td>
+</tr>
+</tbody></table>
+<h3 id="12-1-Clock-Stall-不是-I2C-Clock-Stretch"><a href="#12-1-Clock-Stall-不是-I2C-Clock-Stretch" class="headerlink" title="12.1 Clock Stall 不是 I2C Clock Stretch"></a>12.1 Clock Stall 不是 I2C Clock Stretch</h3><p>I3C 中 SCL 通常由 Controller push-pull 驱动。Target 不像 I2C 那样随意 clock stretching。规范允许 Controller 在某些阶段延长 SCL low：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACK&#x2F;NACK 阶段</td>
+<td>给 Controller&#x2F;Target 状态机留处理时间</td>
+</tr>
+<tr>
+<td>写数据 parity bit</td>
+<td>等待校验或 FIFO</td>
+</tr>
+<tr>
+<td>读数据 T-bit</td>
+<td>处理继续&#x2F;结束和总线接管</td>
+</tr>
+<tr>
+<td>DAA 分配地址首 bit</td>
+<td>给动态地址分配流程留更长响应时间</td>
+</tr>
+</tbody></table>
+<p>驱动调试时如果看到 SCL low 被拉长，先判断是不是 Controller 合法 stall，而不是按 I2C 思维直接怀疑 Target clock stretch。</p>
+<h2 id="13-驱动实现建议"><a href="#13-驱动实现建议" class="headerlink" title="13. 驱动实现建议"></a>13. 驱动实现建议</h2><h3 id="13-1-软件模块划分"><a href="#13-1-软件模块划分" class="headerlink" title="13.1 软件模块划分"></a>13.1 软件模块划分</h3><p>一个可维护的 I3C Controller driver 至少应拆出以下概念：</p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>责任</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bus Manager</td>
+<td>总线初始化、DAA、设备表、地址策略</td>
+</tr>
+<tr>
+<td>Transfer Engine</td>
+<td>SDR private transfer、CCC transfer、HDR transfer</td>
+</tr>
+<tr>
+<td>Event Manager</td>
+<td>IBI、Hot-Join、Controller Role Request</td>
+</tr>
+<tr>
+<td>Device Model</td>
+<td>PID&#x2F;BCR&#x2F;DCR、动态地址、静态地址、能力缓存</td>
+</tr>
+<tr>
+<td>Recovery</td>
+<td>bus reset、Target reset、SDA stuck、DAA retry</td>
+</tr>
+<tr>
+<td>Power&#x2F;Activity</td>
+<td>ENTASx、事件开关、runtime PM</td>
+</tr>
+</tbody></table>
+<h3 id="13-2-初始化伪流程"><a href="#13-2-初始化伪流程" class="headerlink" title="13.2 初始化伪流程"></a>13.2 初始化伪流程</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1. 初始化 Controller IP、pinmux、时钟、FIFO/DMA</span><br><span class="line">2. 置总线到已知空闲状态，处理可能的 SDA stuck</span><br><span class="line">3. 加载板级 Legacy I2C Target 信息和限制</span><br><span class="line">4. 规划动态地址池，避开保留地址和 Legacy I2C 地址</span><br><span class="line">5. 对有静态地址的 I3C Target 可先 SETDASA</span><br><span class="line">6. 对未知 I3C Target 执行 ENTDAA</span><br><span class="line">7. 对每个 Target 读取 GETPID/GETBCR/GETDCR/GETMXDS/GETCAPS</span><br><span class="line">8. 注册 I3C device，绑定上层 function driver</span><br><span class="line">9. 根据需求 ENEC 使能 IBI/Hot-Join/CRR</span><br><span class="line">10. 正常处理 SDR/HDR transfer 和 runtime event</span><br></pre></td></tr></table></figure>
+
+<h3 id="13-3-Transfer-API-不要照搬-I2C"><a href="#13-3-Transfer-API-不要照搬-I2C" class="headerlink" title="13.3 Transfer API 不要照搬 I2C"></a>13.3 Transfer API 不要照搬 I2C</h3><p>I2C 常见 API 是 <code>addr + flags + len + buf</code>。I3C 如果完全照搬，会很快遇到表达力不足：</p>
+<table>
+<thead>
+<tr>
+<th>I3C 需求</th>
+<th>为什么 I2C API 不够</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CCC</td>
+<td>需要表达 broadcast&#x2F;direct、命令码、payload 方向</td>
+</tr>
+<tr>
+<td>DAA</td>
+<td>不是普通地址扫描</td>
+</tr>
+<tr>
+<td>IBI</td>
+<td>不是被动读，是 Target 发起事件</td>
+</tr>
+<tr>
+<td>HDR</td>
+<td>word&#x2F;block&#x2F;CRC&#x2F;lane 结构不同</td>
+</tr>
+<tr>
+<td>Target 主动结束 read</td>
+<td>read length 可能不是 Controller 完全预知</td>
+</tr>
+<tr>
+<td>Dynamic Address</td>
+<td>地址是运行时资源，不是固定硬件属性</td>
+</tr>
+</tbody></table>
+<p>建议在驱动内部明确区分：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">i3c_sdr_priv_xfer</span><br><span class="line">i3c_ccc_xfer</span><br><span class="line">i3c_daa</span><br><span class="line">i3c_ibi_enable / disable / handle</span><br><span class="line">i3c_hdr_xfer</span><br><span class="line">i3c_bus_recovery</span><br></pre></td></tr></table></figure>
+
+<h2 id="14-Bring-up-和调试检查表"><a href="#14-Bring-up-和调试检查表" class="headerlink" title="14. Bring-up 和调试检查表"></a>14. Bring-up 和调试检查表</h2><h3 id="14-1-上电后先确认电气和拓扑"><a href="#14-1-上电后先确认电气和拓扑" class="headerlink" title="14.1 上电后先确认电气和拓扑"></a>14.1 上电后先确认电气和拓扑</h3><ul>
+<li>SCL&#x2F;SDA 空闲电平是否为 high</li>
+<li>上拉和 high-keeper 配置是否符合板级设计</li>
+<li>Legacy I2C Target 是否存在，地址是否冲突</li>
+<li>I2C Target 是否带 50 ns spike filter，决定 mixed bus 能力</li>
+<li>Controller 是否正确配置 open-drain&#x2F;push-pull 切换</li>
+</ul>
+<h3 id="14-2-DAA-不通时"><a href="#14-2-DAA-不通时" class="headerlink" title="14.2 DAA 不通时"></a>14.2 DAA 不通时</h3><ul>
+<li>是否有 Target 支持至少一种动态地址分配方式</li>
+<li><code>7&#39;h7E</code> broadcast 是否被所有 I3C Target ACK</li>
+<li>PID 仲裁阶段 SDA 是否有多个 Target 同时驱动</li>
+<li>分配地址是否落入保留&#x2F;限制&#x2F;冲突范围</li>
+<li>Target ACK assigned dynamic address 是否正常</li>
+<li>失败后是否残留半分配状态，需要 RSTDAA 或 bus reset</li>
+</ul>
+<h3 id="14-3-CCC-不通时"><a href="#14-3-CCC-不通时" class="headerlink" title="14.3 CCC 不通时"></a>14.3 CCC 不通时</h3><ul>
+<li>CCC 是 broadcast 还是 direct</li>
+<li>Direct CCC 是否正确执行 <code>7&#39;h7E + CCC + Sr + Target Address</code></li>
+<li>Payload 方向和长度是否匹配规范</li>
+<li>写数据 T-bit parity 是否正确</li>
+<li>Target 是否 NACK 了不支持的 CCC</li>
+<li>当前模式是否允许该 CCC</li>
+</ul>
+<h3 id="14-4-IBI-不通时"><a href="#14-4-IBI-不通时" class="headerlink" title="14.4 IBI 不通时"></a>14.4 IBI 不通时</h3><ul>
+<li>是否对 Target 执行 ENEC 使能事件</li>
+<li>BCR 是否表明支持 IBI 和 MDB</li>
+<li>Controller 是否打开 IBI 接收队列&#x2F;中断</li>
+<li>IBI 地址仲裁是否输给其他事件</li>
+<li>Controller NACK 后 Target 的重试策略是否被正确处理</li>
+<li>上层 function driver 是否及时清除 Target 内部中断源</li>
+</ul>
+<h3 id="14-5-HDR-不通时"><a href="#14-5-HDR-不通时" class="headerlink" title="14.5 HDR 不通时"></a>14.5 HDR 不通时</h3><ul>
+<li>Target 是否通过 GETMXDS&#x2F;GETCAPS 表示支持对应 HDR 模式</li>
+<li>是否从 SDR 通过正确 ENTHDRx 进入</li>
+<li>HDR Restart 和 HDR Exit Pattern 是否被所有 Target 正确识别</li>
+<li>DDR 双沿采样时序是否满足控制器和板级约束</li>
+<li>CRC&#x2F;parity 错误是否能恢复到 SDR</li>
+<li>DMA&#x2F;FIFO 数据粒度是否匹配 HDR-DDR word 或 HDR-BT block</li>
+</ul>
+<h2 id="15-最容易踩的坑"><a href="#15-最容易踩的坑" class="headerlink" title="15. 最容易踩的坑"></a>15. 最容易踩的坑</h2><ol>
+<li><strong>把 I3C 当成更快的 I2C。</strong> I3C 真正复杂的是总线管理和事件模型，不只是时钟更快。</li>
+<li><strong>把 SDR 写数据第 9 bit 当 ACK。</strong> 写数据第 9 bit 是 Controller 发的 parity T-bit。</li>
+<li><strong>把 SDR 读数据长度看作 Controller 单方面决定。</strong> Target 可以通过 T-bit 主动结束读。</li>
+<li><strong>动态地址硬编码。</strong> 动态地址是运行时分配结果，不能当成设备固定身份。</li>
+<li><strong>忽略 <code>7&#39;h7E</code>。</strong> Broadcast Address 是 CCC、DAA、Enter HDR 的核心入口。</li>
+<li><strong>在 HDR 里做管理动作。</strong> DAA、Hot-Join、IBI、Role Request 等主线仍在 SDR 管理面。</li>
+<li><strong>没有区分 open-drain 和 push-pull 阶段。</strong> ACK&#x2F;仲裁、数据、Repeated START 后 Header 的驱动方式不同。</li>
+<li><strong>Legacy I2C 兼容性只看地址。</strong> 还要看 spike filter、LVR、总线速度和 I3C 流量可见性。</li>
+<li><strong>IBI 没有背压策略。</strong> 高频 IBI 设备需要地址优先级、队列和上层清源配合。</li>
+<li><strong>Recovery 设计不足。</strong> I3C 比 I2C 更依赖控制器状态机，异常后要能回到可预测 SDR 状态。</li>
+</ol>
+<h2 id="16-建议的组内分享节奏"><a href="#16-建议的组内分享节奏" class="headerlink" title="16. 建议的组内分享节奏"></a>16. 建议的组内分享节奏</h2><table>
+<thead>
+<tr>
+<th>时间</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>5 min</td>
+<td>背景：为什么 I3C 解决的是系统 pin&#x2F;GPIO&#x2F;功耗问题</td>
+</tr>
+<tr>
+<td>10 min</td>
+<td>总线模型：Controller&#x2F;Target、Pure&#x2F;Mixed Bus、地址空间</td>
+</tr>
+<tr>
+<td>20 min</td>
+<td>SDR 核心：Header 仲裁、T-bit、DAA、CCC</td>
+</tr>
+<tr>
+<td>15 min</td>
+<td>事件机制：IBI、Hot-Join、Controller Role Request</td>
+</tr>
+<tr>
+<td>10 min</td>
+<td>HDR：HDR-DDR、HDR-BT、为什么它是高速数据面</td>
+</tr>
+<tr>
+<td>15 min</td>
+<td>驱动实现：模块划分、初始化流程、调试检查表</td>
+</tr>
+<tr>
+<td>10 min</td>
+<td>Q&amp;A：结合当前 IP、板级拓扑和验证计划</td>
+</tr>
+</tbody></table>
+<h2 id="17-参考材料"><a href="#17-参考材料" class="headerlink" title="17. 参考材料"></a>17. 参考材料</h2><ul>
+<li><code>mipi_I3C-Basic_specification_v1-1-1.pdf</code>：MIPI I3C Basic Specification v1.1.1，Public Release Edition。</li>
+<li><code>2026-06-06-i3c-basic-spec-v1-1-1.md</code>：由规范 PDF 转写的全文 Markdown。</li>
+<li><code>MIPI_I3C中文文档_1616318682792.pdf</code> 与 <code>2026-06-06-mipi-i3c-chinese-doc.md</code>：中文转写材料。</li>
+<li><code>AMF-DES-T2686.pdf</code> 与 <code>2026-06-06-mipi-i3c-introduction.md</code>：NXP I3C introduction，适合做背景和架构引入。</li>
+<li><code>第三章讲解.md</code>、<code>第四章讲解.md</code>、<code>第四章节第二部分讲解.md</code>：当前目录下已有章节学习笔记。</li>
+<li><code>Broadcast CCC典型用法.md</code>、<code>Slave终止read能力解析.md</code>：针对 CCC 和 T-bit&#x2F;读终止语义的专题笔记。</li>
+</ul>
+<hr>
+<h2 id="18-实战：AST2600-QEMU-Linux-I3C-调试闭环"><a href="#18-实战：AST2600-QEMU-Linux-I3C-调试闭环" class="headerlink" title="18. 实战：AST2600 QEMU + Linux I3C 调试闭环"></a>18. 实战：AST2600 QEMU + Linux I3C 调试闭环</h2><blockquote>
+<p>本节是基于本次 AST2600 I3C 调试经验追加的工程实践记录。前面 1-17 节保持原样，这一节只补充 Linux&#x2F;QEMU 驱动工作流、关键日志和新增验证驱动，方便后续复盘和组内学习。</p>
+</blockquote>
+<h3 id="18-1-调试目标"><a href="#18-1-调试目标" class="headerlink" title="18.1 调试目标"></a>18.1 调试目标</h3><p>这次不是只验证 I3C Basic 规范里的概念，而是把一条最小但完整的链路跑通：</p>
+<ol>
+<li>QEMU AST2600 EVB 暴露一个 DesignWare-compatible I3C controller。</li>
+<li>Linux <code>ast2600-i3c-master</code> 平台驱动完成 probe。</li>
+<li>Linux I3C core 注册 master，执行 RSTDAA、DISEC、ENTDAA。</li>
+<li>QEMU 模拟一个 synthetic I3C target，PID 为 <code>0x123456789abc</code>。</li>
+<li>Linux 通过 GETPID&#x2F;GETBCR&#x2F;GETDCR 读取 target 信息并创建设备。</li>
+<li>新增 Linux synthetic target test driver 绑定该设备。</li>
+<li>通过 private SDR write&#x2F;read 验证 QEMU target 寄存器读写闭环。</li>
+</ol>
+<p>最终验证脚本：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scripts/verify_ast2600_i3c_target.sh</span><br></pre></td></tr></table></figure>
+
+<p>每次脚本运行时，完整 QEMU&#x2F;kernel 日志写到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/tmp/qemu_ast2600_i3c_target_verify.log</span><br></pre></td></tr></table></figure>
+
+<p>当前成功输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0-123456789abc</span><br></pre></td></tr></table></figure>
+
+<p>关键成功日志：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i3c-synthetic-target-test 0-123456789abc: private SDR read/write OK reg=0x10 value=0x5a</span><br></pre></td></tr></table></figure>
+
+<h3 id="18-2-Linux-驱动工作流"><a href="#18-2-Linux-驱动工作流" class="headerlink" title="18.2 Linux 驱动工作流"></a>18.2 Linux 驱动工作流</h3><p>AST2600 的 Linux 侧不是一个完全独立的 master driver，而是 AST2600 glue driver 加 DesignWare I3C master core 的组合。调试时建议按这条调用链看：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Device Tree i3c@1e7a2000</span><br><span class="line">  -&gt; ast2600_i3c_probe()</span><br><span class="line">  -&gt; dw_i3c_common_probe()</span><br><span class="line">  -&gt; i3c_master_register()</span><br><span class="line">  -&gt; i3c_master_bus_init()</span><br><span class="line">  -&gt; dw_i3c_master_bus_init()</span><br><span class="line">  -&gt; RSTDAA</span><br><span class="line">  -&gt; DISEC</span><br><span class="line">  -&gt; i3c_master_do_daa()</span><br><span class="line">  -&gt; dw_i3c_master_daa()</span><br><span class="line">  -&gt; add_i3c_dev_locked()</span><br><span class="line">  -&gt; i3c_master_retrieve_dev_info()</span><br><span class="line">  -&gt; GETPID / GETBCR / GETDCR</span><br><span class="line">  -&gt; i3c_device_match_id()</span><br><span class="line">  -&gt; i3c-synthetic-target-test.probe()</span><br><span class="line">  -&gt; private SDR read/write/read</span><br></pre></td></tr></table></figure>
+
+<p>这条链路里几个边界要分清：</p>
+<ul>
+<li><code>drivers/i3c/master/ast2600-i3c-master.c</code>：AST2600 平台相关 glue，负责 global register、pull-up 配置、platform ops，然后进入 DesignWare common probe。</li>
+<li><code>drivers/i3c/master/dw-i3c-master.c</code>：通用 DesignWare master 实现，负责 FIFO&#x2F;capability 初始化、DAT 分配、CCC、DAA、response queue 和 private transfer。</li>
+<li><code>drivers/i3c/master.c</code>：Linux I3C core，负责 master 注册、bus init、设备枚举、设备信息读取和 driver match。</li>
+<li><code>drivers/i3c/i3c-synthetic-target-test.c</code>：本次新增的验证驱动，只用于 qemu_exp 验证 synthetic target private SDR，不是生产协议驱动。</li>
+</ul>
+<h3 id="18-3-带-trace-的实际日志"><a href="#18-3-带-trace-的实际日志" class="headerlink" title="18.3 带 trace 的实际日志"></a>18.3 带 trace 的实际日志</h3><p>为了学习工作流，单独建了一个带日志的分支：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">debug/i3c-workflow-trace</span><br></pre></td></tr></table></figure>
+
+<p>远程分支：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">origin/debug/i3c-workflow-trace</span><br></pre></td></tr></table></figure>
+
+<p>对应 patch：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">patches/linux/0005-i3c-add-workflow-trace-prints.patch</span><br></pre></td></tr></table></figure>
+
+<p>日志节选如下，可以直接对照上一节调用链阅读：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">ast2600-i3c-master 1e7a2000.i3c: ast2600-i3c: probe start, node=/ahb/apb/i3c@1e7a2000</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: common_probe start</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: hw caps cmd_fifo=16 data_fifo=16 max_devs=8 dat_start=0x100</span><br><span class="line">i3c: master_register start, secondary=0</span><br><span class="line">i3c: calling i3c_master_bus_init</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: bus_init start, bus_mode=0</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: master dyn_addr=0x08</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: send_ccc ccc_id=0x06 ndests=1 rnw=0</span><br><span class="line">i3c: rstdaa before DAA returned 0</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: send_ccc ccc_id=0x01 ndests=1 rnw=0</span><br><span class="line">i3c: DISEC before DAA returned 0</span><br><span class="line">i3c: do_daa start</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: DAA start, maxdevs=8 free_pos=0xff</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: ENTDAA cmd queued dev_index=0 dev_count=8</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: resp[0] tid=0 data_len=7 err=0x4</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: DAA result rx_len=7 newdevs=0x1 olddevs=0xffffff00</span><br><span class="line">i3c: add_i3c_dev_locked addr=0x09</span><br><span class="line">i3c: retrieve_dev_info dyn_addr=0x09</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: send_ccc ccc_id=0x8d ndests=1 rnw=1</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: send_ccc ccc_id=0x8e ndests=1 rnw=1</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: send_ccc ccc_id=0x8f ndests=1 rnw=1</span><br><span class="line">i3c: do_daa returned 0</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: i3c_master_register OK, probe complete</span><br><span class="line">i3c-synthetic-target-test 0-123456789abc: i3c: device_do_xfers nxfers=2 mode=31</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: i3c_xfers start nxfers=2 mode=31 dev_index=0</span><br><span class="line">ast2600-i3c-master 1e7a2000.i3c: dw-i3c: resp[1] tid=1 data_len=1 err=0x0</span><br><span class="line">i3c-synthetic-target-test 0-123456789abc: private SDR read/write OK reg=0x10 value=0x5a</span><br><span class="line">0-123456789abc  i3c-0</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>err=0x4</code> 在 ENTDAA 结束处不是普通失败，它对应 DesignWare response error 的 <code>IBA_NACK</code>，Linux driver 用这个状态判断 DAA 轮次结束。QEMU 模型里用 <code>data_len = I3C_DAT_DEPTH - dev_index - 1</code> 表达“本轮分配了一个新设备，还剩多少 DAT slot”。</p>
+<h3 id="18-4-QEMU-AST2600-I3C-模型实现"><a href="#18-4-QEMU-AST2600-I3C-模型实现" class="headerlink" title="18.4 QEMU AST2600 I3C 模型实现"></a>18.4 QEMU AST2600 I3C 模型实现</h3><p>QEMU 新增的模型是一个最小 DesignWare-compatible AST2600 I3C controller，目标不是完整覆盖 I3C 规范，而是满足 Linux master driver 的关键路径：probe、bus init、DAA、direct CCC read、private SDR transfer。</p>
+<p>关键文件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qemu-mods/hw/misc/aspeed_i3c.c</span><br><span class="line">qemu-mods/include/hw/misc/aspeed_i3c.h</span><br></pre></td></tr></table></figure>
+
+<p>核心寄存器和 synthetic target 常量：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_COMMAND_QUEUE_PORT          0x0c</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_RESPONSE_QUEUE_PORT         0x10</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_RX_TX_DATA_PORT             0x14</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_RESET_CTRL                  0x34</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_INTR_STATUS                 0x3c</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_QUEUE_STATUS_LEVEL          0x4c</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_DATA_BUFFER_STATUS_LEVEL    0x50</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_DEVICE_ADDR_TABLE_POINTER   0x5c</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_CCC_ENTDAA                  0x07</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_CCC_GETPID                  0x8d</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_CCC_GETBCR                  0x8e</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_CCC_GETDCR                  0x8f</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_SYNTH_PID                   0x123456789abcULL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_SYNTH_BCR                   0x00</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_SYNTH_DCR                   0x42</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_SYNTH_TEST_REG              0x10</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> I3C_SYNTH_TEST_RESET_VALUE      0xa5</span></span><br></pre></td></tr></table></figure>
+
+<p>private SDR read&#x2F;write 的模拟逻辑：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">aspeed_i3c_prepare_private_read</span><span class="params">(AspeedI3CState *s, <span class="type">uint32_t</span> len)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">uint8_t</span> payload[ASPEED_I3C_RX_FIFO_SIZE];</span><br><span class="line">    <span class="type">uint8_t</span> n = MIN(len, (<span class="type">uint32_t</span>)<span class="keyword">sizeof</span>(payload));</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        payload[i] = s-&gt;target_regs[(<span class="type">uint8_t</span>)(s-&gt;target_reg_ptr + i)];</span><br><span class="line">    &#125;</span><br><span class="line">    s-&gt;target_reg_ptr += n;</span><br><span class="line">    aspeed_i3c_load_rx_fifo(s, payload, n);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">aspeed_i3c_apply_private_write</span><span class="params">(AspeedI3CState *s, <span class="type">uint32_t</span> len)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">uint8_t</span> n = MIN(len, (<span class="type">uint32_t</span>)s-&gt;tx_len);</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!n) &#123;</span><br><span class="line">        aspeed_i3c_clear_tx_fifo(s);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    s-&gt;target_reg_ptr = s-&gt;tx_fifo[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">        s-&gt;target_regs[s-&gt;target_reg_ptr++] = s-&gt;tx_fifo[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    aspeed_i3c_clear_tx_fifo(s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>direct CCC read 的模拟逻辑：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">aspeed_i3c_prepare_ccc_read</span><span class="params">(AspeedI3CState *s, <span class="type">uint32_t</span> cmd_hi,</span></span><br><span class="line"><span class="params">                                        <span class="type">uint32_t</span> cmd_lo, <span class="type">uint32_t</span> *data_len,</span></span><br><span class="line"><span class="params">                                        <span class="type">uint32_t</span> *error)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">uint8_t</span> payload[<span class="number">8</span>];</span><br><span class="line">    <span class="type">uint32_t</span> len = I3C_COMMAND_PORT_ARG_LEN(cmd_hi);</span><br><span class="line"></span><br><span class="line">    *data_len = <span class="number">0</span>;</span><br><span class="line">    *error = <span class="number">0</span>;</span><br><span class="line">    aspeed_i3c_clear_rx_fifo(s);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!(cmd_lo &amp; I3C_COMMAND_PORT_READ_TRANSFER)) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (I3C_COMMAND_PORT_CMD(cmd_lo)) &#123;</span><br><span class="line">    <span class="keyword">case</span> I3C_CCC_GETPID:</span><br><span class="line">        payload[<span class="number">0</span>] = extract64(I3C_SYNTH_PID, <span class="number">40</span>, <span class="number">8</span>);</span><br><span class="line">        payload[<span class="number">1</span>] = extract64(I3C_SYNTH_PID, <span class="number">32</span>, <span class="number">8</span>);</span><br><span class="line">        payload[<span class="number">2</span>] = extract64(I3C_SYNTH_PID, <span class="number">24</span>, <span class="number">8</span>);</span><br><span class="line">        payload[<span class="number">3</span>] = extract64(I3C_SYNTH_PID, <span class="number">16</span>, <span class="number">8</span>);</span><br><span class="line">        payload[<span class="number">4</span>] = extract64(I3C_SYNTH_PID, <span class="number">8</span>, <span class="number">8</span>);</span><br><span class="line">        payload[<span class="number">5</span>] = extract64(I3C_SYNTH_PID, <span class="number">0</span>, <span class="number">8</span>);</span><br><span class="line">        *data_len = MIN(len, <span class="number">6U</span>);</span><br><span class="line">        aspeed_i3c_load_rx_fifo(s, payload, *data_len);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> I3C_CCC_GETBCR:</span><br><span class="line">        payload[<span class="number">0</span>] = I3C_SYNTH_BCR;</span><br><span class="line">        *data_len = MIN(len, <span class="number">1U</span>);</span><br><span class="line">        aspeed_i3c_load_rx_fifo(s, payload, *data_len);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> I3C_CCC_GETDCR:</span><br><span class="line">        payload[<span class="number">0</span>] = I3C_SYNTH_DCR;</span><br><span class="line">        *data_len = MIN(len, <span class="number">1U</span>);</span><br><span class="line">        aspeed_i3c_load_rx_fifo(s, payload, *data_len);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个模型里 synthetic target 的寄存器窗口是 256 字节，复位后：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">target_regs[0x10] = 0xa5</span><br></pre></td></tr></table></figure>
+
+<p>Linux test driver 会写成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">target_regs[0x10] = 0x5a</span><br></pre></td></tr></table></figure>
+
+<p>再读回来确认。</p>
+<h3 id="18-5-新增-Linux-synthetic-target-test-driver"><a href="#18-5-新增-Linux-synthetic-target-test-driver" class="headerlink" title="18.5 新增 Linux synthetic target test driver"></a>18.5 新增 Linux synthetic target test driver</h3><p>新增驱动文件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">linux/drivers/i3c/i3c-synthetic-target-test.c</span><br></pre></td></tr></table></figure>
+
+<p>Kconfig 开关：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CONFIG_I3C_SYNTHETIC_TARGET_TEST=y</span><br></pre></td></tr></table></figure>
+
+<p>驱动核心代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SPDX-License-Identifier: GPL-2.0</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * qemu_exp synthetic I3C target private SDR test.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/i3c/device.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYNTH_TEST_REG          0x10</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYNTH_TEST_RESET_VALUE  0xa5</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYNTH_TEST_WRITE_VALUE  0x5a</span></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">synth_i3c_read_reg</span><span class="params">(<span class="keyword">struct</span> i3c_device *i3cdev, u8 reg, u8 *val)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">i3c_xfer</span> <span class="title">xfers</span>[] =</span> &#123;</span><br><span class="line">        &#123;</span><br><span class="line">            .rnw = <span class="literal">false</span>,</span><br><span class="line">            .len = <span class="number">1</span>,</span><br><span class="line">            .data.out = &amp;reg,</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            .rnw = <span class="literal">true</span>,</span><br><span class="line">            .len = <span class="number">1</span>,</span><br><span class="line">            .data.in = val,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> i3c_device_do_xfers(i3cdev, xfers, ARRAY_SIZE(xfers), I3C_SDR);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">synth_i3c_write_reg</span><span class="params">(<span class="keyword">struct</span> i3c_device *i3cdev, u8 reg, u8 val)</span></span><br><span class="line">&#123;</span><br><span class="line">    u8 buf[] = &#123; reg, val &#125;;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">i3c_xfer</span> <span class="title">xfer</span> =</span> &#123;</span><br><span class="line">        .rnw = <span class="literal">false</span>,</span><br><span class="line">        .len = <span class="keyword">sizeof</span>(buf),</span><br><span class="line">        .data.out = buf,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> i3c_device_do_xfers(i3cdev, &amp;xfer, <span class="number">1</span>, I3C_SDR);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">synth_i3c_probe</span><span class="params">(<span class="keyword">struct</span> i3c_device *i3cdev)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">dev</span> =</span> i3cdev_to_dev(i3cdev);</span><br><span class="line">    u8 val;</span><br><span class="line">    <span class="type">int</span> ret;</span><br><span class="line"></span><br><span class="line">    ret = synth_i3c_read_reg(i3cdev, SYNTH_TEST_REG, &amp;val);</span><br><span class="line">    <span class="keyword">if</span> (ret)</span><br><span class="line">        <span class="keyword">return</span> dev_err_probe(dev, ret, <span class="string">&quot;initial private SDR read failed\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (val != SYNTH_TEST_RESET_VALUE)</span><br><span class="line">        <span class="keyword">return</span> dev_err_probe(dev, -EIO,</span><br><span class="line">                             <span class="string">&quot;unexpected reset value 0x%02x\n&quot;</span>, val);</span><br><span class="line"></span><br><span class="line">    ret = synth_i3c_write_reg(i3cdev, SYNTH_TEST_REG,</span><br><span class="line">                              SYNTH_TEST_WRITE_VALUE);</span><br><span class="line">    <span class="keyword">if</span> (ret)</span><br><span class="line">        <span class="keyword">return</span> dev_err_probe(dev, ret, <span class="string">&quot;private SDR write failed\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    ret = synth_i3c_read_reg(i3cdev, SYNTH_TEST_REG, &amp;val);</span><br><span class="line">    <span class="keyword">if</span> (ret)</span><br><span class="line">        <span class="keyword">return</span> dev_err_probe(dev, ret, <span class="string">&quot;final private SDR read failed\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (val != SYNTH_TEST_WRITE_VALUE)</span><br><span class="line">        <span class="keyword">return</span> dev_err_probe(dev, -EIO,</span><br><span class="line">                             <span class="string">&quot;unexpected final value 0x%02x\n&quot;</span>, val);</span><br><span class="line"></span><br><span class="line">    dev_info(dev, <span class="string">&quot;private SDR read/write OK reg=0x%02x value=0x%02x\n&quot;</span>,</span><br><span class="line">             SYNTH_TEST_REG, val);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">i3c_device_id</span> <span class="title">synth_i3c_ids</span>[] =</span> &#123;</span><br><span class="line">    I3C_DEVICE_EXTRA_INFO(<span class="number">0x091a</span>, <span class="number">0x5678</span>, <span class="number">0x0abc</span>, <span class="literal">NULL</span>),</span><br><span class="line">    &#123; &#125;,</span><br><span class="line">&#125;;</span><br><span class="line">MODULE_DEVICE_TABLE(i3c, synth_i3c_ids);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">i3c_driver</span> <span class="title">synth_i3c_driver</span> =</span> &#123;</span><br><span class="line">    .driver = &#123;</span><br><span class="line">        .name = <span class="string">&quot;i3c-synthetic-target-test&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    .probe = synth_i3c_probe,</span><br><span class="line">    .id_table = synth_i3c_ids,</span><br><span class="line">&#125;;</span><br><span class="line">module_i3c_driver(synth_i3c_driver);</span><br><span class="line"></span><br><span class="line">MODULE_AUTHOR(<span class="string">&quot;qemu_exp&quot;</span>);</span><br><span class="line">MODULE_DESCRIPTION(<span class="string">&quot;Synthetic I3C target private SDR test&quot;</span>);</span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这个驱动刻意保持最小化：它只证明 Linux I3C device API 能发起 private SDR transfer，并且 QEMU synthetic target 能正确维护 register pointer 和 register window。</p>
+<h3 id="18-6-调试过程复盘"><a href="#18-6-调试过程复盘" class="headerlink" title="18.6 调试过程复盘"></a>18.6 调试过程复盘</h3><p>本次调试可以按四个阶段理解。</p>
+<p>第一阶段：让 Linux master probe 不失败。</p>
+<p>如果 QEMU 没有 AST2600 I3C MMIO 模型，Linux driver 访问 capability、queue status、reset、interrupt status 时会卡住或超时。最小模型必须先覆盖 driver probe 和 bus init 会访问的寄存器。</p>
+<p>第二阶段：让 DAA 走通。</p>
+<p>空 bus 时 Linux 可以完成 master 初始化，但不会创建设备。为了验证完整枚举流程，QEMU synthetic target 需要响应 ENTDAA，让 Linux 分配动态地址，例如日志里的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i3c: add_i3c_dev_locked addr=0x09</span><br></pre></td></tr></table></figure>
+
+<p>第三阶段：让设备信息读取走通。</p>
+<p>DAA 只是给 target 分配动态地址，Linux 后面还会通过 direct CCC 读取 PID、BCR、DCR。QEMU 必须支持：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GETPID 0x8d</span><br><span class="line">GETBCR 0x8e</span><br><span class="line">GETDCR 0x8f</span><br></pre></td></tr></table></figure>
+
+<p>否则 device info 不完整，后续 driver match 无法稳定验证。</p>
+<p>第四阶段：用 private SDR 证明数据面真的通。</p>
+<p>只跑 DAA 和 GETPID 还停留在枚举层；private SDR read&#x2F;write 才能验证 TX FIFO、RX FIFO、command response、target register state 是否闭环。最终成功标准就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private SDR read/write OK reg=0x10 value=0x5a</span><br></pre></td></tr></table></figure>
+
+<h3 id="18-7-调试打印的注意事项"><a href="#18-7-调试打印的注意事项" class="headerlink" title="18.7 调试打印的注意事项"></a>18.7 调试打印的注意事项</h3><p>这次为了学习 I3C 工作流加入了 trace print。给内核代码加临时日志时要特别小心：不要因为少加大括号改变控制流。</p>
+<p>容易出错的模式：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (ret)</span><br><span class="line">    dev_err(...);</span><br><span class="line">    <span class="keyword">goto</span> err;</span><br></pre></td></tr></table></figure>
+
+<p>正确写法：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (ret) &#123;</span><br><span class="line">    dev_err(...);</span><br><span class="line">    <span class="keyword">goto</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 I3C 这条路径上，尤其要检查这些位置：</p>
+<ul>
+<li><code>dw_i3c_master_bus_init()</code> 里的错误处理分支。</li>
+<li><code>dw_i3c_ccc_set()</code> &#x2F; <code>dw_i3c_ccc_get()</code> 里的 CCC 参数校验。</li>
+<li><code>i3c_device_do_xfers()</code> 里的 transfer mode 判断。</li>
+</ul>
+<p>日志分支只用于学习 workflow，不建议直接把这类 trace print 当作生产补丁提交。</p>
+<h3 id="18-8-当前可复现实验命令"><a href="#18-8-当前可复现实验命令" class="headerlink" title="18.8 当前可复现实验命令"></a>18.8 当前可复现实验命令</h3><p>构建 QEMU：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ninja -C build-arm-softmmu qemu-system-arm</span><br></pre></td></tr></table></figure>
+
+<p>构建 Linux zImage 和 AST2600 EVB DTB：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j$(<span class="built_in">nproc</span>) zImage aspeed/aspeed-ast2600-evb.dtb</span><br></pre></td></tr></table></figure>
+
+<p>运行端到端验证：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scripts/verify_ast2600_i3c_target.sh</span><br></pre></td></tr></table></figure>
+
+<p>检查日志：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rg -n <span class="string">&quot;ast2600-i3c|dw-i3c|i3c-synthetic-target-test|private SDR&quot;</span> /tmp/qemu_ast2600_i3c_target_verify.<span class="built_in">log</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="18-9-学习这条链路时的建议阅读顺序"><a href="#18-9-学习这条链路时的建议阅读顺序" class="headerlink" title="18.9 学习这条链路时的建议阅读顺序"></a>18.9 学习这条链路时的建议阅读顺序</h3><p>建议按运行时顺序读代码，而不是按文件名读：</p>
+<ol>
+<li>先看 DTS：确认 <code>i3c@1e7a2000</code> 节点、compatible、reg、interrupt、clock&#x2F;reset。</li>
+<li>看 <code>ast2600-i3c-master.c</code>：确认平台 glue 做了什么。</li>
+<li>看 <code>dw-i3c-master.c</code>：重点看 probe、bus init、send CCC、DAA、private xfer。</li>
+<li>看 <code>drivers/i3c/master.c</code>：理解 Linux I3C core 怎么管理 master、bus 和 device。</li>
+<li>看 QEMU <code>aspeed_i3c.c</code>：对照 Linux 每一次 MMIO&#x2F;command&#x2F;response。</li>
+<li>看 <code>i3c-synthetic-target-test.c</code>：把枚举结果落到 private SDR 数据传输验证。</li>
+</ol>
+<p>I3C 调试不要只盯协议字段，要同时看 Linux core 状态机、master driver 的 command&#x2F;response 约定、QEMU 设备模型的 FIFO&#x2F;寄存器语义，以及最终 target driver 是否真的完成数据面读写。</p>
+<h2 id="19-当前验证状态与交付收口"><a href="#19-当前验证状态与交付收口" class="headerlink" title="19. 当前验证状态与交付收口"></a>19. 当前验证状态与交付收口</h2><blockquote>
+<p>本节记录 2026-06-11 对当前工程状态的复核结果。第 18 节主要讲从 0 到 private SDR 的调试闭环，本节补充最新已验证能力和后续交付前必须收口的问题。</p>
+</blockquote>
+<h3 id="19-1-当前端到端验证结果"><a href="#19-1-当前端到端验证结果" class="headerlink" title="19.1 当前端到端验证结果"></a>19.1 当前端到端验证结果</h3><p>当前分支：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">debug/i3c-workflow-trace</span><br></pre></td></tr></table></figure>
+
+<p>当前验证脚本：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scripts/verify_ast2600_i3c_target.sh</span><br></pre></td></tr></table></figure>
+
+<p>脚本已能在 AST2600 QEMU 环境里完成 Linux I3C 初始化、DAA、target driver probe、private SDR、malformed transfer、IBI 和 hotjoin sysfs toggle 的闭环验证。成功输出包含两个 synthetic target：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0-123456789abc</span><br><span class="line">0-123456789abd</span><br></pre></td></tr></table></figure>
+
+<p>关键成功日志包括：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">i3c: init_done, registering new i3c devs</span><br><span class="line">i3c-synthetic-target-test 0-123456789abc: private SDR read/write OK reg=0x10 value=0x5a</span><br><span class="line">i3c-synthetic-target-test 0-123456789abc: malformed private SDR write rejected ret=-5</span><br><span class="line">i3c-synthetic-target-test 0-123456789abc: IBI enabled</span><br><span class="line">i3c-synthetic-target-test 0-123456789abc: IBI received len=1 payload=0x7c</span><br><span class="line">HJ=0</span><br><span class="line">HJ=1</span><br><span class="line">HJ=0</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>HJ=0 -&gt; HJ=1 -&gt; HJ=0</code> 证明 Linux 暴露的 hotjoin sysfs 控制面可以被正常切换。IBI 日志证明 target driver 已通过 <code>i3c_device_request_ibi()</code> 和 <code>i3c_device_enable_ibi()</code> 打开 IBI 接收，并且 QEMU 模型能把 payload <code>0x7c</code> 送入 Linux handler。</p>
+<h3 id="19-2-当前-QEMU-模型已覆盖的能力"><a href="#19-2-当前-QEMU-模型已覆盖的能力" class="headerlink" title="19.2 当前 QEMU 模型已覆盖的能力"></a>19.2 当前 QEMU 模型已覆盖的能力</h3><p>当前 <code>aspeed_i3c.c</code> 不是完整 I3C 控制器模型，而是一个面向 Linux AST2600 bring-up 的最小 DesignWare-compatible 行为模型。它当前覆盖：</p>
+<ol>
+<li>AST2600 I3C MMIO register window。</li>
+<li>command queue 和 response queue。</li>
+<li>DAT 动态地址表读取。</li>
+<li>ENTDAA，为 synthetic target 分配动态地址。</li>
+<li>direct CCC read：<code>GETPID</code>、<code>GETBCR</code>、<code>GETDCR</code>。</li>
+<li>private SDR write&#x2F;read，用一个 256-byte target register window 模拟设备寄存器。</li>
+<li>malformed 1-byte private write 拒绝路径。</li>
+<li>两个 synthetic target 的 DAA 枚举。</li>
+<li>late target 通过 hotjoin enable 后可见。</li>
+<li>最小 SIR IBI queue，payload 固定为 <code>0x7c</code>。</li>
+</ol>
+<p>这已经足够验证 Linux I3C core、DesignWare master driver、AST2600 glue driver、QEMU MMIO 模型和 synthetic target driver 之间的主要控制面和数据面交互。</p>
+<h3 id="19-3-当前-Linux-验证驱动覆盖的能力"><a href="#19-3-当前-Linux-验证驱动覆盖的能力" class="headerlink" title="19.3 当前 Linux 验证驱动覆盖的能力"></a>19.3 当前 Linux 验证驱动覆盖的能力</h3><p><code>drivers/i3c/i3c-synthetic-target-test.c</code> 当前用于验证 QEMU synthetic target，不是生产设备协议驱动。它的作用是把枚举出来的 I3C target 真正拉到数据面：</p>
+<ol>
+<li>probe 时读取寄存器 <code>0x10</code>，期望 reset value <code>0xa5</code>。</li>
+<li>写入 <code>0x5a</code>。</li>
+<li>再读回 <code>0x5a</code>。</li>
+<li>发送 malformed 1-byte private write，期望 master&#x2F;QEMU 返回错误。</li>
+<li>request IBI。</li>
+<li>enable IBI。</li>
+<li>收到 payload <code>0x7c</code> 后打印成功日志。</li>
+</ol>
+<p>这类验证驱动的价值在于：DAA 只能证明设备被枚举，private SDR 和 IBI 才能证明 Linux device API、master driver command&#x2F;response、QEMU FIFO&#x2F;IRQ 语义之间形成了闭环。</p>
+<h3 id="19-4-当前仍需收口的问题"><a href="#19-4-当前仍需收口的问题" class="headerlink" title="19.4 当前仍需收口的问题"></a>19.4 当前仍需收口的问题</h3><p>当前运行态已经通过，但交付态还没有完全收口。主要问题有两个：</p>
+<p>第一，QEMU patch series 里 <code>patches/qemu/0001-misc-add-aspeed-i3c-device-model.patch</code> 不是一个可直接应用的补丁。它包含 <code>full source</code> 占位描述，而不是完整 <code>aspeed_i3c.c</code> 内容。用 <code>git apply --check</code> 检查会报补丁损坏。因此现在的 QEMU 工作树能跑，不等于 patch series 能从干净 QEMU 源码复现。</p>
+<p>第二，<code>linux-mods/drivers/i3c/i3c-synthetic-target-test.c</code> 落后于实际 <code>linux/drivers/i3c/i3c-synthetic-target-test.c</code>。<code>linux-mods</code> 版本还停在 private SDR 和 malformed write，没有包含 IBI request&#x2F;enable&#x2F;handler。后续如果把 <code>linux-mods</code> 当作 source-of-record，会丢失 IBI 验证能力。</p>
+<h3 id="19-5-后续交付建议"><a href="#19-5-后续交付建议" class="headerlink" title="19.5 后续交付建议"></a>19.5 后续交付建议</h3><p>建议把当前工程拆成两个状态看：</p>
+<ol>
+<li>运行验证状态：当前已通过，可以继续用于学习 AST2600 I3C &#x2F; Linux I3C core &#x2F; QEMU 设备模型的交互。</li>
+<li>patch 交付状态：还需要整理补丁和 source-of-record，避免别人按 README 复现失败。</li>
+</ol>
+<p>交付前建议按顺序完成：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 重新生成 QEMU 0001 patch，确保没有占位内容</span></span><br><span class="line">git apply --check ../patches/qemu/0001-misc-add-aspeed-i3c-device-model.patch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 同步 linux-mods 测试驱动到实际 linux 树中的版本</span></span><br><span class="line"><span class="comment"># 3. 重新构建 QEMU 和 Linux</span></span><br><span class="line"><span class="comment"># 4. 跑默认验证</span></span><br><span class="line">scripts/verify_ast2600_i3c_target.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 跑 late-hotjoin 验证</span></span><br><span class="line">VERIFY_I3C_LATE_HOTJOIN=1 \\</span><br><span class="line">QEMU_I3C_TARGET_COUNT=1 \\</span><br><span class="line">QEMU_I3C_LATE_TARGET_COUNT=1 \\</span><br><span class="line">EXPECT_TARGETS=<span class="string">&quot;0-123456789abc 0-123456789abd&quot;</span> \\</span><br><span class="line">LOG=/tmp/qemu_ast2600_i3c_late_hotjoin_ibi_verify.<span class="built_in">log</span> \\</span><br><span class="line">scripts/verify_ast2600_i3c_target.sh</span><br></pre></td></tr></table></figure>
+
+<p>当前 I3C 调试闭环已经跑通，后面最重要的不是继续堆功能，而是把可复现补丁、source-of-record 和验证脚本三者对齐。</p>
+<h2 id="20-新增特性的代码走读与驱动软件结构"><a href="#20-新增特性的代码走读与驱动软件结构" class="headerlink" title="20. 新增特性的代码走读与驱动软件结构"></a>20. 新增特性的代码走读与驱动软件结构</h2><blockquote>
+<p>本节补充当前新增特性的代码阅读路线。重点不是把每个函数逐行解释完，而是先建立软件结构图，再按 DAA、多 target、private SDR、malformed write、IBI、hotjoin&#x2F;late target 六条链路读代码。</p>
+</blockquote>
+<h3 id="20-1-当前软件结构分层"><a href="#20-1-当前软件结构分层" class="headerlink" title="20.1 当前软件结构分层"></a>20.1 当前软件结构分层</h3><p>当前 AST2600 I3C 验证链路可以分成五层：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">synthetic target test driver</span><br><span class="line">        ↓</span><br><span class="line">Linux I3C device API</span><br><span class="line">        ↓</span><br><span class="line">Linux I3C core / bus manager</span><br><span class="line">        ↓</span><br><span class="line">DesignWare I3C master + AST2600 glue</span><br><span class="line">        ↓</span><br><span class="line">QEMU aspeed_i3c MMIO model</span><br></pre></td></tr></table></figure>
+
+<p>每一层职责不同：</p>
+<ol>
+<li><code>drivers/i3c/i3c-synthetic-target-test.c</code> 是验证用 target driver。它不关心 controller 寄存器，只调用 Linux I3C device API，验证 private SDR、malformed write 和 IBI。</li>
+<li><code>drivers/i3c/device.c</code> 是 I3C device driver 面向设备驱动的 API 层。<code>i3c_device_do_xfers()</code>、<code>i3c_device_request_ibi()</code>、<code>i3c_device_enable_ibi()</code> 都在这里进入 core。</li>
+<li><code>drivers/i3c/master.c</code> 是 I3C core 的 bus manager。它负责 master 注册、DAA、设备对象创建、sysfs 属性、hotjoin&#x2F;do_daa 入口、IBI 资源管理的上层调度。</li>
+<li><code>drivers/i3c/master/dw-i3c-master.c</code> 是 DesignWare controller driver。它负责把 core 的抽象操作翻译成 command queue、response queue、DAT、IBI queue、interrupt 等硬件语义。</li>
+<li><code>drivers/i3c/master/ast2600-i3c-master.c</code> 是 AST2600 glue。它处理 ASPEED global register、pull-up、平台 workaround，然后把主体流程交给 DesignWare common driver。</li>
+<li><code>qemu-mods/hw/misc/aspeed_i3c.c</code> 是 QEMU 侧模拟硬件。Linux 写 command queue、读 response queue、读写 data port、读 IBI queue，最终都落到这个模型。</li>
+</ol>
+<p>所以读代码时不要从 QEMU 文件开始硬啃。推荐先从 Linux target driver 看“谁触发了功能”，再向下追到 DesignWare ops，最后看 QEMU 如何响应。</p>
+<h3 id="20-2-probe-和总线初始化读法"><a href="#20-2-probe-和总线初始化读法" class="headerlink" title="20.2 probe 和总线初始化读法"></a>20.2 probe 和总线初始化读法</h3><p>先读 AST2600 平台入口：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ast2600_i3c_probe()</span><br><span class="line">  -&gt; ast2600_i3c_init()</span><br><span class="line">  -&gt; dw_i3c_common_probe()</span><br></pre></td></tr></table></figure>
+
+<p><code>ast2600_i3c_probe()</code> 的重点是：</p>
+<ol>
+<li>从 DTS 解析 <code>aspeed,global-regs</code>。</li>
+<li>设置 <code>sda-pullup-ohms</code>。</li>
+<li>安装 <code>ast2600_i3c_ops</code> 到 <code>dw.platform_ops</code>。</li>
+<li>调用 <code>dw_i3c_common_probe()</code>。</li>
+</ol>
+<p>然后读 <code>dw_i3c_common_probe()</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dw_i3c_common_probe()</span><br><span class="line">  -&gt; ioremap controller MMIO</span><br><span class="line">  -&gt; enable clock/reset</span><br><span class="line">  -&gt; request irq</span><br><span class="line">  -&gt; read QUEUE_STATUS_LEVEL</span><br><span class="line">  -&gt; read DATA_BUFFER_STATUS_LEVEL</span><br><span class="line">  -&gt; read DEVICE_ADDR_TABLE_POINTER</span><br><span class="line">  -&gt; i3c_master_register(&amp;master-&gt;base, ..., &amp;dw_mipi_i3c_ops, false)</span><br></pre></td></tr></table></figure>
+
+<p>这里能看出 QEMU 最小模型为什么必须先实现这些寄存器。Linux 在 probe 早期就会读取 FIFO 深度和 DAT 位置，如果 QEMU 返回不合理值，后面的 DAA 和 private transfer 都不会稳定。</p>
+<p>最后读 <code>i3c_master_register()</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">i3c_master_register()</span><br><span class="line">  -&gt; i3c_bus_init()</span><br><span class="line">  -&gt; i3c_master_bus_init()</span><br><span class="line">  -&gt; master-&gt;ops-&gt;bus_init()</span><br><span class="line">  -&gt; RSTDAA / DISEC / DAA</span><br><span class="line">  -&gt; master-&gt;init_done = true</span><br><span class="line">  -&gt; i3c_master_register_new_i3c_devs()</span><br></pre></td></tr></table></figure>
+
+<p>这说明 Linux I3C core 的角色不是“简单转发传输”，而是总线状态机的 owner。controller driver 只提供 ops，core 决定何时初始化 bus、何时注册 device、何时把 DAA 结果变成 <code>/sys/bus/i3c/devices/0-...</code>。</p>
+<h3 id="20-3-DAA-和多-target-读法"><a href="#20-3-DAA-和多-target-读法" class="headerlink" title="20.3 DAA 和多 target 读法"></a>20.3 DAA 和多 target 读法</h3><p>DAA 的 Linux 入口在 core：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">i3c_master_do_daa()</span><br><span class="line">  -&gt; i3c_master_do_daa_ext()</span><br><span class="line">  -&gt; master-&gt;ops-&gt;do_daa()</span><br><span class="line">  -&gt; i3c_master_register_new_i3c_devs()</span><br></pre></td></tr></table></figure>
+
+<p>对 AST2600 来说，<code>master-&gt;ops-&gt;do_daa</code> 指向 <code>dw_i3c_master_daa()</code>。这个函数的关键动作是：</p>
+<ol>
+<li>找空闲 DAT slot。</li>
+<li>给每个空闲 slot 预写一个候选 dynamic address。</li>
+<li>组一个 ENTDAA command。</li>
+<li>写入 DesignWare command queue。</li>
+<li>等 response。</li>
+<li>根据 <code>rx_len</code> 推导本轮新增了哪些 device。</li>
+<li>调用 <code>i3c_master_add_i3c_dev_locked()</code> 把新设备加入 I3C core。</li>
+</ol>
+<p>QEMU 侧对应 <code>aspeed_i3c_assign_targets()</code> 和 <code>aspeed_i3c_push_response()</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Linux dw_i3c_master_daa()</span><br><span class="line">  -&gt; write COMMAND_QUEUE_PORT: ENTDAA</span><br><span class="line">QEMU aspeed_i3c_write()</span><br><span class="line">  -&gt; aspeed_i3c_push_response()</span><br><span class="line">  -&gt; aspeed_i3c_assign_targets()</span><br><span class="line">  -&gt; push response with data_len</span><br><span class="line">Linux sees response rx_len</span><br><span class="line">  -&gt; i3c_master_add_i3c_dev_locked()</span><br></pre></td></tr></table></figure>
+
+<p>当前多 target 的关键点是：QEMU 不是只返回一个固定设备，而是维护 <code>target_assigned[]</code>、<code>target_dyn_addr[]</code>、<code>target_dat_index[]</code>。Linux 给 DAT slot 写入 dynamic address 后，QEMU 从 DAT 里读出地址并绑定到 synthetic target。这样第二个 target 才能得到独立 PID：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0-123456789abc</span><br><span class="line">0-123456789abd</span><br></pre></td></tr></table></figure>
+
+<p>读这一段时要特别关注 <code>data_len</code>。DesignWare driver 用 response 里的长度字段反推这轮 DAA 分配了多少设备；QEMU 如果这里填错，Linux 可能认为没有新设备，或者设备数量不对。</p>
+<h3 id="20-4-private-SDR-和-malformed-write-读法"><a href="#20-4-private-SDR-和-malformed-write-读法" class="headerlink" title="20.4 private SDR 和 malformed write 读法"></a>20.4 private SDR 和 malformed write 读法</h3><p>private SDR 从验证驱动开始读最清楚：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">synth_i3c_probe()</span><br><span class="line">  -&gt; synth_i3c_read_reg()</span><br><span class="line">  -&gt; synth_i3c_write_reg()</span><br><span class="line">  -&gt; synth_i3c_read_reg()</span><br><span class="line">  -&gt; synth_i3c_expect_malformed_write_rejected()</span><br></pre></td></tr></table></figure>
+
+<p><code>read_reg()</code> 实际是两个 transfer：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">write 1 byte register address</span><br><span class="line">read  1 byte register value</span><br></pre></td></tr></table></figure>
+
+<p>这会进入：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">i3c_device_do_xfers()</span><br><span class="line">  -&gt; i3c_dev_do_xfers_locked()</span><br><span class="line">  -&gt; master-&gt;ops-&gt;i3c_xfers()</span><br><span class="line">  -&gt; dw_i3c_master_i3c_xfers()</span><br></pre></td></tr></table></figure>
+
+<p>DesignWare driver 在 <code>dw_i3c_master_i3c_xfers()</code> 里把每个 <code>struct i3c_xfer</code> 变成 command queue 项：</p>
+<ol>
+<li><code>cmd_hi</code> 放 data length。</li>
+<li><code>cmd_lo</code> 放 transfer direction、device index、TID、ROC&#x2F;TOC。</li>
+<li>write transfer 绑定 <code>tx_buf</code>。</li>
+<li>read transfer 绑定 <code>rx_buf</code>。</li>
+<li>enqueue 后等待 completion。</li>
+</ol>
+<p>QEMU 侧 private SDR 的对应逻辑在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">aspeed_i3c_write_tx_fifo()</span><br><span class="line">aspeed_i3c_apply_private_write()</span><br><span class="line">aspeed_i3c_prepare_private_read()</span><br><span class="line">aspeed_i3c_read_rx_fifo()</span><br></pre></td></tr></table></figure>
+
+<p>当前 synthetic target 的寄存器语义很简单：第一个写入 byte 是 register pointer，后续 byte 写入 target register window；read 从当前 register pointer 取数据并递增。</p>
+<p>malformed write 的负向测试也在这一层。验证驱动发一个 1-byte write 且 transfer 结束，QEMU 在 <code>aspeed_i3c_apply_private_write()</code> 里识别：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">n == 1 &amp;&amp; TOC set</span><br></pre></td></tr></table></figure>
+
+<p>然后返回 <code>I3C_RESPONSE_ERROR_IBA_NACK</code>。Linux 侧最后看到的是 <code>i3c_device_do_xfers()</code> 返回错误，测试驱动打印：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">malformed private SDR write rejected ret=-5</span><br></pre></td></tr></table></figure>
+
+<p>这个负向测试很有价值，因为它证明 QEMU 不只是“无条件成功”，而是能把 transfer error 通过 response queue 传回 Linux master driver。</p>
+<h3 id="20-5-IBI-读法"><a href="#20-5-IBI-读法" class="headerlink" title="20.5 IBI 读法"></a>20.5 IBI 读法</h3><p>IBI 从 target driver 的 <code>synth_i3c_enable_ibi()</code> 开始读：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">synth_i3c_enable_ibi()</span><br><span class="line">  -&gt; i3c_device_request_ibi()</span><br><span class="line">  -&gt; i3c_device_enable_ibi()</span><br></pre></td></tr></table></figure>
+
+<p><code>i3c_device_request_ibi()</code> 在 core 里做资源准备，最终调到 DesignWare 的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dw_i3c_master_request_ibi()</span><br><span class="line">  -&gt; i3c_generic_ibi_alloc_pool()</span><br><span class="line">  -&gt; master-&gt;devs[index].ibi_dev = dev</span><br></pre></td></tr></table></figure>
+
+<p><code>i3c_device_enable_ibi()</code> 进入：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dw_i3c_master_enable_ibi()</span><br><span class="line">  -&gt; dw_i3c_master_set_sir_enabled()</span><br><span class="line">  -&gt; i3c_master_enec_locked(..., I3C_CCC_EVENT_SIR)</span><br></pre></td></tr></table></figure>
+
+<p>这里有两个关键动作：</p>
+<ol>
+<li>修改 DAT entry，让 controller 不再 reject 这个 target 的 SIR。</li>
+<li>发送 direct ENEC CCC，使 target 的 SIR event 打开。</li>
+</ol>
+<p>QEMU 侧在 <code>aspeed_i3c_apply_ccc_write()</code> 里看到 direct ENEC 且 payload 含 <code>I3C_CCC_EVENT_SIR</code>，就调用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aspeed_i3c_queue_ibi()</span><br></pre></td></tr></table></figure>
+
+<p>它会设置 IBI status、payload <code>0x7c</code>，并拉起 <code>I3C_INTR_IBI_THLD_STAT</code>。Linux irq handler 后续读取 IBI queue，进入：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dw_i3c_master_handle_ibi_sir()</span><br><span class="line">  -&gt; dw_i3c_master_read_ibi_fifo()</span><br><span class="line">  -&gt; i3c_master_queue_ibi()</span><br><span class="line">  -&gt; synth_i3c_ibi_handler()</span><br></pre></td></tr></table></figure>
+
+<p>最终验证驱动打印：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">IBI received len=1 payload=0x7c</span><br></pre></td></tr></table></figure>
+
+<p>这一段说明 IBI 不是普通 read，也不是 target driver 主动轮询；它是 target 通过 controller IBI queue 和 Linux IBI pool&#x2F;slot 机制异步上报。</p>
+<h3 id="20-6-hotjoin-和-late-target-读法"><a href="#20-6-hotjoin-和-late-target-读法" class="headerlink" title="20.6 hotjoin 和 late target 读法"></a>20.6 hotjoin 和 late target 读法</h3><p>hotjoin 这条链路从 sysfs 开始：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/sys/bus/i3c/devices/i3c-0/hotjoin</span><br><span class="line">/sys/bus/i3c/devices/i3c-0/do_daa</span><br></pre></td></tr></table></figure>
+
+<p>core 里的入口是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hotjoin_store()</span><br><span class="line">  -&gt; i3c_set_hotjoin()</span><br><span class="line">  -&gt; master-&gt;ops-&gt;enable_hotjoin()</span><br></pre></td></tr></table></figure>
+
+<p>DesignWare 对应：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dw_i3c_master_enable_hotjoin()</span><br><span class="line">  -&gt; dw_i3c_master_enable_sir_signal(true)</span><br><span class="line">  -&gt; clear DEV_CTRL_HOT_JOIN_NACK</span><br></pre></td></tr></table></figure>
+
+<p>QEMU 侧在 <code>aspeed_i3c_write()</code> 里监控 <code>I3C_DEVICE_CTRL</code>：当 Linux 清掉 <code>HOT_JOIN_NACK</code>，并且配置了 <code>synth-late-target-count</code>，QEMU 设置：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">late_targets_visible = true</span><br></pre></td></tr></table></figure>
+
+<p>此时 late target 只是“可见”，还不会自动变成 Linux device。验证脚本还要写：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 1 &gt; /sys/bus/i3c/devices/i3c-0/do_daa</span><br></pre></td></tr></table></figure>
+
+<p>这会进入：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">do_daa_store()</span><br><span class="line">  -&gt; i3c_master_do_daa()</span><br><span class="line">  -&gt; dw_i3c_master_daa()</span><br><span class="line">  -&gt; QEMU aspeed_i3c_assign_targets()</span><br></pre></td></tr></table></figure>
+
+<p>late target 被第二轮 DAA 分配动态地址后，Linux 才会注册出新的 <code>0-...</code> 设备。</p>
+<h3 id="20-7-推荐代码走读顺序"><a href="#20-7-推荐代码走读顺序" class="headerlink" title="20.7 推荐代码走读顺序"></a>20.7 推荐代码走读顺序</h3><p>如果是为了理解当前新增特性，建议按这个顺序读：</p>
+<ol>
+<li><code>scripts/verify_ast2600_i3c_target.sh</code>：先看验证脚本到底检查什么。</li>
+<li><code>drivers/i3c/i3c-synthetic-target-test.c</code>：看 private SDR、malformed write、IBI 是怎么被触发的。</li>
+<li><code>drivers/i3c/device.c</code>：看 target driver API 如何进入 core。</li>
+<li><code>drivers/i3c/master.c</code>：看 DAA、device register、hotjoin、do_daa sysfs、IBI 上层管理。</li>
+<li><code>drivers/i3c/master/ast2600-i3c-master.c</code>：看 AST2600 glue 只做平台配置，不直接实现完整传输状态机。</li>
+<li><code>drivers/i3c/master/dw-i3c-master.c</code>：看真正的 command queue、response queue、DAT、IBI queue 操作。</li>
+<li><code>qemu-mods/hw/misc/aspeed_i3c.c</code>：最后对照 Linux command&#x2F;response，看 QEMU 如何模拟硬件。</li>
+</ol>
+<p>每个新增特性可以按下面的索引读：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Linux 起点</th>
+<th>DesignWare 关键点</th>
+<th>QEMU 关键点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>多 target DAA</td>
+<td><code>i3c_master_do_daa()</code></td>
+<td><code>dw_i3c_master_daa()</code></td>
+<td><code>aspeed_i3c_assign_targets()</code></td>
+</tr>
+<tr>
+<td>private SDR</td>
+<td><code>i3c_device_do_xfers()</code></td>
+<td><code>dw_i3c_master_i3c_xfers()</code></td>
+<td><code>aspeed_i3c_apply_private_write()</code> &#x2F; <code>aspeed_i3c_prepare_private_read()</code></td>
+</tr>
+<tr>
+<td>malformed write</td>
+<td><code>synth_i3c_expect_malformed_write_rejected()</code></td>
+<td>response error 传回 <code>xfer-&gt;ret</code></td>
+<td><code>I3C_RESPONSE_ERROR_IBA_NACK</code></td>
+</tr>
+<tr>
+<td>IBI</td>
+<td><code>i3c_device_request_ibi()</code> &#x2F; <code>i3c_device_enable_ibi()</code></td>
+<td><code>dw_i3c_master_enable_ibi()</code> &#x2F; <code>dw_i3c_master_handle_ibi_sir()</code></td>
+<td><code>aspeed_i3c_queue_ibi()</code> &#x2F; <code>aspeed_i3c_read_ibi_queue()</code></td>
+</tr>
+<tr>
+<td>hotjoin &#x2F; late target</td>
+<td><code>hotjoin_store()</code> &#x2F; <code>do_daa_store()</code></td>
+<td><code>dw_i3c_master_enable_hotjoin()</code> &#x2F; <code>dw_i3c_master_daa()</code></td>
+<td><code>late_targets_visible</code> &#x2F; <code>aspeed_i3c_assign_targets()</code></td>
+</tr>
+</tbody></table>
+<h3 id="20-8-阅读时最容易误判的点"><a href="#20-8-阅读时最容易误判的点" class="headerlink" title="20.8 阅读时最容易误判的点"></a>20.8 阅读时最容易误判的点</h3><ol>
+<li>AST2600 driver 不是完整 master 实现。它是平台 glue，主体逻辑在 DesignWare common driver。</li>
+<li>DAA 不等于设备驱动 probe。DAA 只产生 <code>i3c_dev_desc</code>，<code>i3c_master_register_new_i3c_devs()</code> 之后才有 Linux device 并触发 driver match。</li>
+<li>private SDR 的第一字节在当前 synthetic target 里被解释成 register pointer，这只是测试协议，不是 I3C 规范强制格式。</li>
+<li>IBI 不是普通 read path。它走 request&#x2F;enable、DAT SIR reject mask、ENEC CCC、IBI queue、中断、IBI slot、handler 这一整条异步路径。</li>
+<li>hotjoin enable 只是允许 late target 出现；真正把 late target 注册出来，还需要再执行一次 DAA。</li>
+<li>QEMU 当前模型是验证模型，不是完整协议模型。它服务于 Linux driver bring-up 和教学调试，不能直接等同于真实硬件全部行为。</li>
+</ol>
+<p>当前代码的主线是 Linux I3C core 管状态，DesignWare driver 管硬件队列，AST2600 glue 管平台差异，QEMU 模型管硬件响应，synthetic target driver 负责把新增特性触发并验证出来。</p>
+<h2 id="21-Linux-I3C-软件架构"><a href="#21-Linux-I3C-软件架构" class="headerlink" title="21. Linux I3C 软件架构"></a>21. Linux I3C 软件架构</h2><pre class="mermaid">
+flowchart TB
+    %% Top
+    subgraph D["I3C / I2C 设备驱动层"]
+        I3CDRV["I3C device driver\nprobe/remove\nprivate SDR/HDR transfer\nrequest/enable IBI"]
+        I2CDRV["Legacy I2C driver\n普通 i2c_client\n走 i2c_transfer()/SMBus"]
+    end
+
+    subgraph CORE["Linux I3C Core"]
+        DEVCORE["I3C device core\nstruct i3c_device\nstruct i3c_device_info\nPID/BCR/DCR/HDR cap/IBI cap"]
+        BUSMGR["I3C bus manager\nstruct i3c_bus\n地址槽管理\nI3C/I2C 设备链表\nnormal-use / maintenance lock"]
+        CCC["CCC 管理\nRSTDAA / ENTDAA / SETDASA / SETNEWDA\nGETPID / GETBCR / GETDCR\nENEC / DISEC / DEFSLVS"]
+        DAA["动态地址分配 DAA\n发现设备\n分配 dyn_addr\n设备重绑定 reattach"]
+        IBI["IBI 框架\nrequest/free IBI\nenable/disable IBI\nIBI slot pool\nworkqueue handler"]
+        I2CBRIDGE["I2C 兼容桥\n在 I3C master 下注册 i2c_adapter\n把 i2c_msg 转成 master-&gt;ops-&gt;i2c_xfers()"]
+    end
+
+    subgraph MOPS["I3C Master Controller Abstraction"]
+        OPS["struct i3c_master_controller_ops\nbus_init / bus_cleanup\ndo_daa\nsend_ccc_cmd\ni3c_xfers / i2c_xfers\nrequest_ibi / enable_ibi / disable_ibi\nattach_i3c_dev / attach_i2c_dev"]
+    end
+
+    subgraph HCD["具体 Master Controller Driver"]
+        DW["dw-i3c-master / ast2600 / cdns / svc / hci ...\n寄存器编程\nFIFO/DMA/PIO\n中断处理\n速度/模式配置"]
+    end
+
+    subgraph BUS["物理 I3C Bus"]
+        PURE["Pure I3C Bus\n只挂 I3C devices"]
+        MIXED["Mixed Bus\nI3C devices + Legacy I2C devices"]
+        TARGETS["Targets\nI3C target: PID/BCR/DCR/IBI/HDR\nI2C target: static addr/LVR/限速约束"]
+    end
+
+    I3CDRV --&gt; DEVCORE
+    I2CDRV --&gt; I2CBRIDGE
+
+    DEVCORE --&gt; BUSMGR
+    BUSMGR --&gt; CCC
+    BUSMGR --&gt; DAA
+    DEVCORE --&gt; IBI
+    I2CBRIDGE --&gt; BUSMGR
+
+    CCC --&gt; OPS
+    DAA --&gt; OPS
+    IBI --&gt; OPS
+    I2CBRIDGE --&gt; OPS
+    DEVCORE --&gt; OPS
+
+    OPS --&gt; DW
+    DW --&gt; PURE
+    DW --&gt; MIXED
+    PURE --&gt; TARGETS
+    MIXED --&gt; TARGETS
+</pre>
+
+<h2 id="同专题阅读"><a href="#同专题阅读" class="headerlink" title="同专题阅读"></a>同专题阅读</h2><ul>
+<li><a href="/2026/11/25/i3c-controller-guide/">两根线，一笔事务：I3C 控制器学习手记</a></li>
+<li><a href="/2026/11/25/i3c-target-study/">DWC MIPI I3C Target 开发学习文档</a></li>
+<li><a href="/2026/11/25/i3c-linux-driver/">Linux I3C 驱动视角学习笔记</a></li>
+</ul>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/25/axidma-basics/">AXIDMA：从参数配置到数据校验</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/25/i3c-linux-driver/">Linux I3C 驱动视角学习笔记</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-%E5%88%86%E4%BA%AB%E7%9B%AE%E6%A0%87%E5%92%8C%E9%98%85%E8%AF%BB%E5%9C%B0%E5%9B%BE"><span class="toc-text">0. 分享目标和阅读地图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF%EF%BC%9AI3C-%E8%A6%81%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98"><span class="toc-text">1. 背景：I3C 要解决什么问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-I3C-%E7%9A%84%E6%80%BB%E7%BA%BF%E5%BF%83%E6%99%BA%E6%A8%A1%E5%9E%8B"><span class="toc-text">2. I3C 的总线心智模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9C%AF%E8%AF%AD%E5%8F%98%E5%8C%96"><span class="toc-text">2.1 术语变化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%90%8C%E4%B8%80%E6%97%B6%E5%88%BB%E5%8F%AA%E6%9C%89%E4%B8%80%E4%B8%AA-Active-Controller"><span class="toc-text">2.2 同一时刻只有一个 Active Controller</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%80%BB%E7%BA%BF%E9%85%8D%E7%BD%AE%EF%BC%9APure%E3%80%81Mixed-Fast%E3%80%81Mixed-Slow"><span class="toc-text">3. 总线配置：Pure、Mixed Fast、Mixed Slow</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-I3C-%E7%9A%84%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="toc-text">4. I3C 的地址空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-SDR%EF%BC%9AI3C-%E7%9A%84%E5%9F%BA%E7%A1%80%E6%8E%A7%E5%88%B6%E9%9D%A2"><span class="toc-text">5. SDR：I3C 的基础控制面</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-SDR-%E7%9A%84%E5%A4%96%E5%BD%A2%E5%83%8F-I2C%EF%BC%8C%E4%BD%86%E7%AC%AC-9-bit-%E8%AF%AD%E4%B9%89%E4%B8%8D%E5%90%8C"><span class="toc-text">5.1 SDR 的外形像 I2C，但第 9 bit 语义不同</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%86%99%E4%BC%A0%E8%BE%93%EF%BC%9AT-bit-%E6%98%AF%E5%A5%87%E6%A0%A1%E9%AA%8C"><span class="toc-text">5.2 写传输：T-bit 是奇校验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E8%AF%BB%E4%BC%A0%E8%BE%93%EF%BC%9ATarget-%E4%B9%9F%E8%83%BD%E7%BB%93%E6%9D%9F%E8%AF%BB"><span class="toc-text">5.3 读传输：Target 也能结束读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-START-%E5%90%8E-Header-%E5%8F%AF%E4%BB%A5%E4%BB%B2%E8%A3%81"><span class="toc-text">5.4 START 后 Header 可以仲裁</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%8A%A8%E6%80%81%E5%9C%B0%E5%9D%80%E5%88%86%E9%85%8D-DAA"><span class="toc-text">6. 动态地址分配 DAA</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-DAA-%E7%9A%84%E8%BE%93%E5%85%A5%E4%BF%A1%E6%81%AF"><span class="toc-text">6.1 DAA 的输入信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E5%85%B8%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="toc-text">6.2 典型初始化流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-DAA-%E7%9A%84%E9%A9%B1%E5%8A%A8%E5%AE%9E%E7%8E%B0%E8%A6%81%E7%82%B9"><span class="toc-text">6.3 DAA 的驱动实现要点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-CCC%EF%BC%9AI3C-%E7%9A%84%E6%80%BB%E7%BA%BF%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E9%80%9A%E9%81%93"><span class="toc-text">7. CCC：I3C 的总线管理命令通道</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-Broadcast-CCC-%E5%92%8C-Direct-CCC"><span class="toc-text">7.1 Broadcast CCC 和 Direct CCC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E5%B8%B8%E7%94%A8-CCC-%E5%88%86%E7%B1%BB"><span class="toc-text">7.2 常用 CCC 分类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-CCC-%E7%9A%84%E5%AE%9E%E7%8E%B0%E8%BE%B9%E7%95%8C"><span class="toc-text">7.3 CCC 的实现边界</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-IBI%EF%BC%9A%E5%B8%A6%E5%86%85%E4%B8%AD%E6%96%AD"><span class="toc-text">8. IBI：带内中断</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-IBI-%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="toc-text">8.1 IBI 基本流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-Mandatory-Data-Byte"><span class="toc-text">8.2 Mandatory Data Byte</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-IBI-%E8%B0%83%E8%AF%95%E9%87%8D%E7%82%B9"><span class="toc-text">8.3 IBI 调试重点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-Hot-Join%EF%BC%9A%E8%BF%90%E8%A1%8C%E4%B8%AD%E5%8A%A0%E5%85%A5%E6%80%BB%E7%BA%BF"><span class="toc-text">9. Hot-Join：运行中加入总线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-Controller-Role-Handoff"><span class="toc-text">10. Controller Role Handoff</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-HDR%EF%BC%9A%E9%AB%98%E9%80%9F%E6%95%B0%E6%8D%AE%E9%9D%A2"><span class="toc-text">11. HDR：高速数据面</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-1-HDR-DDR"><span class="toc-text">11.1 HDR-DDR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-2-HDR-BT"><span class="toc-text">11.2 HDR-BT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-3-HDR-%E5%92%8C%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-text">11.3 HDR 和事件的关系</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-%E9%94%99%E8%AF%AF%E6%A3%80%E6%B5%8B%E5%92%8C%E6%81%A2%E5%A4%8D"><span class="toc-text">12. 错误检测和恢复</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#12-1-Clock-Stall-%E4%B8%8D%E6%98%AF-I2C-Clock-Stretch"><span class="toc-text">12.1 Clock Stall 不是 I2C Clock Stretch</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#13-%E9%A9%B1%E5%8A%A8%E5%AE%9E%E7%8E%B0%E5%BB%BA%E8%AE%AE"><span class="toc-text">13. 驱动实现建议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#13-1-%E8%BD%AF%E4%BB%B6%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86"><span class="toc-text">13.1 软件模块划分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-2-%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BC%AA%E6%B5%81%E7%A8%8B"><span class="toc-text">13.2 初始化伪流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-3-Transfer-API-%E4%B8%8D%E8%A6%81%E7%85%A7%E6%90%AC-I2C"><span class="toc-text">13.3 Transfer API 不要照搬 I2C</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#14-Bring-up-%E5%92%8C%E8%B0%83%E8%AF%95%E6%A3%80%E6%9F%A5%E8%A1%A8"><span class="toc-text">14. Bring-up 和调试检查表</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#14-1-%E4%B8%8A%E7%94%B5%E5%90%8E%E5%85%88%E7%A1%AE%E8%AE%A4%E7%94%B5%E6%B0%94%E5%92%8C%E6%8B%93%E6%89%91"><span class="toc-text">14.1 上电后先确认电气和拓扑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-2-DAA-%E4%B8%8D%E9%80%9A%E6%97%B6"><span class="toc-text">14.2 DAA 不通时</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-3-CCC-%E4%B8%8D%E9%80%9A%E6%97%B6"><span class="toc-text">14.3 CCC 不通时</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-4-IBI-%E4%B8%8D%E9%80%9A%E6%97%B6"><span class="toc-text">14.4 IBI 不通时</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-5-HDR-%E4%B8%8D%E9%80%9A%E6%97%B6"><span class="toc-text">14.5 HDR 不通时</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#15-%E6%9C%80%E5%AE%B9%E6%98%93%E8%B8%A9%E7%9A%84%E5%9D%91"><span class="toc-text">15. 最容易踩的坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#16-%E5%BB%BA%E8%AE%AE%E7%9A%84%E7%BB%84%E5%86%85%E5%88%86%E4%BA%AB%E8%8A%82%E5%A5%8F"><span class="toc-text">16. 建议的组内分享节奏</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99"><span class="toc-text">17. 参考材料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#18-%E5%AE%9E%E6%88%98%EF%BC%9AAST2600-QEMU-Linux-I3C-%E8%B0%83%E8%AF%95%E9%97%AD%E7%8E%AF"><span class="toc-text">18. 实战：AST2600 QEMU + Linux I3C 调试闭环</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#18-1-%E8%B0%83%E8%AF%95%E7%9B%AE%E6%A0%87"><span class="toc-text">18.1 调试目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-2-Linux-%E9%A9%B1%E5%8A%A8%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-text">18.2 Linux 驱动工作流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-3-%E5%B8%A6-trace-%E7%9A%84%E5%AE%9E%E9%99%85%E6%97%A5%E5%BF%97"><span class="toc-text">18.3 带 trace 的实际日志</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-4-QEMU-AST2600-I3C-%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0"><span class="toc-text">18.4 QEMU AST2600 I3C 模型实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-5-%E6%96%B0%E5%A2%9E-Linux-synthetic-target-test-driver"><span class="toc-text">18.5 新增 Linux synthetic target test driver</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-6-%E8%B0%83%E8%AF%95%E8%BF%87%E7%A8%8B%E5%A4%8D%E7%9B%98"><span class="toc-text">18.6 调试过程复盘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-7-%E8%B0%83%E8%AF%95%E6%89%93%E5%8D%B0%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">18.7 调试打印的注意事项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-8-%E5%BD%93%E5%89%8D%E5%8F%AF%E5%A4%8D%E7%8E%B0%E5%AE%9E%E9%AA%8C%E5%91%BD%E4%BB%A4"><span class="toc-text">18.8 当前可复现实验命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-9-%E5%AD%A6%E4%B9%A0%E8%BF%99%E6%9D%A1%E9%93%BE%E8%B7%AF%E6%97%B6%E7%9A%84%E5%BB%BA%E8%AE%AE%E9%98%85%E8%AF%BB%E9%A1%BA%E5%BA%8F"><span class="toc-text">18.9 学习这条链路时的建议阅读顺序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#19-%E5%BD%93%E5%89%8D%E9%AA%8C%E8%AF%81%E7%8A%B6%E6%80%81%E4%B8%8E%E4%BA%A4%E4%BB%98%E6%94%B6%E5%8F%A3"><span class="toc-text">19. 当前验证状态与交付收口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#19-1-%E5%BD%93%E5%89%8D%E7%AB%AF%E5%88%B0%E7%AB%AF%E9%AA%8C%E8%AF%81%E7%BB%93%E6%9E%9C"><span class="toc-text">19.1 当前端到端验证结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-2-%E5%BD%93%E5%89%8D-QEMU-%E6%A8%A1%E5%9E%8B%E5%B7%B2%E8%A6%86%E7%9B%96%E7%9A%84%E8%83%BD%E5%8A%9B"><span class="toc-text">19.2 当前 QEMU 模型已覆盖的能力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-3-%E5%BD%93%E5%89%8D-Linux-%E9%AA%8C%E8%AF%81%E9%A9%B1%E5%8A%A8%E8%A6%86%E7%9B%96%E7%9A%84%E8%83%BD%E5%8A%9B"><span class="toc-text">19.3 当前 Linux 验证驱动覆盖的能力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-4-%E5%BD%93%E5%89%8D%E4%BB%8D%E9%9C%80%E6%94%B6%E5%8F%A3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">19.4 当前仍需收口的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-5-%E5%90%8E%E7%BB%AD%E4%BA%A4%E4%BB%98%E5%BB%BA%E8%AE%AE"><span class="toc-text">19.5 后续交付建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#20-%E6%96%B0%E5%A2%9E%E7%89%B9%E6%80%A7%E7%9A%84%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB%E4%B8%8E%E9%A9%B1%E5%8A%A8%E8%BD%AF%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-text">20. 新增特性的代码走读与驱动软件结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#20-1-%E5%BD%93%E5%89%8D%E8%BD%AF%E4%BB%B6%E7%BB%93%E6%9E%84%E5%88%86%E5%B1%82"><span class="toc-text">20.1 当前软件结构分层</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-2-probe-%E5%92%8C%E6%80%BB%E7%BA%BF%E5%88%9D%E5%A7%8B%E5%8C%96%E8%AF%BB%E6%B3%95"><span class="toc-text">20.2 probe 和总线初始化读法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-3-DAA-%E5%92%8C%E5%A4%9A-target-%E8%AF%BB%E6%B3%95"><span class="toc-text">20.3 DAA 和多 target 读法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-4-private-SDR-%E5%92%8C-malformed-write-%E8%AF%BB%E6%B3%95"><span class="toc-text">20.4 private SDR 和 malformed write 读法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-5-IBI-%E8%AF%BB%E6%B3%95"><span class="toc-text">20.5 IBI 读法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-6-hotjoin-%E5%92%8C-late-target-%E8%AF%BB%E6%B3%95"><span class="toc-text">20.6 hotjoin 和 late target 读法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-7-%E6%8E%A8%E8%8D%90%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB%E9%A1%BA%E5%BA%8F"><span class="toc-text">20.7 推荐代码走读顺序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-8-%E9%98%85%E8%AF%BB%E6%97%B6%E6%9C%80%E5%AE%B9%E6%98%93%E8%AF%AF%E5%88%A4%E7%9A%84%E7%82%B9"><span class="toc-text">20.8 阅读时最容易误判的点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#21-Linux-I3C-%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84"><span class="toc-text">21. Linux I3C 软件架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E4%B8%93%E9%A2%98%E9%98%85%E8%AF%BB"><span class="toc-text">同专题阅读</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div></body></html>

@@ -1,0 +1,1445 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>Linux I3C 驱动视角学习笔记 - 搴愬北涓滄灄</title>
+
+  
+    <meta name="description" content="把 I3C 协议动作对应到 Linux core、controller driver 和 device driver，梳理设备模型与常用 API。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux I3C 驱动视角学习笔记">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/25/i3c-linux-driver/">
+<meta property="og:site_name" content="搴愬北涓滄灄">
+<meta property="og:description" content="把 I3C 协议动作对应到 Linux core、controller driver 和 device driver，梳理设备模型与常用 API。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-25T08:18:58.864Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="driver">
+<meta property="article:tag" content="i3c">
+<meta property="article:tag" content="ibi">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  <meta name="keywords" content="linux,driver,i3c,ibi">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-25T00:00:00+08:00","dateModified":"2026-11-25T16:18:58+08:00","datePublished":"2026-11-25T00:00:00+08:00","description":"\n这份笔记站在 Linux 内核驱动的角度重新理解 I3C。它不是协议综述，而是回答几个更工程化的问题：\n\n协议里的 Master / Slave / DAA / CCC / IBI，在 Linux 里分别落到哪些对象和 API 上？\n普通 I3C 设备驱动到底该关心什么，不该关心什么？\nI3C 控制器驱动和普通 I3C 设备驱动，边界在哪里？\nI2C&#x2F;I3C 混合总线在 Linux 子系统里是怎么建模的？\n\n这份笔记参考了本机 Linux 6.8 头文件中的 I3C 定义，主要来自：/usr/src/linux-hwe-6.8-headers-6.8.0-106/include/linux/i3c/device.h、/usr/src/linux-hwe-6.8-headers-6.8.0-106/include/linux/i3c/master.h、/usr/src/linux-hwe-6.8-headers-6.8.0-106/include/linux/regmap.h。\n","headline":"Linux I3C 驱动视角学习笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/25/i3c-linux-driver/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/25/i3c-linux-driver/","keywords":"linux, driver, i3c, ibi","image":[]}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/06/pcie/pcie_ep_demo/"><span class="title">PCIe 加速卡驱动：结构与工作流程</span></a><a class="item title" href="/2026/03/23/pcie/pcie_fw/"><span class="title">PCIe Endpoint 固件初始化实例</span></a><a class="item title" href="/2026/03/03/pcie/pcie_introduction/"><span class="title">pcie_introduction</span></a><a class="item title" href="/2026/03/10/low-speed/i2c_controller_1/"><span class="title">DW APB I2C Controller 第二篇</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/">I3C</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-24T16:00:00.000Z">2026-11-25</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-25T08:18:58.864Z">2026-11-25</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Linux I3C 驱动视角学习笔记</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><blockquote>
+<p>这份笔记站在 Linux 内核驱动的角度重新理解 I3C。<br>它不是协议综述，而是回答几个更工程化的问题：</p>
+<ul>
+<li>协议里的 <code>Master / Slave / DAA / CCC / IBI</code>，在 Linux 里分别落到哪些对象和 API 上？</li>
+<li>普通 I3C 设备驱动到底该关心什么，不该关心什么？</li>
+<li>I3C 控制器驱动和普通 I3C 设备驱动，边界在哪里？</li>
+<li>I2C&#x2F;I3C 混合总线在 Linux 子系统里是怎么建模的？</li>
+</ul>
+<p>这份笔记参考了本机 Linux 6.8 头文件中的 I3C 定义，主要来自：<br><code>/usr/src/linux-hwe-6.8-headers-6.8.0-106/include/linux/i3c/device.h</code>、<br><code>/usr/src/linux-hwe-6.8-headers-6.8.0-106/include/linux/i3c/master.h</code>、<br><code>/usr/src/linux-hwe-6.8-headers-6.8.0-106/include/linux/regmap.h</code>。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1-先换一个视角：协议世界和-Linux-世界不是一一平铺的"><a href="#1-先换一个视角：协议世界和-Linux-世界不是一一平铺的" class="headerlink" title="1. 先换一个视角：协议世界和 Linux 世界不是一一平铺的"></a>1. 先换一个视角：协议世界和 Linux 世界不是一一平铺的</h2><p>协议文档的讲法通常是：</p>
+<ul>
+<li>总线上有 Main Master、Current Master、Slave</li>
+<li>总线上发生 SDR、DAA、IBI、Hot-Join、CCC 等事务</li>
+</ul>
+<p>Linux 内核的讲法则不同。它不会直接按“协议章节”组织代码，而是按职责拆层：</p>
+<ul>
+<li><code>controller driver</code>：真正驱动 I3C 控制器硬件</li>
+<li><code>I3C core</code>：管理总线、设备枚举、地址分配后的设备建模、驱动绑定</li>
+<li><code>device driver</code>：具体某个 I3C 外设的功能驱动</li>
+</ul>
+<p>所以学习 Linux I3C 时，必须先接受一个事实：</p>
+<blockquote>
+<p>协议里的一个动作，到了 Linux 里，往往要被 core、controller driver、device driver 三方分摊。</p>
+</blockquote>
+<p>举个最典型的例子：</p>
+<ul>
+<li>协议上说“做一次 DAA”</li>
+<li>Linux 里却意味着：<ul>
+<li>core 维护地址槽和总线设备列表</li>
+<li>controller driver 真正往硬件上发 <code>ENTDAA</code></li>
+<li>core 再把发现到的设备包装成 <code>i3c_device</code></li>
+<li>最终普通设备驱动才收到 <code>probe()</code></li>
+</ul>
+</li>
+</ul>
+<p>这就是为什么“懂协议”还不够，必须再补一层“Linux 怎么落地”。</p>
+<h2 id="2-Linux-I3C-子系统的三层分工"><a href="#2-Linux-I3C-子系统的三层分工" class="headerlink" title="2. Linux I3C 子系统的三层分工"></a>2. Linux I3C 子系统的三层分工</h2><p>我会把 Linux I3C 子系统记成下面这三层。</p>
+<h3 id="2-1-最底层：I3C-控制器驱动"><a href="#2-1-最底层：I3C-控制器驱动" class="headerlink" title="2.1 最底层：I3C 控制器驱动"></a>2.1 最底层：I3C 控制器驱动</h3><p>这一层的对象是：</p>
+<ul>
+<li><code>struct i3c_master_controller</code></li>
+<li><code>struct i3c_master_controller_ops</code></li>
+</ul>
+<p>这层驱动面对的是控制器硬件本身，负责：</p>
+<ul>
+<li>初始化总线</li>
+<li>发送 <code>CCC</code></li>
+<li>发起 <code>DAA</code></li>
+<li>执行私有 SDR 传输</li>
+<li>执行兼容 I2C 传输</li>
+<li>如果硬件支持，还要处理 <code>IBI</code>、<code>Hot-Join</code>、主控权交接等能力</li>
+</ul>
+<blockquote>
+<p>controller driver 负责“怎么把协议动作变成硬件事务”。</p>
+</blockquote>
+<h3 id="2-2-中间层：I3C-core"><a href="#2-2-中间层：I3C-core" class="headerlink" title="2.2 中间层：I3C core"></a>2.2 中间层：I3C core</h3><p>这一层是 Linux 子系统真正的“组织者”。它负责：</p>
+<ul>
+<li>建模总线对象</li>
+<li>维护地址槽位</li>
+<li>跟踪当前 master</li>
+<li>维护 I3C 设备和 I2C 设备列表</li>
+<li>在设备出现后创建 Linux 设备对象</li>
+<li>绑定普通设备驱动</li>
+<li>帮普通设备驱动提供统一 API</li>
+</ul>
+<blockquote>
+<p>core 负责“总线秩序”和“把硬件发现结果变成 Linux 设备模型”。</p>
+</blockquote>
+<h3 id="2-3-最上层：普通-I3C-设备驱动"><a href="#2-3-最上层：普通-I3C-设备驱动" class="headerlink" title="2.3 最上层：普通 I3C 设备驱动"></a>2.3 最上层：普通 I3C 设备驱动</h3><p>这一层就是我们平时最常写的功能驱动，面对的是：</p>
+<ul>
+<li><code>struct i3c_device</code></li>
+<li><code>struct i3c_driver</code></li>
+</ul>
+<p>它通常只需要关心：</p>
+<ul>
+<li>自己是不是匹配到目标器件</li>
+<li>设备的 <code>PID / BCR / DCR / dyn_addr</code> 等基础信息</li>
+<li>怎么做 private transfer</li>
+<li>是否需要启用 <code>IBI</code></li>
+<li>是否用 <code>regmap</code></li>
+</ul>
+<blockquote>
+<p>普通设备驱动负责“这个传感器&#x2F;芯片的功能”，不负责“总线怎么建起来”。</p>
+</blockquote>
+<h2 id="3-先记住几个最关键的内核对象"><a href="#3-先记住几个最关键的内核对象" class="headerlink" title="3. 先记住几个最关键的内核对象"></a>3. 先记住几个最关键的内核对象</h2><p>这一节是整篇最重要的对象地图。</p>
+<h3 id="3-1-struct-i3c-master-controller"><a href="#3-1-struct-i3c-master-controller" class="headerlink" title="3.1 struct i3c_master_controller"></a>3.1 <code>struct i3c_master_controller</code></h3><p>这是控制器驱动的核心对象。<br>从本机 6.8 头文件看，它内部至少包含这些关键成员：</p>
+<ul>
+<li><code>struct device dev</code></li>
+<li><code>struct i3c_dev_desc *this</code></li>
+<li><code>struct i2c_adapter i2c</code></li>
+<li><code>const struct i3c_master_controller_ops *ops</code></li>
+<li><code>struct i3c_bus bus</code></li>
+<li><code>struct workqueue_struct *wq</code></li>
+</ul>
+<p>这里最值得注意的点有两个：</p>
+<ul>
+<li>它里面直接带了一个 <code>struct i2c_adapter</code>，说明 Linux 把 I3C 控制器同时看成“也能托管 legacy I2C 设备”的一类控制器。</li>
+<li>它里面直接带了 <code>struct i3c_bus</code>，说明总线状态本身是内核要显式维护的对象，不只是控制器的隐含状态。</li>
+</ul>
+<h3 id="3-2-struct-i3c-bus"><a href="#3-2-struct-i3c-bus" class="headerlink" title="3.2 struct i3c_bus"></a>3.2 <code>struct i3c_bus</code></h3><p>这是总线对象。它最关键的成员包括：</p>
+<ul>
+<li><code>cur_master</code></li>
+<li><code>addrslots</code></li>
+<li><code>mode</code></li>
+<li><code>scl_rate.i3c</code></li>
+<li><code>scl_rate.i2c</code></li>
+<li><code>devs.i3c</code></li>
+<li><code>devs.i2c</code></li>
+<li><code>lock</code></li>
+</ul>
+<p>这个结构非常说明问题，因为它揭示了 Linux 对 I3C 的核心认知：</p>
+<ul>
+<li>这是一条总线，不只是一个控制器</li>
+<li>总线可以多主</li>
+<li>总线上既有 I3C 设备，也可能有 I2C 设备</li>
+<li>地址槽位是 core 显式维护的</li>
+</ul>
+<p>其中 <code>addrslots</code> 很关键，因为它直接对应协议里的地址管理和 DAA。</p>
+<p>还有一个非常容易误解的点：<br><code>i3c_bus.lock</code> 主要保护的是 <strong>bus 级别状态变化</strong>，比如地址回收、设备重枚举、总线维护动作。<br>它<strong>不等于</strong>“普通设备驱动的所有传输天然会被这个锁自动串行化”。</p>
+<p>换句话说：</p>
+<blockquote>
+<p>多个设备驱动可以并发发起请求，但 controller driver 仍然必须保证底层帧不会互相交错。</p>
+</blockquote>
+<h3 id="3-3-struct-i3c-dev-desc"><a href="#3-3-struct-i3c-dev-desc" class="headerlink" title="3.3 struct i3c_dev_desc"></a>3.3 <code>struct i3c_dev_desc</code></h3><p>这是 <strong>core 和 controller driver</strong> 更常接触到的“内部设备描述符”。<br>它不是普通设备驱动直接操作的对象。</p>
+<p>它里面的重要成员有：</p>
+<ul>
+<li><code>struct i3c_device_info info</code></li>
+<li><code>struct i3c_device_ibi_info *ibi</code></li>
+<li><code>struct i3c_device *dev</code></li>
+<li><code>const struct i3c_dev_boardinfo *boardinfo</code></li>
+</ul>
+<p>我对它的理解是：</p>
+<blockquote>
+<p><code>i3c_dev_desc</code> 是“内核内部对一个 I3C 设备的低层描述”。<br>controller driver 基本围着它转，普通设备驱动则主要看不到它。</p>
+</blockquote>
+<h3 id="3-4-struct-i3c-device"><a href="#3-4-struct-i3c-device" class="headerlink" title="3.4 struct i3c_device"></a>3.4 <code>struct i3c_device</code></h3><p>这是 <strong>普通 I3C 设备驱动</strong> 面对的对象。<br>头文件里能看到它至少包含：</p>
+<ul>
+<li><code>struct device dev</code></li>
+<li><code>struct i3c_dev_desc *desc</code></li>
+<li><code>struct i3c_bus *bus</code></li>
+</ul>
+<p>注意这个关系：</p>
+<ul>
+<li><code>i3c_dev_desc</code> 是内部描述</li>
+<li><code>i3c_device</code> 是暴露给普通驱动的设备对象</li>
+</ul>
+<p>所以我会这样记：</p>
+<blockquote>
+<p>controller driver 面向 <code>desc</code>，普通设备驱动面向 <code>device</code>。</p>
+</blockquote>
+<h3 id="3-5-struct-i3c-device-info"><a href="#3-5-struct-i3c-device-info" class="headerlink" title="3.5 struct i3c_device_info"></a>3.5 <code>struct i3c_device_info</code></h3><p>这个结构基本就是普通设备驱动最喜欢看的“器件摘要信息”。</p>
+<p>按本机头文件，它包含：</p>
+<ul>
+<li><code>pid</code></li>
+<li><code>bcr</code></li>
+<li><code>dcr</code></li>
+<li><code>static_addr</code></li>
+<li><code>dyn_addr</code></li>
+<li><code>hdr_cap</code></li>
+<li><code>max_ibi_len</code></li>
+<li><code>max_read_len</code></li>
+<li><code>max_write_len</code></li>
+<li>以及若干速率&#x2F;turn-around 相关字段</li>
+</ul>
+<p>这个结构的一个关键注释是：</p>
+<blockquote>
+<p>对于通过 <code>i3c_master_add_i3c_dev_locked()</code> 挂上的 I3C slave，core 会发送相关 <code>CCC</code> 把这些基础信息取回来。</p>
+</blockquote>
+<p>这句话非常重要，因为它告诉我们：</p>
+<ul>
+<li><code>PID / BCR / DCR</code> 这类基础能力信息，不一定要普通设备驱动自己去发 <code>CCC</code> 取</li>
+<li>很多时候 core 在设备建模时就已经帮你拿到了</li>
+</ul>
+<h2 id="4-普通-I3C-设备驱动，真正应该关心什么"><a href="#4-普通-I3C-设备驱动，真正应该关心什么" class="headerlink" title="4. 普通 I3C 设备驱动，真正应该关心什么"></a>4. 普通 I3C 设备驱动，真正应该关心什么</h2><p>这部分是最实用的。</p>
+<h3 id="4-1-最基本的驱动模型：struct-i3c-driver"><a href="#4-1-最基本的驱动模型：struct-i3c-driver" class="headerlink" title="4.1 最基本的驱动模型：struct i3c_driver"></a>4.1 最基本的驱动模型：<code>struct i3c_driver</code></h3><p>从 <code>include/linux/i3c/device.h</code> 来看，普通 I3C 驱动模型很直接：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">i3c_driver</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device_driver</span> <span class="title">driver</span>;</span></span><br><span class="line">	<span class="type">int</span> (*probe)(<span class="keyword">struct</span> i3c_device *dev);</span><br><span class="line">	<span class="type">void</span> (*remove)(<span class="keyword">struct</span> i3c_device *dev);</span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">i3c_device_id</span> *<span class="title">id_table</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，普通 I3C 驱动本质上就是：</p>
+<ul>
+<li>一张匹配表</li>
+<li>一个 <code>probe()</code></li>
+<li>一个 <code>remove()</code></li>
+</ul>
+<h3 id="4-2-匹配怎么做"><a href="#4-2-匹配怎么做" class="headerlink" title="4.2 匹配怎么做"></a>4.2 匹配怎么做</h3><p>常用方式是通过 <code>i3c_device_id</code> 表匹配，头文件里提供了几个宏：</p>
+<ul>
+<li><code>I3C_DEVICE(...)</code></li>
+<li><code>I3C_DEVICE_EXTRA_INFO(...)</code></li>
+<li><code>I3C_CLASS(...)</code></li>
+</ul>
+<p>我对这几种匹配的理解是：</p>
+<ul>
+<li>设备已经能明确到厂商和料号，就按 <code>PID</code> 细粒度匹配</li>
+<li>如果更关心类别，就可以按 <code>DCR</code> 做类匹配</li>
+</ul>
+<h3 id="4-3-probe-里第一件事通常是什么"><a href="#4-3-probe-里第一件事通常是什么" class="headerlink" title="4.3 probe() 里第一件事通常是什么"></a>4.3 <code>probe()</code> 里第一件事通常是什么</h3><p>通常不是立刻发传输，而是先把设备基础信息读出来。</p>
+<p>Linux 提供了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">i3c_device_get_info</span><span class="params">(<span class="type">const</span> <span class="keyword">struct</span> i3c_device *dev,</span></span><br><span class="line"><span class="params">			 <span class="keyword">struct</span> i3c_device_info *info)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这一步非常有用，因为你能直接拿到：</p>
+<ul>
+<li><code>pid</code></li>
+<li><code>bcr</code></li>
+<li><code>dcr</code></li>
+<li><code>dyn_addr</code></li>
+<li><code>max_ibi_len</code></li>
+</ul>
+<p>这样驱动可以先判断：</p>
+<ul>
+<li>当前绑定到的是不是预期器件</li>
+<li>设备是否支持 IBI</li>
+<li>设备的数据长度、速率能力大概怎样</li>
+</ul>
+<h3 id="4-4-私有数据怎么挂"><a href="#4-4-私有数据怎么挂" class="headerlink" title="4.4 私有数据怎么挂"></a>4.4 私有数据怎么挂</h3><p>普通 I3C 驱动同样可以用常规设备模型那套私有数据挂接方式：</p>
+<ul>
+<li><code>i3cdev_set_drvdata()</code></li>
+<li><code>i3cdev_get_drvdata()</code></li>
+</ul>
+<p>所以从驱动写法上说，I3C 设备驱动和 SPI&#x2F;I2C 驱动在“probe 挂私有结构体”这件事上差异并不大。</p>
+<h3 id="4-5-真正做数据收发时用什么"><a href="#4-5-真正做数据收发时用什么" class="headerlink" title="4.5 真正做数据收发时用什么"></a>4.5 真正做数据收发时用什么</h3><p>普通 I3C SDR 私有传输的标准入口是：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">i3c_device_do_priv_xfers</span><span class="params">(<span class="keyword">struct</span> i3c_device *dev,</span></span><br><span class="line"><span class="params">			     <span class="keyword">struct</span> i3c_priv_xfer *xfers,</span></span><br><span class="line"><span class="params">			     <span class="type">int</span> nxfers)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>struct i3c_priv_xfer</code> 就对应一段私有 SDR 传输。</p>
+<p>这一点很值得明确：</p>
+<blockquote>
+<p>普通 I3C 设备驱动最常用的数据面入口，是 <code>i3c_device_do_priv_xfers()</code>；<br>不是自己去拼底层 <code>CCC</code> 或手写地址仲裁。</p>
+</blockquote>
+<h3 id="4-6-普通设备驱动通常不该亲自干什么"><a href="#4-6-普通设备驱动通常不该亲自干什么" class="headerlink" title="4.6 普通设备驱动通常不该亲自干什么"></a>4.6 普通设备驱动通常不该亲自干什么</h3><p>普通设备驱动通常 <strong>不该</strong> 直接负责下面这些动作：</p>
+<ul>
+<li>跑 DAA</li>
+<li>管理地址槽位</li>
+<li>决定总线模式</li>
+<li>直接控制 Hot-Join 开关</li>
+<li>管整个 bus 级别的 <code>CCC</code> 策略</li>
+</ul>
+<p>这些更接近：</p>
+<ul>
+<li>I3C core</li>
+<li>controller driver</li>
+<li>或系统初始化流程</li>
+</ul>
+<p>这条边界非常重要。<br>很多设计上的混乱，都是因为把“设备功能驱动”和“总线管理驱动”揉到一起了。</p>
+<h2 id="5-一个普通-I3C-设备驱动的脑内模板"><a href="#5-一个普通-I3C-设备驱动的脑内模板" class="headerlink" title="5. 一个普通 I3C 设备驱动的脑内模板"></a>5. 一个普通 I3C 设备驱动的脑内模板</h2><p>如果我自己写一个 I3C 传感器驱动，我脑中的最小模板会是这样：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">my_i3c_chip</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">regmap</span> *<span class="title">regmap</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">i3c_device_info</span> <span class="title">info</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">my_i3c_probe</span><span class="params">(<span class="keyword">struct</span> i3c_device *i3cdev)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">my_i3c_chip</span> *<span class="title">chip</span>;</span></span><br><span class="line"></span><br><span class="line">	chip = devm_kzalloc(i3cdev_to_dev(i3cdev), <span class="keyword">sizeof</span>(*chip), GFP_KERNEL);</span><br><span class="line">	<span class="keyword">if</span> (!chip)</span><br><span class="line">		<span class="keyword">return</span> -ENOMEM;</span><br><span class="line"></span><br><span class="line">	i3c_device_get_info(i3cdev, &amp;chip-&gt;info);</span><br><span class="line"></span><br><span class="line">	chip-&gt;regmap = devm_regmap_init_i3c(i3cdev, &amp;my_regmap_config);</span><br><span class="line">	<span class="keyword">if</span> (IS_ERR(chip-&gt;regmap))</span><br><span class="line">		<span class="keyword">return</span> PTR_ERR(chip-&gt;regmap);</span><br><span class="line"></span><br><span class="line">	i3cdev_set_drvdata(i3cdev, chip);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码的重点不在细节，而在思路：</p>
+<ol>
+<li><code>probe()</code> 收到的是 <code>struct i3c_device *</code></li>
+<li>先取 <code>i3c_device_info</code></li>
+<li>如果器件是寄存器型设备，优先考虑 <code>regmap</code></li>
+<li>之后再决定要不要开 IBI、要不要发私有传输</li>
+</ol>
+<h3 id="5-1-为什么-regmap-值得单独记"><a href="#5-1-为什么-regmap-值得单独记" class="headerlink" title="5.1 为什么 regmap 值得单独记"></a>5.1 为什么 <code>regmap</code> 值得单独记</h3><p>本机头文件里可以看到：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> devm_regmap_init_i3c(i3c, config) ...</span></span><br></pre></td></tr></table></figure>
+
+<p>这意味着：</p>
+<blockquote>
+<p>对寄存器型 I3C 设备，Linux 已经给出了标准的 <code>regmap</code> 入口。</p>
+</blockquote>
+<p>所以如果设备访问模型是“寄存器地址 + 数据读写”，优先把它收束进 <code>regmap</code> 往往比自己手写收发逻辑更整洁。</p>
+<h2 id="6-IBI-在-Linux-设备驱动里怎么落地"><a href="#6-IBI-在-Linux-设备驱动里怎么落地" class="headerlink" title="6. IBI 在 Linux 设备驱动里怎么落地"></a>6. IBI 在 Linux 设备驱动里怎么落地</h2><p>协议上，<code>IBI</code> 表示设备在总线内发起事件。<br>Linux 里，普通设备驱动如果要接 IBI，主要看这几组 API：</p>
+<ul>
+<li><code>i3c_device_request_ibi()</code></li>
+<li><code>i3c_device_enable_ibi()</code></li>
+<li><code>i3c_device_disable_ibi()</code></li>
+<li><code>i3c_device_free_ibi()</code></li>
+</ul>
+<p>配套的数据结构是：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">i3c_ibi_setup</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> max_payload_len;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> num_slots;</span><br><span class="line">	<span class="type">void</span> (*handler)(<span class="keyword">struct</span> i3c_device *dev,</span><br><span class="line">			<span class="type">const</span> <span class="keyword">struct</span> i3c_ibi_payload *payload);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-1-我对这套设计的理解"><a href="#6-1-我对这套设计的理解" class="headerlink" title="6.1 我对这套设计的理解"></a>6.1 我对这套设计的理解</h3><p>这套接口有几个特别好的地方：</p>
+<ul>
+<li>驱动可以显式声明自己能接受的最大 payload</li>
+<li>驱动可以控制预分配多少个 IBI slot</li>
+<li>handler 由 core 调起，驱动不用自己实现底层仲裁接入</li>
+</ul>
+<p>更重要的是，头文件明确写了：</p>
+<blockquote>
+<p><code>handler</code> 在 workqueue context 里执行，可以睡眠，也允许继续发送总线消息。</p>
+</blockquote>
+<p>这直接影响驱动设计：</p>
+<ul>
+<li>你不用把它当硬中断 top-half 来写</li>
+<li>但也不应该在 handler 里干过重的活</li>
+<li>它更像一个“被 IBI 事件唤醒的可睡眠回调”</li>
+</ul>
+<h3 id="6-2-设备驱动该怎么用-IBI"><a href="#6-2-设备驱动该怎么用-IBI" class="headerlink" title="6.2 设备驱动该怎么用 IBI"></a>6.2 设备驱动该怎么用 IBI</h3><p>我的建议是分成四步：</p>
+<ol>
+<li><code>probe()</code> 里先读 <code>i3c_device_info</code>，确认设备能力</li>
+<li>调 <code>i3c_device_request_ibi()</code> 建 handler</li>
+<li>合适时机调 <code>i3c_device_enable_ibi()</code></li>
+<li><code>remove()</code> 或 suspend path 里做 disable&#x2F;free</li>
+</ol>
+<h3 id="6-3-设备驱动不该关心哪些-IBI-细节"><a href="#6-3-设备驱动不该关心哪些-IBI-细节" class="headerlink" title="6.3 设备驱动不该关心哪些 IBI 细节"></a>6.3 设备驱动不该关心哪些 IBI 细节</h3><p>普通设备驱动通常不需要亲自关心：</p>
+<ul>
+<li>IBI slot 怎么从控制器硬件里回收</li>
+<li>控制器中断怎么转成 IBI payload</li>
+<li>IBI 和总线仲裁怎么衔接</li>
+</ul>
+<p>这些更偏 controller driver 侧。</p>
+<h2 id="7-I3C-controller-driver-需要实现什么"><a href="#7-I3C-controller-driver-需要实现什么" class="headerlink" title="7. I3C controller driver 需要实现什么"></a>7. I3C controller driver 需要实现什么</h2><p>这部分是“控制器驱动视角”，和普通设备驱动完全不是一个层级。</p>
+<p>核心入口是：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">i3c_master_register</span><span class="params">(<span class="keyword">struct</span> i3c_master_controller *master,</span></span><br><span class="line"><span class="params">			<span class="keyword">struct</span> device *parent,</span></span><br><span class="line"><span class="params">			<span class="type">const</span> <span class="keyword">struct</span> i3c_master_controller_ops *ops,</span></span><br><span class="line"><span class="params">			<span class="type">bool</span> secondary)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>controller driver 的主体工作就是实现 <code>struct i3c_master_controller_ops</code>。</p>
+<h3 id="7-1-必须重点认识的几个回调"><a href="#7-1-必须重点认识的几个回调" class="headerlink" title="7.1 必须重点认识的几个回调"></a>7.1 必须重点认识的几个回调</h3><p>我会先抓住这几个最关键的 mandatory&#x2F;核心回调：</p>
+<ul>
+<li><code>bus_init</code></li>
+<li><code>do_daa</code></li>
+<li><code>send_ccc_cmd</code></li>
+<li><code>priv_xfers</code></li>
+<li><code>i2c_xfers</code></li>
+</ul>
+<p>如果硬件支持更多能力，再看：</p>
+<ul>
+<li><code>request_ibi</code></li>
+<li><code>enable_ibi</code></li>
+<li><code>disable_ibi</code></li>
+<li><code>free_ibi</code></li>
+<li><code>recycle_ibi_slot</code></li>
+<li><code>enable_hotjoin</code></li>
+<li><code>disable_hotjoin</code></li>
+</ul>
+<h3 id="7-2-bus-init-干什么"><a href="#7-2-bus-init-干什么" class="headerlink" title="7.2 bus_init 干什么"></a>7.2 <code>bus_init</code> 干什么</h3><p>头文件注释里明确说：</p>
+<ul>
+<li>至少要在这里调用 <code>i3c_master_set_info()</code></li>
+<li>还要设置 bus mode</li>
+<li>也可以顺便做控制器私有初始化</li>
+</ul>
+<p>所以 <code>bus_init</code> 不是“只是上电复位一下寄存器”，而是 controller driver 向 core 宣告：</p>
+<ul>
+<li>当前 master 的基本能力</li>
+<li>当前 bus 的模式</li>
+<li>当前总线可以开始进入 I3C 管理流程</li>
+</ul>
+<h3 id="7-3-do-daa-的责任边界"><a href="#7-3-do-daa-的责任边界" class="headerlink" title="7.3 do_daa 的责任边界"></a>7.3 <code>do_daa</code> 的责任边界</h3><p>这一点我觉得特别重要。头文件注释写得很清楚：</p>
+<ul>
+<li><code>do_daa</code> 要真正发 <code>ENTDAA</code></li>
+<li>在发现设备后，调用 <code>i3c_master_add_i3c_dev_locked()</code></li>
+</ul>
+<p>换句话说：</p>
+<ul>
+<li>controller driver 负责“把设备从线里找出来”</li>
+<li>core 负责“把找到的设备接到 Linux 设备模型里”</li>
+</ul>
+<p>这就是 Linux I3C 的典型分工。</p>
+<h3 id="7-4-send-ccc-cmd-和-priv-xfers"><a href="#7-4-send-ccc-cmd-和-priv-xfers" class="headerlink" title="7.4 send_ccc_cmd 和 priv_xfers"></a>7.4 <code>send_ccc_cmd</code> 和 <code>priv_xfers</code></h3><p>这两个接口基本对应两类不同事务：</p>
+<ul>
+<li><code>send_ccc_cmd</code>：总线管理面</li>
+<li><code>priv_xfers</code>：设备私有 SDR 数据面</li>
+</ul>
+<p>这也是协议视角和 Linux 视角之间最清楚的映射之一。<br>在 Linux 里，<code>CCC</code> 和 private transfer 就是两条不同的接口路径。</p>
+<h3 id="7-5-controller-driver-面对的是-i3c-dev-desc，不是-i3c-device"><a href="#7-5-controller-driver-面对的是-i3c-dev-desc，不是-i3c-device" class="headerlink" title="7.5 controller driver 面对的是 i3c_dev_desc，不是 i3c_device"></a>7.5 controller driver 面对的是 <code>i3c_dev_desc</code>，不是 <code>i3c_device</code></h3><p>这点需要反复强调。</p>
+<p>controller driver 的很多 ops 入口，比如：</p>
+<ul>
+<li><code>attach_i3c_dev(struct i3c_dev_desc *dev)</code></li>
+<li><code>priv_xfers(struct i3c_dev_desc *dev, ...)</code></li>
+<li><code>request_ibi(struct i3c_dev_desc *dev, ...)</code></li>
+</ul>
+<p>面对的都是 <code>i3c_dev_desc</code>。</p>
+<p>这意味着 controller driver 可以：</p>
+<ul>
+<li>给 descriptor 绑定 controller 私有数据</li>
+<li>用 <code>i3c_dev_set_master_data()</code> &#x2F; <code>i3c_dev_get_master_data()</code></li>
+</ul>
+<p>这和普通设备驱动在 <code>i3c_device</code> 上挂 <code>drvdata</code> 是两套不同层次的私有数据通道。</p>
+<h2 id="8-DAA-在-Linux-里的完整映射"><a href="#8-DAA-在-Linux-里的完整映射" class="headerlink" title="8. DAA 在 Linux 里的完整映射"></a>8. DAA 在 Linux 里的完整映射</h2><p>协议里，DAA 是一个总线动作。<br>Linux 里，DAA 变成了一串分层协作：</p>
+<ol>
+<li>controller driver 已经通过 <code>i3c_master_register()</code> 注册 master</li>
+<li>core 组织总线初始化</li>
+<li>controller <code>ops-&gt;do_daa()</code> 真正发 <code>ENTDAA</code></li>
+<li>每发现一个设备，就调用 <code>i3c_master_add_i3c_dev_locked()</code></li>
+<li>core 为设备分配&#x2F;更新 <code>i3c_dev_desc</code></li>
+<li>core 通过相关 <code>CCC</code> 填充 <code>i3c_device_info</code></li>
+<li>core 最终把设备暴露成 <code>i3c_device</code></li>
+<li>普通驱动通过 <code>id_table</code> 匹配并进入 <code>probe()</code></li>
+</ol>
+<p>这段流程说明：</p>
+<blockquote>
+<p>对普通设备驱动来说，DAA 发生在 <code>probe()</code> 之前。<br><code>probe()</code> 收到设备时，设备已经不是“协议裸对象”，而是“被 core 消化过的 Linux 设备”。</p>
+</blockquote>
+<p>这会直接影响驱动设计。<br>普通设备驱动不该一上来再想着自己去做 <code>ENTDAA</code>。</p>
+<h2 id="9-IBI-在-controller-driver-里的映射"><a href="#9-IBI-在-controller-driver-里的映射" class="headerlink" title="9. IBI 在 controller driver 里的映射"></a>9. IBI 在 controller driver 里的映射</h2><p>如果你写的是 controller driver，那么 <code>IBI</code> 不是一个抽象事件，而是一条完整的硬件路径：</p>
+<ul>
+<li>硬件检测到 IBI</li>
+<li>控制器从线里收下 payload</li>
+<li>把 payload 放到一个 slot</li>
+<li>交给 core 排队</li>
+<li>core 在 workqueue 里回调设备驱动的 handler</li>
+</ul>
+<p>本机头文件里能看到几组很关键的 helper：</p>
+<ul>
+<li><code>i3c_generic_ibi_alloc_pool()</code></li>
+<li><code>i3c_generic_ibi_get_free_slot()</code></li>
+<li><code>i3c_generic_ibi_recycle_slot()</code></li>
+<li><code>i3c_master_queue_ibi()</code></li>
+<li><code>i3c_master_get_free_ibi_slot()</code></li>
+</ul>
+<p>这说明 Linux I3C 对 IBI 的建模是：</p>
+<blockquote>
+<p>IBI 不是一个“立刻执行的同步回调”，而是“带 slot 管理和排队语义的异步事件通道”。</p>
+</blockquote>
+<p>这也解释了为什么设备驱动里的 IBI handler 能睡眠，因为真正的中断硬处理已经被前面几层吸收掉了。</p>
+<h2 id="10-Hot-Join-在-Linux-controller-driver-里的位置"><a href="#10-Hot-Join-在-Linux-controller-driver-里的位置" class="headerlink" title="10. Hot-Join 在 Linux controller driver 里的位置"></a>10. Hot-Join 在 Linux controller driver 里的位置</h2><p>从 <code>i3c_master_controller_ops</code> 看，Hot-Join 对 controller driver 主要体现在：</p>
+<ul>
+<li><code>enable_hotjoin</code></li>
+<li><code>disable_hotjoin</code></li>
+</ul>
+<p>而且 <code>struct i3c_master_controller</code> 里带有 <code>workqueue_struct *wq</code>，注释里还专门提到：</p>
+<blockquote>
+<p>Hot Join 处理通常需要在可睡眠上下文中延后处理，因为可能要拿 bus lock 做维护动作。</p>
+</blockquote>
+<p>这句话对实现者很重要，因为它说明：</p>
+<ul>
+<li>Hot-Join 不是一个适合在硬中断里直接做完的流程</li>
+<li>它通常是“硬件先检测到，软件再切到 workqueue 里补完后续管理动作”</li>
+</ul>
+<h2 id="11-为什么-Linux-同时保留-I3C-驱动模型和-I2C-驱动模型"><a href="#11-为什么-Linux-同时保留-I3C-驱动模型和-I2C-驱动模型" class="headerlink" title="11. 为什么 Linux 同时保留 I3C 驱动模型和 I2C 驱动模型"></a>11. 为什么 Linux 同时保留 I3C 驱动模型和 I2C 驱动模型</h2><p>I3C 在 Linux 里并不是“彻底替代 I2C 子系统”。<br>相反，它是“让一个更现代的 bus model，兼容旧 I2C 世界继续存在”。</p>
+<p>从 <code>struct i3c_master_controller</code> 里直接带 <code>struct i2c_adapter i2c</code> 就能看出这一点。<br>从 <code>struct i3c_bus</code> 里同时维护：</p>
+<ul>
+<li><code>devs.i3c</code></li>
+<li><code>devs.i2c</code></li>
+</ul>
+<p>更能看出这一点。</p>
+<p>所以我对 Linux I3C 子系统的理解是：</p>
+<blockquote>
+<p>它不是要抹掉 I2C，而是在一个总线对象里同时管理 I3C 设备和 legacy I2C 设备。</p>
+</blockquote>
+<h3 id="11-1-对普通设备驱动意味着什么"><a href="#11-1-对普通设备驱动意味着什么" class="headerlink" title="11.1 对普通设备驱动意味着什么"></a>11.1 对普通设备驱动意味着什么</h3><p>有些芯片可能同时支持 I2C 和 I3C 模式。<br>这时 Linux 头文件提供了很有用的一组双注册 helper：</p>
+<ul>
+<li><code>i3c_i2c_driver_register()</code></li>
+<li><code>module_i3c_i2c_driver()</code></li>
+</ul>
+<p>这类接口很适合：</p>
+<ul>
+<li>同一颗芯片，板上不同项目可能跑 I2C 或 I3C</li>
+<li>驱动功能主体相同，只是总线接入方式不同</li>
+</ul>
+<p>换句话说，Linux 已经预判了“同一功能驱动需要同时服务 I2C 和 I3C”这种现实。</p>
+<h2 id="12-boardinfo-和固件描述在-Linux-里扮演什么角色"><a href="#12-boardinfo-和固件描述在-Linux-里扮演什么角色" class="headerlink" title="12. boardinfo 和固件描述在 Linux 里扮演什么角色"></a>12. <code>boardinfo</code> 和固件描述在 Linux 里扮演什么角色</h2><p>协议层不会关心设备树，但 Linux 必须关心“板上到底宣告了哪些设备、有没有静态地址、有没有希望的初始动态地址”。</p>
+<p>因此头文件里专门有：</p>
+<ul>
+<li><code>struct i3c_dev_boardinfo</code></li>
+<li><code>struct i2c_dev_boardinfo</code></li>
+</ul>
+<p>其中 <code>i3c_dev_boardinfo</code> 里很关键的几个字段包括：</p>
+<ul>
+<li><code>init_dyn_addr</code></li>
+<li><code>static_addr</code></li>
+<li><code>pid</code></li>
+<li><code>of_node</code></li>
+</ul>
+<p>这说明 Linux 在建模时并不只依赖“线上的发现结果”，还允许把板级信息叠加进去，比如：</p>
+<ul>
+<li>某个器件希望优先拿某个动态地址</li>
+<li>某个器件虽然没有静态地址，但板级已经知道它的 <code>PID</code></li>
+<li>某个器件在设备树里带了额外资源</li>
+</ul>
+<p>所以 DAA 在 Linux 里从来不是完全“裸总线自发现”，而是“总线发现 + 板级知识”的综合过程。</p>
+<h2 id="13-协议概念和-Linux-对象怎么对上号"><a href="#13-协议概念和-Linux-对象怎么对上号" class="headerlink" title="13. 协议概念和 Linux 对象怎么对上号"></a>13. 协议概念和 Linux 对象怎么对上号</h2><p>这是我自己最常用的对照表。</p>
+<table>
+<thead>
+<tr>
+<th>协议概念</th>
+<th>Linux 里的主要落点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Main Master &#x2F; Current Master</td>
+<td><code>i3c_master_controller</code> + <code>i3c_bus.cur_master</code></td>
+</tr>
+<tr>
+<td>I3C 总线</td>
+<td><code>struct i3c_bus</code></td>
+</tr>
+<tr>
+<td>I3C 设备的内部描述</td>
+<td><code>struct i3c_dev_desc</code></td>
+</tr>
+<tr>
+<td>暴露给普通驱动的设备对象</td>
+<td><code>struct i3c_device</code></td>
+</tr>
+<tr>
+<td>设备基础能力信息</td>
+<td><code>struct i3c_device_info</code></td>
+</tr>
+<tr>
+<td>DAA</td>
+<td><code>ops-&gt;do_daa()</code> + <code>i3c_master_add_i3c_dev_locked()</code> + core 建模</td>
+</tr>
+<tr>
+<td>CCC</td>
+<td><code>ops-&gt;send_ccc_cmd()</code>，以及 core 组织的一系列 helper</td>
+</tr>
+<tr>
+<td>私有 SDR 传输</td>
+<td><code>i3c_device_do_priv_xfers()</code> &#x2F; <code>ops-&gt;priv_xfers()</code></td>
+</tr>
+<tr>
+<td>IBI</td>
+<td><code>i3c_device_request_ibi()</code> 及 controller 的 IBI ops</td>
+</tr>
+<tr>
+<td>Hot-Join</td>
+<td>controller hotjoin ops + core&#x2F;workqueue 协作</td>
+</tr>
+<tr>
+<td>I2C 共存</td>
+<td><code>i3c_master_controller.i2c</code> + <code>i3c_bus.devs.i2c</code></td>
+</tr>
+</tbody></table>
+<p>把这张表记住后，再回头看协议和代码，心里会清楚很多。</p>
+<h2 id="14-如果我要读-Linux-I3C-代码，我会怎么切入口"><a href="#14-如果我要读-Linux-I3C-代码，我会怎么切入口" class="headerlink" title="14. 如果我要读 Linux I3C 代码，我会怎么切入口"></a>14. 如果我要读 Linux I3C 代码，我会怎么切入口</h2><h3 id="14-1-如果我是普通设备驱动作者"><a href="#14-1-如果我是普通设备驱动作者" class="headerlink" title="14.1 如果我是普通设备驱动作者"></a>14.1 如果我是普通设备驱动作者</h3><p>我优先看这些对象和接口：</p>
+<ul>
+<li><code>struct i3c_driver</code></li>
+<li><code>I3C_DEVICE(...)</code></li>
+<li><code>i3c_device_get_info()</code></li>
+<li><code>i3c_device_do_priv_xfers()</code></li>
+<li><code>i3c_device_request_ibi()</code></li>
+<li><code>devm_regmap_init_i3c()</code></li>
+</ul>
+<h3 id="14-2-如果我是-controller-driver-作者"><a href="#14-2-如果我是-controller-driver-作者" class="headerlink" title="14.2 如果我是 controller driver 作者"></a>14.2 如果我是 controller driver 作者</h3><p>我优先看这些对象和接口：</p>
+<ul>
+<li><code>struct i3c_master_controller</code></li>
+<li><code>struct i3c_master_controller_ops</code></li>
+<li><code>i3c_master_register()</code></li>
+<li><code>i3c_master_set_info()</code></li>
+<li><code>i3c_master_add_i3c_dev_locked()</code></li>
+<li><code>i3c_master_do_daa()</code></li>
+<li><code>i3c_master_queue_ibi()</code></li>
+</ul>
+<h3 id="14-3-如果我是在-debug-枚举问题"><a href="#14-3-如果我是在-debug-枚举问题" class="headerlink" title="14.3 如果我是在 debug 枚举问题"></a>14.3 如果我是在 debug 枚举问题</h3><p>我会按这个顺序问自己：</p>
+<ol>
+<li><code>bus_init</code> 有没有把 controller 能力和 bus mode 设对？</li>
+<li><code>do_daa</code> 有没有真的把发现到的设备通过 <code>i3c_master_add_i3c_dev_locked()</code> 上报给 core？</li>
+<li>设备的 <code>i3c_device_info</code> 有没有被 core 正确补全？</li>
+<li>驱动匹配表是不是和设备真实 <code>PID/DCR</code> 对得上？</li>
+<li>这是 I3C 设备问题，还是混合总线里的 I2C 兼容问题？</li>
+</ol>
+<h2 id="15-我现在对-Linux-I3C-子系统的总结"><a href="#15-我现在对-Linux-I3C-子系统的总结" class="headerlink" title="15. 我现在对 Linux I3C 子系统的总结"></a>15. 我现在对 Linux I3C 子系统的总结</h2><p>如果只从协议角度看 I3C，很容易把注意力全放在：</p>
+<ul>
+<li>DAA</li>
+<li>CCC</li>
+<li>IBI</li>
+<li>Hot-Join</li>
+</ul>
+<p>但到了 Linux 里，更关键的是：</p>
+<blockquote>
+<p>这些协议动作到底由谁来负责。</p>
+</blockquote>
+<p>我现在对 Linux I3C 的稳定理解是：</p>
+<ul>
+<li><strong>controller driver</strong> 负责把协议动作变成硬件事务</li>
+<li><strong>core</strong> 负责维护总线秩序和设备模型</li>
+<li><strong>普通设备驱动</strong> 只处理自己的功能，不处理总线治理</li>
+</ul>
+<p>这个分层一旦看清，I3C 子系统就不会显得混乱，反而会觉得它设计得相当克制：</p>
+<ul>
+<li>设备驱动 API 很薄</li>
+<li>controller ops 很明确</li>
+<li>core 把总线级复杂度尽量吸收到了中间层</li>
+</ul>
+<h2 id="16-后续继续往下读，最值得补的方向"><a href="#16-后续继续往下读，最值得补的方向" class="headerlink" title="16. 后续继续往下读，最值得补的方向"></a>16. 后续继续往下读，最值得补的方向</h2><p>如果要把这份“Linux 视角版”继续扩下去，我建议优先补三块：</p>
+<ul>
+<li>真实 controller driver 的实现路径，比如 <code>dw-i3c-master</code>、<code>cdns</code>、<code>mipi-i3c-hci</code></li>
+<li>具体设备驱动案例，尤其是同时支持 I2C&#x2F;I3C 的传感器驱动</li>
+<li><code>CCC</code> 在 Linux core 里的 helper 组织方式，以及哪些 <code>CCC</code> 是 core 自动做的，哪些需要驱动显式触发</li>
+</ul>
+<p>到这里，这份笔记希望回答的是四个问题：</p>
+<ul>
+<li>协议概念怎么映射到 Linux 子系统对象</li>
+<li>普通设备驱动到底该用哪些接口</li>
+<li>controller driver 到底需要实现哪些动作</li>
+<li>Linux 是怎么把 I2C 和 I3C 共存这件事真正落地的</li>
+</ul>
+<h2 id="同专题阅读"><a href="#同专题阅读" class="headerlink" title="同专题阅读"></a>同专题阅读</h2><ul>
+<li><a href="/2026/11/25/i3c-basic-spec/">MIPI I3C Basic v1.1.1 组内分享</a></li>
+<li><a href="/2026/11/25/i3c-controller-guide/">两根线，一笔事务：I3C 控制器学习手记</a></li>
+<li><a href="/2026/11/25/i3c-target-study/">DWC MIPI I3C Target 开发学习文档</a></li>
+</ul>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/25/i3c-basic-spec/">MIPI I3C Basic v1.1.1 组内分享</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/25/i3c-controller-guide/">两根线，一笔事务：I3C 控制器学习手记</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%88%E6%8D%A2%E4%B8%80%E4%B8%AA%E8%A7%86%E8%A7%92%EF%BC%9A%E5%8D%8F%E8%AE%AE%E4%B8%96%E7%95%8C%E5%92%8C-Linux-%E4%B8%96%E7%95%8C%E4%B8%8D%E6%98%AF%E4%B8%80%E4%B8%80%E5%B9%B3%E9%93%BA%E7%9A%84"><span class="toc-text">1. 先换一个视角：协议世界和 Linux 世界不是一一平铺的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Linux-I3C-%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%B8%89%E5%B1%82%E5%88%86%E5%B7%A5"><span class="toc-text">2. Linux I3C 子系统的三层分工</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9C%80%E5%BA%95%E5%B1%82%EF%BC%9AI3C-%E6%8E%A7%E5%88%B6%E5%99%A8%E9%A9%B1%E5%8A%A8"><span class="toc-text">2.1 最底层：I3C 控制器驱动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%B8%AD%E9%97%B4%E5%B1%82%EF%BC%9AI3C-core"><span class="toc-text">2.2 中间层：I3C core</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%9C%80%E4%B8%8A%E5%B1%82%EF%BC%9A%E6%99%AE%E9%80%9A-I3C-%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8"><span class="toc-text">2.3 最上层：普通 I3C 设备驱动</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%85%88%E8%AE%B0%E4%BD%8F%E5%87%A0%E4%B8%AA%E6%9C%80%E5%85%B3%E9%94%AE%E7%9A%84%E5%86%85%E6%A0%B8%E5%AF%B9%E8%B1%A1"><span class="toc-text">3. 先记住几个最关键的内核对象</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-struct-i3c-master-controller"><span class="toc-text">3.1 struct i3c_master_controller</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-struct-i3c-bus"><span class="toc-text">3.2 struct i3c_bus</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-struct-i3c-dev-desc"><span class="toc-text">3.3 struct i3c_dev_desc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-struct-i3c-device"><span class="toc-text">3.4 struct i3c_device</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-struct-i3c-device-info"><span class="toc-text">3.5 struct i3c_device_info</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%99%AE%E9%80%9A-I3C-%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%EF%BC%8C%E7%9C%9F%E6%AD%A3%E5%BA%94%E8%AF%A5%E5%85%B3%E5%BF%83%E4%BB%80%E4%B9%88"><span class="toc-text">4. 普通 I3C 设备驱动，真正应该关心什么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9E%8B%EF%BC%9Astruct-i3c-driver"><span class="toc-text">4.1 最基本的驱动模型：struct i3c_driver</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%8C%B9%E9%85%8D%E6%80%8E%E4%B9%88%E5%81%9A"><span class="toc-text">4.2 匹配怎么做</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-probe-%E9%87%8C%E7%AC%AC%E4%B8%80%E4%BB%B6%E4%BA%8B%E9%80%9A%E5%B8%B8%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">4.3 probe() 里第一件事通常是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E7%A7%81%E6%9C%89%E6%95%B0%E6%8D%AE%E6%80%8E%E4%B9%88%E6%8C%82"><span class="toc-text">4.4 私有数据怎么挂</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-%E7%9C%9F%E6%AD%A3%E5%81%9A%E6%95%B0%E6%8D%AE%E6%94%B6%E5%8F%91%E6%97%B6%E7%94%A8%E4%BB%80%E4%B9%88"><span class="toc-text">4.5 真正做数据收发时用什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-%E6%99%AE%E9%80%9A%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E9%80%9A%E5%B8%B8%E4%B8%8D%E8%AF%A5%E4%BA%B2%E8%87%AA%E5%B9%B2%E4%BB%80%E4%B9%88"><span class="toc-text">4.6 普通设备驱动通常不该亲自干什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E4%B8%80%E4%B8%AA%E6%99%AE%E9%80%9A-I3C-%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%9A%84%E8%84%91%E5%86%85%E6%A8%A1%E6%9D%BF"><span class="toc-text">5. 一个普通 I3C 设备驱动的脑内模板</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E4%B8%BA%E4%BB%80%E4%B9%88-regmap-%E5%80%BC%E5%BE%97%E5%8D%95%E7%8B%AC%E8%AE%B0"><span class="toc-text">5.1 为什么 regmap 值得单独记</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-IBI-%E5%9C%A8-Linux-%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E9%87%8C%E6%80%8E%E4%B9%88%E8%90%BD%E5%9C%B0"><span class="toc-text">6. IBI 在 Linux 设备驱动里怎么落地</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%88%91%E5%AF%B9%E8%BF%99%E5%A5%97%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%90%86%E8%A7%A3"><span class="toc-text">6.1 我对这套设计的理解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E8%AF%A5%E6%80%8E%E4%B9%88%E7%94%A8-IBI"><span class="toc-text">6.2 设备驱动该怎么用 IBI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E4%B8%8D%E8%AF%A5%E5%85%B3%E5%BF%83%E5%93%AA%E4%BA%9B-IBI-%E7%BB%86%E8%8A%82"><span class="toc-text">6.3 设备驱动不该关心哪些 IBI 细节</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-I3C-controller-driver-%E9%9C%80%E8%A6%81%E5%AE%9E%E7%8E%B0%E4%BB%80%E4%B9%88"><span class="toc-text">7. I3C controller driver 需要实现什么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E5%BF%85%E9%A1%BB%E9%87%8D%E7%82%B9%E8%AE%A4%E8%AF%86%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9B%9E%E8%B0%83"><span class="toc-text">7.1 必须重点认识的几个回调</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-bus-init-%E5%B9%B2%E4%BB%80%E4%B9%88"><span class="toc-text">7.2 bus_init 干什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-do-daa-%E7%9A%84%E8%B4%A3%E4%BB%BB%E8%BE%B9%E7%95%8C"><span class="toc-text">7.3 do_daa 的责任边界</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-send-ccc-cmd-%E5%92%8C-priv-xfers"><span class="toc-text">7.4 send_ccc_cmd 和 priv_xfers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-controller-driver-%E9%9D%A2%E5%AF%B9%E7%9A%84%E6%98%AF-i3c-dev-desc%EF%BC%8C%E4%B8%8D%E6%98%AF-i3c-device"><span class="toc-text">7.5 controller driver 面对的是 i3c_dev_desc，不是 i3c_device</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-DAA-%E5%9C%A8-Linux-%E9%87%8C%E7%9A%84%E5%AE%8C%E6%95%B4%E6%98%A0%E5%B0%84"><span class="toc-text">8. DAA 在 Linux 里的完整映射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-IBI-%E5%9C%A8-controller-driver-%E9%87%8C%E7%9A%84%E6%98%A0%E5%B0%84"><span class="toc-text">9. IBI 在 controller driver 里的映射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-Hot-Join-%E5%9C%A8-Linux-controller-driver-%E9%87%8C%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="toc-text">10. Hot-Join 在 Linux controller driver 里的位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E4%B8%BA%E4%BB%80%E4%B9%88-Linux-%E5%90%8C%E6%97%B6%E4%BF%9D%E7%95%99-I3C-%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9E%8B%E5%92%8C-I2C-%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9E%8B"><span class="toc-text">11. 为什么 Linux 同时保留 I3C 驱动模型和 I2C 驱动模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-1-%E5%AF%B9%E6%99%AE%E9%80%9A%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E6%84%8F%E5%91%B3%E7%9D%80%E4%BB%80%E4%B9%88"><span class="toc-text">11.1 对普通设备驱动意味着什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-boardinfo-%E5%92%8C%E5%9B%BA%E4%BB%B6%E6%8F%8F%E8%BF%B0%E5%9C%A8-Linux-%E9%87%8C%E6%89%AE%E6%BC%94%E4%BB%80%E4%B9%88%E8%A7%92%E8%89%B2"><span class="toc-text">12. boardinfo 和固件描述在 Linux 里扮演什么角色</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#13-%E5%8D%8F%E8%AE%AE%E6%A6%82%E5%BF%B5%E5%92%8C-Linux-%E5%AF%B9%E8%B1%A1%E6%80%8E%E4%B9%88%E5%AF%B9%E4%B8%8A%E5%8F%B7"><span class="toc-text">13. 协议概念和 Linux 对象怎么对上号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#14-%E5%A6%82%E6%9E%9C%E6%88%91%E8%A6%81%E8%AF%BB-Linux-I3C-%E4%BB%A3%E7%A0%81%EF%BC%8C%E6%88%91%E4%BC%9A%E6%80%8E%E4%B9%88%E5%88%87%E5%85%A5%E5%8F%A3"><span class="toc-text">14. 如果我要读 Linux I3C 代码，我会怎么切入口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#14-1-%E5%A6%82%E6%9E%9C%E6%88%91%E6%98%AF%E6%99%AE%E9%80%9A%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E4%BD%9C%E8%80%85"><span class="toc-text">14.1 如果我是普通设备驱动作者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-2-%E5%A6%82%E6%9E%9C%E6%88%91%E6%98%AF-controller-driver-%E4%BD%9C%E8%80%85"><span class="toc-text">14.2 如果我是 controller driver 作者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-3-%E5%A6%82%E6%9E%9C%E6%88%91%E6%98%AF%E5%9C%A8-debug-%E6%9E%9A%E4%B8%BE%E9%97%AE%E9%A2%98"><span class="toc-text">14.3 如果我是在 debug 枚举问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#15-%E6%88%91%E7%8E%B0%E5%9C%A8%E5%AF%B9-Linux-I3C-%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%BB%E7%BB%93"><span class="toc-text">15. 我现在对 Linux I3C 子系统的总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#16-%E5%90%8E%E7%BB%AD%E7%BB%A7%E7%BB%AD%E5%BE%80%E4%B8%8B%E8%AF%BB%EF%BC%8C%E6%9C%80%E5%80%BC%E5%BE%97%E8%A1%A5%E7%9A%84%E6%96%B9%E5%90%91"><span class="toc-text">16. 后续继续往下读，最值得补的方向</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E4%B8%93%E9%A2%98%E9%98%85%E8%AF%BB"><span class="toc-text">同专题阅读</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div></body></html>
