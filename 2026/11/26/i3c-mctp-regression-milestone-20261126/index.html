@@ -1,0 +1,1385 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK - 搴愬北涓滄灄</title>
+
+  
+    <meta name="description" content="从 open 枚举基线追溯、MCTP 模式切换和 AF_MCTP 类型字节修正，到 7 项只读查询、69 字节边界与连续分包实验，记录 2026-11-26 的调试过程和未解决问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/">
+<meta property="og:site_name" content="搴愬北涓滄灄">
+<meta property="og:description" content="从 open 枚举基线追溯、MCTP 模式切换和 AF_MCTP 类型字节修正，到 7 项只读查询、69 字节边界与连续分包实验，记录 2026-11-26 的调试过程和未解决问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-26T11:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-26T11:14:06.310Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="baremetal">
+<meta property="article:tag" content="bringup">
+<meta property="article:tag" content="debugging">
+<meta property="article:tag" content="i3c">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="mctp">
+<meta property="article:tag" content="pldm">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  <meta name="keywords" content="baremetal,linux,i3c,mctp,pldm,bringup,debugging">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-26T19:00:00+08:00","dateModified":"2026-11-26T19:14:06+08:00","datePublished":"2026-11-26T19:00:00+08:00","description":"2026 年 11 月 26 日，MCTP&#x2F;PLDM over I3C 的基础查询终于有了端到端结果：3 项 MCTP Control、4 项 PLDM Base，共 7 项只读查询全部通过。 Host 能读到 Target 的 EID、TID、协议版本和命令位图，响应版本列表的 CRC32 也通过了校验。\n接着往包长边界走，新的问题出现了。Host 连续发送一条拆成两包的消息时，第一包 69 字节发送成功，第二包 6 字节在 0x44/W 地址阶段收到 NACK。两包之间留约 1 秒，Host 驱动又都报告发送成功；重新枚举后去掉间隔，第二包 NACK 再次出现。\n今天可以把“单包管理查询打通”记为一个里程碑。连续分包、Target 重组和满包响应还没有完成验收，接下来要盯的是第一包结束后，Target 怎样准备好接下一包。","headline":"I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/","keywords":"baremetal, linux, i3c, mctp, pldm, bringup, debugging","image":[]}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/"><span class="title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</span></a><a class="item title" href="/2026/11/26/i3c-mctp-regression-milestone-20261126/"><span class="title">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</span></a><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/06/pcie/pcie_ep_demo/"><span class="title">PCIe 加速卡驱动：结构与工作流程</span></a><a class="item title" href="/2026/03/23/pcie/pcie_fw/"><span class="title">PCIe Endpoint 固件初始化实例</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/">I3C</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-26T11:00:00.000Z">2026-11-26</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-26T11:14:06.310Z">2026-11-26</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><p><strong>2026 年 11 月 26 日，MCTP&#x2F;PLDM over I3C 的基础查询终于有了端到端结果：3 项 MCTP Control、4 项 PLDM Base，共 7 项只读查询全部通过。</strong> Host 能读到 Target 的 EID、TID、协议版本和命令位图，响应版本列表的 CRC32 也通过了校验。</p>
+<p>接着往包长边界走，新的问题出现了。Host 连续发送一条拆成两包的消息时，第一包 69 字节发送成功，第二包 6 字节在 <code>0x44/W</code> 地址阶段收到 NACK。两包之间留约 1 秒，Host 驱动又都报告发送成功；重新枚举后去掉间隔，第二包 NACK 再次出现。</p>
+<p>今天可以把“单包管理查询打通”记为一个里程碑。连续分包、Target 重组和满包响应还没有完成验收，接下来要盯的是第一包结束后，Target 怎样准备好接下一包。</p>
+<span id="more"></span>
+
+<p>上一篇<a href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/">移植记录</a>停在首笔请求地址 NACK。今天继续在 <code>i3c回归验证</code> 会话里推进，前半段先找回枚举基线，再切入 MCTP；中间修掉 Host 请求工具的字节错位；最后才碰到分包问题。下面把这几个阶段分开记，否则同样一个“没收到响应”，很容易被当成同一个故障。</p>
+<h2 id="1-先把历史基线找回来：open-成功，究竟是哪一版"><a href="#1-先把历史基线找回来：open-成功，究竟是哪一版" class="headerlink" title="1. 先把历史基线找回来：open 成功，究竟是哪一版"></a>1. 先把历史基线找回来：open 成功，究竟是哪一版</h2><p>今天一开始没有急着发 MCTP 请求，而是回头找最初用 <code>i3c_test open</code> 配合 Host 枚举的版本。这一步有实际用途：后面不论改了协议层还是 Target 运行模式，总得知道底层原来在哪个组合上跑通过。</p>
+<p>查到的记录有三组，含义并不一样。</p>
+<table>
+<thead>
+<tr>
+<th>记录</th>
+<th>能确认的内容</th>
+<th>不能据此确认的内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2026-09-24 的 <code>open-2khz-3placeholder</code> 部署</td>
+<td>Host 分支 <code>lab/imx93-i3c-open-2khz</code>，提交 <code>028713bdf</code>；配置约 2 kHz，正式枚举前先发三次 placeholder 供钟；已有构建、部署和重启检查</td>
+<td>当时记录明确没有完成 Target 枚举成功验证</td>
+</tr>
+<tr>
+<td>2026-11-18 的 <code>i3c-poll-write4/run03</code></td>
+<td>找到明确记载 <code>i3c_test open</code> 后 Host 枚举成功的记录；SETDASA、ENTDAA 和身份查询通过；Host 产物有哈希和源码快照</td>
+<td>没有 Target 固件指纹，不能还原双端完整版本</td>
+</tr>
+<tr>
+<td>Baremetal unified open 实现记录</td>
+<td>找到实现基线 <code>348f02c72c42300f3a0fd8e6830bc72f06223c19</code></td>
+<td>不能证明 run03 烧入的就是这一提交对应的固件，相关阶段还有未提交修改</td>
+</tr>
+</tbody></table>
+<p>run03 的 Host app 基于 <code>befcc155109d0413e4c0b9dee093530839fbcbbc</code>，叠加了工作树改动。因此，这个 commit 只能叫源码基线；实际产物还要结合 R4 的 source 快照和 <code>artifact-sha256.txt</code> 看。</p>
+<p>这里留下一个以后要补的工程习惯：每轮回归，双端都保存源码状态和固件指纹。否则过几周再追溯，只能说“某个基线加一些修改跑通过”，很难把同一套实验环境重新搭出来。</p>
+<h3 id="1-1-原来裸写通过，并不包含今天的-PEC-验证"><a href="#1-1-原来裸写通过，并不包含今天的-PEC-验证" class="headerlink" title="1.1 原来裸写通过，并不包含今天的 PEC 验证"></a>1.1 原来裸写通过，并不包含今天的 PEC 验证</h3><p>昨天的讨论还专门核对过旧 <code>i3c-host ... write HEX</code> 回归：Host 把十六进制文本解码后按原长度写出去，没有自动追加 PEC；Target 当时要求 PEC 关闭。</p>
+<p>所以，即使旧回归里写过一串 69 字节，也不能把它算成 MCTP 的“68 字节包加 1 字节 PEC 已验证”。当时末尾的 <code>E2</code> 是用户提供的载荷字节，没有计算或校验含义。</p>
+<p>今天走 <code>mctp-i3c</code> 后，PEC 是 transport 的组成部分。长度刚好相同，不代表经过同一条代码路径，也不代表覆盖了相同的功能。</p>
+<h2 id="2-今天的枚举分了几轮，DCR-的变化要保留"><a href="#2-今天的枚举分了几轮，DCR-的变化要保留" class="headerlink" title="2. 今天的枚举分了几轮，DCR 的变化要保留"></a>2. 今天的枚举分了几轮，DCR 的变化要保留</h2><p>中午先检查当前状态。当时控制器已有绑定，<code>i3c</code> 模块被 <code>mctp_i3c</code> 使用，sysfs 里能读到 PID 和动态地址。这次只是确认已有状态，没有新发一轮枚举。后来明确要求重启内核、只做 I3C 枚举，才重新走 Controller 的初始化。</p>
+<p>这两种动作值得区分：读到已有设备，说明设备模型里存在这个 Target；重新枚举成功，才说明这一轮初始化和 CCC 交互实际走通了。</p>
+<p>当日几次结果按会话时间排列如下，时间采用北京时间：</p>
+<table>
+<thead>
+<tr>
+<th>时间 &#x2F; 阶段</th>
+<th>动作与结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>12:04 左右</td>
+<td>检查现存枚举状态；保留活动绑定，没有重新发总线事务</td>
+</tr>
+<tr>
+<td>12:06 后</td>
+<td>重启到 <code>6.6.36-slim-mctp</code>，仅加载 I3C core 和 Controller；枚举成功，DCR 为 <code>0x00</code></td>
+</tr>
+<tr>
+<td>17:05 后</td>
+<td>再做一次纯 I3C 枚举，DCR 仍为 <code>0x00</code>，没有发送 Private 数据</td>
+</tr>
+<tr>
+<td>17:18 后</td>
+<td>操作员确认已执行 <code>bmc start</code>；Host 重启并枚举，读到 DCR <code>0xcc</code></td>
+</tr>
+<tr>
+<td>17:24 后</td>
+<td>根据 Target 状态截图，确认 MCTP endpoint 就绪，开始绑定 <code>mctp-i3c</code></td>
+</tr>
+<tr>
+<td>18:51 后</td>
+<td>为复现分包问题再次枚举、绑定并恢复路由；DCR 仍为 <code>0xcc</code></td>
+</tr>
+</tbody></table>
+<p>DCR 从 <code>0x00</code> 到 <code>0xcc</code>，不能在最终表格里悄悄抹平。前几轮只验证通用 I3C 设备身份；后面才在操作员确认 BMC 启动的条件下进入 MCTP 模式。早期枚举成功，没有顺便证明 MCTP endpoint 已经准备好。</p>
+<h3 id="2-1-枚举日志里的-assigned-0-为什么不算失败"><a href="#2-1-枚举日志里的-assigned-0-为什么不算失败" class="headerlink" title="2.1 枚举日志里的 assigned&#x3D;0 为什么不算失败"></a>2.1 枚举日志里的 assigned&#x3D;0 为什么不算失败</h3><p>后面复现用的一轮日志很完整，顺序是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PLACEHOLDER 1/3：0x7e/W ACK</span><br><span class="line">PLACEHOLDER 2/3：0x7e/W ACK</span><br><span class="line">PLACEHOLDER 3/3：0x7e/W ACK</span><br><span class="line">SETDASA：rc=0</span><br><span class="line">ENTDAA：rc=0, assigned=0</span><br><span class="line">GETPID / GETBCR / GETDCR / GETMRL / GETMWL / GETCAPS：成功</span><br><span class="line">identity OK：da=0x44 PID=beee00000101 BCR=3e DCR=cc</span><br></pre></td></tr></table></figure>
+
+<p>这套实验配置先通过 SETDASA，把静态地址 <code>0x44</code> 对应的 Target 配到动态地址 <code>0x44</code>。后续 ENTDAA 没有再分配一个新设备，<code>assigned=0</code> 与前面的成功并不冲突。判断整轮结果，还要看身份查询和最终 sysfs 状态。</p>
+<p>本轮读回的关键信息是：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>在当前系统中的用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PID</td>
+<td><code>beee00000101</code></td>
+<td>I3C 设备身份，也是 MCTP 邻居表使用的链路地址</td>
+</tr>
+<tr>
+<td>DA</td>
+<td><code>0x44</code></td>
+<td>实际 Private Transfer 的 I3C 寻址地址</td>
+</tr>
+<tr>
+<td>BCR</td>
+<td><code>0x3e</code></td>
+<td>transport 检查 IBI 与 MDB 能力的依据</td>
+</tr>
+<tr>
+<td>DCR</td>
+<td><code>0xcc</code></td>
+<td>当前 MCTP 模式下读到的设备类别</td>
+</tr>
+<tr>
+<td>MRL &#x2F; MWL</td>
+<td><code>260 / 260</code></td>
+<td>Target 广告的最大读写长度</td>
+</tr>
+<tr>
+<td>GETCAPS</td>
+<td><code>01 f1 18</code></td>
+<td>本轮 CCC 能力查询的实际返回</td>
+</tr>
+</tbody></table>
+<p>MRL&#x2F;MWL 为 260，没有让当前 MCTP 接口自动变成 260 字节 MTU。本次 binding 仍按基线配置：MCTP payload 64 字节、MCTP 包 68 字节，加 PEC 后 69 字节。后面的边界测试就是围绕这个限制做的。</p>
+<p>驱动日志还打印了 PP <code>1994.681 Hz</code>、OD <code>1953.125 Hz</code> 和 SKEW <code>4</code>。这是配置计算与寄存器读回信息，今天没有为这些轮次另抓物理波形，不能把它写成实测总线频率。</p>
+<h2 id="3-枚举之后，还需要把三层地址接起来"><a href="#3-枚举之后，还需要把三层地址接起来" class="headerlink" title="3. 枚举之后，还需要把三层地址接起来"></a>3. 枚举之后，还需要把三层地址接起来</h2><p>Target 就绪后，Host 加载与当前内核匹配的 <code>mctp-i3c.ko</code>。绑定完成，创建 <code>mctpi3c0</code>，IBI 启用；日志中 ENEC CCC 返回成功。</p>
+<p>这时接口存在，但最初还是 down，也没有 Host EID、路由和邻居。一个网口名字出现，不会自动告诉内核“EID 9 在哪里”。</p>
+<p>本轮采用固定配置：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MCTP network：1</span><br><span class="line">本地 Host EID：8</span><br><span class="line">远端 Target EID：9</span><br><span class="line">出口设备：mctpi3c0，MTU 68，up</span><br><span class="line">邻居：EID 9 → PID be:ee:00:00:01:01</span><br><span class="line">I3C 设备：PID beee00000101 → 当前 DA 0x44</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>network 1</code> 是 Linux MCTP 的网络编号；EID 是 MCTP 端点地址；PID 是 I3C 设备身份；DA 才是 Controller 发起总线事务时使用的动态地址。它们不能互相代替。</p>
+<pre class="mermaid">
+flowchart LR
+    A[请求：network 1 / EID 9] --> B[路由：mctpi3c0]
+    B --> C[邻居：PID beee00000101]
+    C --> D[I3C 设备：DA 0x44]
+    D --> E[Private Write 到 Target]
+</pre>
+
+<p>Host 配置本地 EID、路由和 PID 邻居，是本地 netlink 操作，不会因为加了一条路由就向 Target 发数据。加载 transport 并启用 IBI 则会涉及 ENEC 等总线操作，两者的作用不同。</p>
+<p>Target 的 EID 9 来自对端状态确认。今天没有执行 SetEID，也没有部署自动发现与动态端点管理服务。这一轮证明的是固定 EID、单 Target 条件下的通信。</p>
+<h2 id="4-第一笔-GetEID-超时：这一次请求已经到-Target-了"><a href="#4-第一笔-GetEID-超时：这一次请求已经到-Target-了" class="headerlink" title="4. 第一笔 GetEID 超时：这一次请求已经到 Target 了"></a>4. 第一笔 GetEID 超时：这一次请求已经到 Target 了</h2><p>配置完成后，单独发送只读 GetEID。第一次执行的仍是原部署包里的工具：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 执行端：i.MX93。此命令会产生实际 I3C 请求。</span></span><br><span class="line">/opt/frdm/deployments/mctp-slim-20261125-run01/bundle/mctp-pldm-request control 1 9 get-eid</span><br></pre></td></tr></table></figure>
+
+<p>参数依次表示 MCTP Control、network 1、目的 EID 9、Get Endpoint ID。Host 本地 EID 已预先设为 8。</p>
+<p>Host 结果是 TX 增加 1 包、8 字节，RX 没有增加，等待后没有得到 EID。到这里还不能断言“IBI 丢了”，因为不知道 Target 是否已经生成响应。于是没有马上重发，而是先看 Target 状态。</p>
+<p>操作员随后提供的截图把故障位置往后推了一步：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rx_packets=1, irq_count=1</span><br><span class="line">rx_errors=0, rx_pec_errors=0，PEC=OK</span><br><span class="line">EID 8 → 9</span><br><span class="line">kind=CONTROL, cmd=0x83</span><br><span class="line">pending_tx=0, tx_packets=0, ibi_submitted=0</span><br></pre></td></tr></table></figure>
+
+<p>这张截图提供的是 Target 侧观测。它表明请求已经收到、PEC 已通过，也进了 Control 解析；但读到的命令码是 <code>0x83</code>，正确的 GetEID 应为 <code>0x02</code>。没有排队响应，就不会有用于通知响应就绪的 IBI。</p>
+<p>因此，本轮超时发生在响应生成之前。继续围着“IBI 为何没来”排查，会跳过前面已经出现的字节错位。</p>
+<h3 id="4-1-多出来的-0x00，是谁加的"><a href="#4-1-多出来的-0x00，是谁加的" class="headerlink" title="4.1 多出来的 0x00，是谁加的"></a>4.1 多出来的 0x00，是谁加的</h3><p>沿着 Host 工具和本地 Linux <code>af_mctp.c</code> 对照，问题出在 socket 接口契约。</p>
+<p>工具内部为了统一构造和解析，把消息放成了这样的布局：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">req[0]：MCTP message type，Control 为 0x00</span><br><span class="line">req[1]：Control 请求位与 Instance ID</span><br><span class="line">req[2]：Control 命令码，GetEID 为 0x02</span><br></pre></td></tr></table></figure>
+
+<p>这个内部布局可以保留，但不能原样作为 <code>sendto()</code> 的正文。</p>
+<p>本地内核的 AF_MCTP 发送路径先从 <code>sockaddr_mctp.smctp_type</code> 取类型字节，放进 skb，然后才复制用户传入的消息正文。旧工具同时做了两件事：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dest.smctp_type = req[<span class="number">0</span>];</span><br><span class="line">sendto(fd, req, req_len, <span class="number">0</span>, ...);</span><br></pre></td></tr></table></figure>
+
+<p>类型既放在地址结构里，又在正文开头带了一份，于是重复了。</p>
+<p>用这次 Target 读到的 <code>0x83</code> 作字节位置示意，可以重建出下面的错位关系。这是根据源码与对端解析结果说明布局，不是额外抓到的一段完整总线原始数据：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">正确消息：00 | 83 | 02</span><br><span class="line">          类型 请求头 命令码</span><br><span class="line"></span><br><span class="line">旧工具路径：00 | 00 | 83 | 02</span><br><span class="line">          内核  工具正文</span><br><span class="line">          加类型 又带类型</span><br><span class="line"></span><br><span class="line">Target 按 Control 结构解析，命令字段落到了 83 上。</span><br></pre></td></tr></table></figure>
+
+<p>昨天在地址阶段失败，数据还没进去；今天这笔已经通过地址和 PEC，才暴露出工具里的接口问题。两个阶段的失败都要留下，不能用今天的原因倒推昨天那笔 NACK。</p>
+<h3 id="4-2-发送少交一个字节，接收也要对应处理"><a href="#4-2-发送少交一个字节，接收也要对应处理" class="headerlink" title="4.2 发送少交一个字节，接收也要对应处理"></a>4.2 发送少交一个字节，接收也要对应处理</h3><p>修正集中在 <code>linux/vendor/intellif/tools/mctp-host/mctp-pldm-request.c</code> 的 socket 边界：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* req 内部仍然包含 type；交给 AF_MCTP 的正文不包含它。 */</span></span><br><span class="line"><span class="type">size_t</span> body_len = req_len - <span class="number">1</span>;</span><br><span class="line">sendto(fd, req + <span class="number">1</span>, body_len, <span class="number">0</span>,</span><br><span class="line">       (<span class="keyword">struct</span> sockaddr *)&amp;dest, <span class="keyword">sizeof</span>(dest));</span><br></pre></td></tr></table></figure>
+
+<p>接收方向的契约相反：<code>recvfrom()</code> 返回消息正文，类型通过源地址结构里的 <code>smctp_type</code> 返回。原来的解析函数仍然需要“类型加正文”的内部布局，所以接收时先给类型留一字节：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ssize_t</span> n = recvfrom(fd, resp + <span class="number">1</span>, <span class="keyword">sizeof</span>(resp) - <span class="number">1</span>,</span><br><span class="line">                     MSG_DONTWAIT | MSG_TRUNC,</span><br><span class="line">                     (<span class="keyword">struct</span> sockaddr *)&amp;from, &amp;flen);</span><br><span class="line"><span class="comment">/* 先完成返回长度、地址长度等检查。 */</span></span><br><span class="line">resp[<span class="number">0</span>] = from.smctp_type;</span><br><span class="line"><span class="type">size_t</span> resp_len = (<span class="type">size_t</span>)n + <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>后续响应匹配和解析使用 <code>resp_len</code>。只修发送，很可能把问题从“Target 不认识请求”挪到“Host 不认识正确响应”，所以这两边要一起核对。</p>
+<p>原来的离线 selftest 为什么没发现？它覆盖请求构造、响应匹配、解析与 CRC 检查，直接使用内部数组，没有真正经过 AF_MCTP socket 的收发边界。内部数组测试通过，并不能证明数组与系统调用之间的契约正确。</p>
+<h3 id="4-3-修正版先独立验证，再替换默认路径"><a href="#4-3-修正版先独立验证，再替换默认路径" class="headerlink" title="4.3 修正版先独立验证，再替换默认路径"></a>4.3 修正版先独立验证，再替换默认路径</h3><p>修正版重新交叉编译为静态 AArch64 程序，先传到板端独立目录。核对 SHA-256、执行离线自检、确认 DA 和绑定状态后，只发送一笔 GetEID。</p>
+<p>这次得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">response: 00 19 02 00 09 01 00</span><br><span class="line">completion_code=0x00</span><br><span class="line">eid=9 endpoint_type=0x01 medium_specific=0x00</span><br><span class="line">REQUEST_EXIT=0</span><br></pre></td></tr></table></figure>
+
+<p>这是工具按“类型加正文”恢复后打印的响应，不包含 MCTP transport header 和 PEC。<code>00</code> 是 Control 类型，<code>19</code> 是本次响应头，<code>02</code> 是 GetEID 命令，后面的 <code>00</code> 是成功完成码，<code>09</code> 是 EID。</p>
+<p>接口计数也有对应变化：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TX：1 → 2，TX bytes：8 → 15</span><br><span class="line">RX：0 → 1，RX bytes：0 → 11</span><br><span class="line">tx_errors / rx_errors / rx_crc_errors / rx_length_errors：均为 0</span><br></pre></td></tr></table></figure>
+
+<p>所以修正版这笔增加的是 TX 7 字节、RX 11 字节。这些统计包含 4 字节 MCTP 头，不包含 PEC；不能拿 <code>tx_bytes</code> 直接当 I3C 数据长度。</p>
+<p>正确 GetEID 消息为 3 字节，加 MCTP 头得到 7，再加 PEC 才是 8 字节 I3C 数据。旧请求多一个类型字节，因而之前统计成了 TX 8。源码解释、计数差值和 Target 的错位解析能互相对应。</p>
+<p>独立目录验证通过后，再按要求替换板端部署包里的默认程序，并更新 <code>SHA256SUMS</code>；旧程序和清单另留了备份。这个顺序很有必要：独立路径下跑通，不等于平时直接敲工具名就已经在用新版。</p>
+<p>两版程序的指纹是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">旧版：93017c34021d85e3a91c7756ff53323e8dbdd1af5033cd1962b4d3aeb9fe5ab2</span><br><span class="line">新版：e3717b9327c1d886655bcb82f418ffeccbd518345ee0630bbdb6d1c69083ca1b</span><br></pre></td></tr></table></figure>
+
+<p>板端默认路径已替换，整包校验通过。不过本地原始打包目录仍保留旧版，这一点没有随着板端替换自动解决。正式交付前还要从确定的源码重新打完整包，不能直接拿旧 bundle 再部署一遍。</p>
+<h2 id="5-7-项只读查询，实际跑通了哪些内容"><a href="#5-7-项只读查询，实际跑通了哪些内容" class="headerlink" title="5. 7 项只读查询，实际跑通了哪些内容"></a>5. 7 项只读查询，实际跑通了哪些内容</h2><p>GetEID 通过后，继续逐项执行剩下 6 个只读查询。每一步都先保留响应与退出码，再核对 Host 收发计数，不一口气连续刷屏。</p>
+<p>下表命令均在 i.MX93 上执行，前缀是板端已替换的 <code>mctp-pldm-request</code>。<code>control</code> 选择 MCTP Control，<code>base</code> 选择 PLDM Base；后面的 <code>1 9</code> 仍是 network 与目的 EID。</p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>命令参数</th>
+<th>本轮结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>control 1 9 get-eid</code></td>
+<td>EID 为 9，完成码 <code>0x00</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>control 1 9 get-version</code></td>
+<td>返回 4 个 MCTP 版本条目</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>control 1 9 get-types</code></td>
+<td>声明支持 <code>0x00</code> Control 和 <code>0x01</code> PLDM</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>base 1 9 get-tid</code></td>
+<td>TID 为 1</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>base 1 9 get-types</code></td>
+<td>PLDM 类型位图支持 Base，类型 0</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>base 1 9 get-version</code></td>
+<td>Base 1.1.0，版本列表 CRC32 校验通过</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>base 1 9 get-commands</code></td>
+<td>Base 1.1.0 命令位图支持 <code>0x01</code>～<code>0x05</code></td>
+</tr>
+</tbody></table>
+<p>后 6 项均为完成码 <code>0x00</code>、退出码 0，每项 TX 增加 1 包、RX 增加 1 包；这 6 笔期间收发错误、PEC 错误、长度错误和丢包计数均无增量。</p>
+<p>PLDM Base 的版本返回里，版本字段为 <code>00 f0 f1 f1</code>，工具解析为 1.1.0；版本列表 CRC32 的字节为 <code>ba be 9d 53</code>。这里的 CRC32 是 PLDM 版本响应内部的校验，和 I3C transport 每包末尾的 PEC 是两回事。</p>
+<p>命令位图开头为 <code>3e</code>，二进制 <code>00111110</code>，置位的是 1～5，对应 <code>0x01</code>～<code>0x05</code>。能力声明说明对端支持这些命令，不代表今天已经执行了其中的状态修改命令。例如 SetTID 并没有因为这个位图被置位就算验证过。</p>
+<h3 id="5-1-回包经过了怎样一条链"><a href="#5-1-回包经过了怎样一条链" class="headerlink" title="5.1 回包经过了怎样一条链"></a>5.1 回包经过了怎样一条链</h3><p>在当前实现中，一次查询走的是：</p>
+<pre class="mermaid">
+sequenceDiagram
+    participant U as Host 请求程序
+    participant K as AF_MCTP / MCTP core
+    participant D as mctp-i3c / Controller
+    participant T as Target endpoint
+    U->>K: sendto：类型在地址结构，正文在 buffer
+    K->>D: 路由、Tag、MCTP 包
+    D->>T: Private Write：MCTP 包 + PEC
+    T->>T: 校验、处理命令、排队响应
+    T-->>D: IBI，MDB 0xAE
+    D->>T: Private Read
+    T-->>D: 响应包 + PEC
+    D->>K: 按实际长度校验 PEC，再上送
+    K-->>U: recvfrom：正文与 smctp_type
+</pre>
+
+<p>今天收到了成功响应，结合当前代码，基础请求和响应链路已经形成闭环。上图描述的是实现路径；它不等于本轮已经归档了一份逐边沿的完整波形。</p>
+<p>读路径还有昨天移植时处理过的一个细节：Controller 请求的读长度是上限，Target 可以短读结束。binding 要用 <code>actual_len</code> 作为本次实际收到的长度，再取末尾 PEC 校验，不能用缓冲区容量或请求上限去校验没收进来的字节。今天这些短响应通过了这条路径，但 69 字节满包响应仍需另测。</p>
+<p>到这一步，首轮固定 EID 的 MCTP Control &#x2F; PLDM Base 目标有了实板结果。传感器值、PDR、FRU、固件更新等业务今天没有接入；连续压力和异常恢复也不能由这 7 项查询代替。</p>
+<h2 id="6-做边界测试之前，先把长度单位算清楚"><a href="#6-做边界测试之前，先把长度单位算清楚" class="headerlink" title="6. 做边界测试之前，先把长度单位算清楚"></a>6. 做边界测试之前，先把长度单位算清楚</h2><p>后半段开始验证包长与分包。这里一共有四个容易混用的长度：</p>
+<ol>
+<li>测试工具 <code>len</code> 参数指定的测试数据长度。</li>
+<li>完整 MCTP 消息长度，包含一次 message type。</li>
+<li>单个 MCTP 包长度，包含该包自己的 4 字节 transport header。</li>
+<li>交给 I3C Private Transfer 的数据长度，另含 1 字节 PEC。</li>
+</ol>
+<p>今天 echo 测试的消息内容是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">7E | CC DE F0 | 00 01 02 03 ...</span><br><span class="line">类型  测试标识     len 个递增数据字节</span><br></pre></td></tr></table></figure>
+
+<p>也就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MCTP message length = 1 + 3 + len = len + 4</span><br><span class="line">每包最多装 64 字节 MCTP payload</span><br><span class="line">I3C 数据长度 = 4 字节 MCTP 包头 + 本片 payload + 1 字节 PEC</span><br></pre></td></tr></table></figure>
+
+<p>这里把带 PEC 的长度写成“69 字节包”是实验里的简称，不包含 START、地址帧、ACK&#x2F;T-bit 和 STOP 等总线开销。</p>
+<table>
+<thead>
+<tr>
+<th><code>len</code> 参数</th>
+<th align="right">完整消息长度</th>
+<th>64 字节 payload 下的分片</th>
+<th>每次 I3C 数据长度，含 PEC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>59</td>
+<td align="right">63</td>
+<td>63</td>
+<td>68</td>
+</tr>
+<tr>
+<td>60</td>
+<td align="right">64</td>
+<td>64</td>
+<td>69</td>
+</tr>
+<tr>
+<td>61</td>
+<td align="right">65</td>
+<td>64 + 1</td>
+<td>69 + 6</td>
+</tr>
+<tr>
+<td>125</td>
+<td align="right">129</td>
+<td>64 + 64 + 1</td>
+<td>69 + 69 + 6</td>
+</tr>
+</tbody></table>
+<p>从 60 增到 61 个测试数据字节，只多了一个字节，线上却多出一个完整的 I3C 事务。这正好能把“单包长度”与“连续接下一包”的问题拆开。</p>
+<h3 id="6-1-64-字节消息的单包布局"><a href="#6-1-64-字节消息的单包布局" class="headerlink" title="6.1 64 字节消息的单包布局"></a>6.1 64 字节消息的单包布局</h3><p>本次软件观测到的单包头为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">01 09 08 C8 | 7E CC DE F0 00 01 ... 3B | PEC</span><br></pre></td></tr></table></figure>
+
+<p>前四字节依次包含版本、目的 EID、源 EID和分包控制信息。在这组实测中 Tag 为 0：<code>C8</code> 表示 SOM 与 EOM 都置位、序号为 0、TO 为 1。一包既是开头又是结尾，完整消息一次装下。</p>
+<p><code>7E CC DE F0</code> 加 <code>00</code> 到 <code>3B</code> 共 64 字节；再加 4 字节包头与 1 字节 PEC，总计 69。</p>
+<p>PEC 由 transport 根据地址字节和本包数据计算。DA 为 <code>0x44</code> 时，写方向参与 PEC 的地址字节为 <code>0x88</code>，读方向则为 <code>0x89</code>。地址参与校验，不等于地址字节也计入上面的 69 字节数据长度。</p>
+<h3 id="6-2-65-字节消息为什么拆成-69-6"><a href="#6-2-65-字节消息为什么拆成-69-6" class="headerlink" title="6.2 65 字节消息为什么拆成 69 + 6"></a>6.2 65 字节消息为什么拆成 69 + 6</h3><p>测试数据增加到 <code>00</code>～<code>3C</code>，整个消息长 65 字节。Host 内核生成了两片：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">第一片：01 09 08 88 | 7E CC DE F0 00 01 ... 3B | PEC</span><br><span class="line">第二片：01 09 08 58 | 3C                       | PEC</span><br></pre></td></tr></table></figure>
+
+<p>第一片的 <code>88</code> 表示 SOM&#x3D;1、EOM&#x3D;0、序号 0；第二片的 <code>58</code> 表示 SOM&#x3D;0、EOM&#x3D;1、序号 1；TO 和 Tag 保持一致。</p>
+<p>类型字节只在整条消息开头出现一次，第二片不会再补一个 <code>7E</code>。否则重组出的正文会多一个字节。</p>
+<p>第一片是 <code>4 + 64 + 1 = 69</code>；第二片是 <code>4 + 1 + 1 = 6</code>。每片有自己的 transport header 和 PEC，Target 需要把两片的消息内容重组起来，再交给上层处理。</p>
+<p>上面两片来自 Host 软件观测。后面会看到：第二片虽然在 Host 网络路径里生成了，但地址 NACK 时，它的数据并没有因此自动出现在物理总线上。</p>
+<h2 id="7-Host-内核回环通过了，但它不经过-I3C"><a href="#7-Host-内核回环通过了，但它不经过-I3C" class="headerlink" title="7. Host 内核回环通过了，但它不经过 I3C"></a>7. Host 内核回环通过了，但它不经过 I3C</h2><p>先做 Host 内核回环，是为了把 Linux MCTP 的分包重组和真实硬件链路拆开验证。</p>
+<p>实验是在 i.MX93 当前运行内核上做的。通过 <code>unshare -n</code> 创建临时 network namespace，在里面启用 <code>lo</code>、把 MTU 设为 68、配置本地 EID 8，再运行 echo 进程和请求进程。</p>
+<p>下面是当时使用方式的核心部分，仅作为实验复现记录。这段在板端独立 namespace 里改变网络配置并走本地 socket，不会向 Target 发送 I3C 数据：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">unshare -n sh</span><br><span class="line"><span class="built_in">cd</span> /root/mctp-get-eid-fix-20261126-iG7pGX</span><br><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> lo mtu 68 up</span><br><span class="line">/opt/frdm/modules/6.6.36-slim-mctp/mctp address add 8 dev lo</span><br><span class="line">./mctp-echo &amp;</span><br><span class="line">echo_pid=$!</span><br><span class="line"><span class="built_in">trap</span> <span class="string">&#x27;kill &quot;$echo_pid&quot; 2&gt;/dev/null || true&#x27;</span> EXIT</span><br><span class="line"><span class="built_in">sleep</span> 0.15</span><br><span class="line"><span class="keyword">for</span> n <span class="keyword">in</span> 59 60 61 125; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">timeout</span> 5 ./mctp-req net 1 eid 8 len <span class="string">&quot;<span class="variable">$n</span>&quot;</span> || <span class="built_in">break</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>两只 AF_MCTP socket 分别负责请求与应答。目的 EID 是本地 8，内核走本地路由；MTU 68 使相应长度覆盖 1 包、2 包和 3 包的情况。echo 收到消息后应答，请求端逐字节比较返回数据。</p>
+<p>四组输出均为 <code>byte_compare=PASS</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">data_len=59  message_len=63   PASS</span><br><span class="line">data_len=60  message_len=64   PASS</span><br><span class="line">data_len=61  message_len=65   PASS</span><br><span class="line">data_len=125 message_len=129  PASS</span><br></pre></td></tr></table></figure>
+
+<p>这说明当前 Host 内核在这组参数下可以完成 MCTP 本地发送、分包、重组和回送。它没有验证 I3C PEC、Controller 时序、Target 接收与重组，也没有验证反向 IBI 通知。</p>
+<p>所以，129 字节回环通过，不能写成“129 字节已通过 I3C 发到 Target”。真实链路上的三包实验今天没有完成。</p>
+<h2 id="8-真实-I3C-边界：68、69-字节发出，第二片失败"><a href="#8-真实-I3C-边界：68、69-字节发出，第二片失败" class="headerlink" title="8. 真实 I3C 边界：68、69 字节发出，第二片失败"></a>8. 真实 I3C 边界：68、69 字节发出，第二片失败</h2><p>真实链路使用 EID 9，让请求经过 <code>mctpi3c0</code>。测试脚本用 AF_PACKET 观察 Host 生成的 MCTP 包，同时比较 <code>mctpi3c0</code> 驱动统计。</p>
+<p>这里使用的是测试 echo 消息，Target 没有该 echo handler。因此脚本并不期待收到 echo 响应；内部请求进程超时返回 124，是这组单向发送观察的预期条件。是否发送成功，还要单独看驱动统计与内核错误。</p>
+<table>
+<thead>
+<tr>
+<th align="right">消息长度</th>
+<th>Host 生成的包</th>
+<th>驱动统计变化</th>
+<th>本轮能确认的结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">63</td>
+<td>67 字节 MCTP 包，加 PEC 为 68</td>
+<td>TX +1，TX bytes +67，TX errors +0</td>
+<td>Host 驱动报告一次发送成功</td>
+</tr>
+<tr>
+<td align="right">64</td>
+<td>68 字节 MCTP 包，加 PEC 为 69</td>
+<td>TX +1，TX bytes +68，TX errors +0</td>
+<td>Host 驱动报告满长度单包发送成功</td>
+</tr>
+<tr>
+<td align="right">65</td>
+<td>68 与 5 字节 MCTP 包，加 PEC 为 69 + 6</td>
+<td>TX +1，TX bytes +68，TX errors +1</td>
+<td>第一片成功，第二片失败</td>
+</tr>
+</tbody></table>
+<p>前两项的脚本输出 <code>HOST_I3C_TX_PASS</code>，对应的是 Host 发送路径通过。Target 实际收到了多少字节、满包 PEC 是否通过，需要 Target 日志交叉核对；也没有在这一步读回一包 69 字节响应。</p>
+<p>第三项观察到了两个 <code>HOST_PACKET</code>，脚本却报：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Driver successful-transfer counters do not match capture</span><br></pre></td></tr></table></figure>
+
+<p>这是有用的失败：网络路径捕获到了两个待发送的包，驱动只完成一个，另一个产生 TX error。软件捕获没有被误当作物理发送成功。</p>
+<h3 id="8-1-sendto-返回，并不是最后一次成功判定"><a href="#8-1-sendto-返回，并不是最后一次成功判定" class="headerlink" title="8.1 sendto 返回，并不是最后一次成功判定"></a>8.1 sendto 返回，并不是最后一次成功判定</h3><p>当前 transport 的发送经过 netdev 与发送线程。应用把数据交给内核后，后续 I3C 操作可以在异步路径里才失败。</p>
+<p>在 <code>mctp_i3c_xmit()</code> 中，真正调用 <code>i3c_device_do_priv_xfers()</code>；返回 0 才增加 <code>tx_packets</code> 和 <code>tx_bytes</code>，否则增加 <code>tx_errors</code>。发送线程完成后再释放 skb。</p>
+<p>所以这里至少有三个观察点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">应用 sendto 被接受</span><br><span class="line">    ↓</span><br><span class="line">Host 网络路径生成 / 观察到包</span><br><span class="line">    ↓</span><br><span class="line">Controller 完成 Private Transfer，驱动更新成功或错误统计</span><br></pre></td></tr></table></figure>
+
+<p>再往后才是 Target PEC、重组与业务处理。今天第二片的错误，就出现在前两层已经经过、硬件传输尚未成功的地方。</p>
+<h3 id="8-2-失败后，小-GetEID-仍然通过"><a href="#8-2-失败后，小-GetEID-仍然通过" class="headerlink" title="8.2 失败后，小 GetEID 仍然通过"></a>8.2 失败后，小 GetEID 仍然通过</h3><p>第一次两片测试失败后，又单独验证了一笔 GetEID，返回成功、EID 仍为 9。Host TX 和 RX 各增加 1 包，已有的 <code>tx_errors=1</code> 没有继续增加。</p>
+<p>这说明当时失败没有让所有后续通信都永久失效，也没有证据要求立刻重做整套部署。但它不能证明所有恢复场景都没问题，更不能代替丢失分片后的 Target 重组状态检查。</p>
+<h2 id="9-两片间隔约-1-秒：一个缩小范围的实验"><a href="#9-两片间隔约-1-秒：一个缩小范围的实验" class="headerlink" title="9. 两片间隔约 1 秒：一个缩小范围的实验"></a>9. 两片间隔约 1 秒：一个缩小范围的实验</h2><p>看到第二片失败，接着按要求做了一个很小的对照：保持两片内容，第一片完成后等 1 秒，再送第二片。</p>
+<p>具体做法没有往正式 AF_MCTP 驱动里加 <code>sleep</code>，而是用临时 Python 脚本经 AF_PACKET raw socket，把已知的两片分别交给现有 <code>mctpi3c0</code> 发送路径。脚本先等第一片的驱动统计出现完成，再休眠，然后发第二片。</p>
+<p>这与正常应用只调用一次 <code>sendto()</code>、内核连续完成分片发送的路径有区别。它适合观察“给接收端留出时间，结果会不会变化”，还不足以证明一个正式的软件修复。</p>
+<p>结果如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">FRAG 1：MCTP 68 字节，I3C 数据含 PEC 69 字节</span><br><span class="line">        tx_packets +1，tx_bytes +68，tx_errors +0</span><br><span class="line"></span><br><span class="line">FRAG 2：MCTP 5 字节，I3C 数据含 PEC 6 字节</span><br><span class="line">        tx_packets +1，tx_bytes +5，tx_errors +0</span><br><span class="line"></span><br><span class="line">OBSERVED_GAP_S=1.002566</span><br><span class="line">HOST_I3C_TX_PASS</span><br></pre></td></tr></table></figure>
+
+<p>约 1.003 秒是脚本观测到第一片统计完成、到提交第二片之间的时间差，不是逻辑分析仪测出的 STOP 到下一次 START 间隔。</p>
+<p>这个结果使“连续两片之间的准备时序”成为下一步值得重点检查的方向。它还没有告诉我们：</p>
+<ul>
+<li>第一片之后哪个状态迟迟没有恢复，是接收使能、FIFO、buffer 归还，还是其他条件。</li>
+<li>真正需要的时间是多少，是否与主循环调度或协议处理有关。</li>
+<li>第二片在 Target 上是否通过 PEC，两片有没有形成完整消息。</li>
+<li>其他长度和连续多条消息下能否复现同样的规律。</li>
+</ul>
+<p>因此，1 秒只是这次诊断实验的参数。正式发送路径没有因此增加固定延时，也没有把它当作分包问题已修复。</p>
+<h3 id="9-1-Host-发两片，中间要等-IBI-吗"><a href="#9-1-Host-发两片，中间要等-IBI-吗" class="headerlink" title="9.1 Host 发两片，中间要等 IBI 吗"></a>9.1 Host 发两片，中间要等 IBI 吗</h3><p>这也是今天讨论得很具体的一个问题。</p>
+<p>在当前实现中，Host → Target 的每片是一次 Private Write。Host 继续写下一片，并不会先等一个表示“可以写下一片”的 IBI。能不能接受这次访问，先体现在地址应答与传输结果上。</p>
+<p>Target → Host 则不同：Target 有数据待 Host 读取时，通过带 MDB <code>0xAE</code> 的 IBI 通知；Host 的 <code>mctp_i3c_ibi_handler()</code> 识别后进入读路径，再发 Private Read。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Host → Target 分片：</span><br><span class="line">Private Write 第 1 片 → Private Write 第 2 片</span><br><span class="line"></span><br><span class="line">Target → Host 数据：</span><br><span class="line">Target IBI 通知 → Host Private Read</span><br></pre></td></tr></table></figure>
+
+<p>今天第二片被 NACK，不能用“少等了一个 IBI”直接解释。应先检查第一片完成后，对端为什么还不能应答下一次写地址。如果以后设计额外的流控或重试，也需要单独明确接口与错误处理，不能靠实验间隔含糊带过。</p>
+<h2 id="10-重新枚举后再试一次，第二片-NACK-仍能复现"><a href="#10-重新枚举后再试一次，第二片-NACK-仍能复现" class="headerlink" title="10. 重新枚举后再试一次，第二片 NACK 仍能复现"></a>10. 重新枚举后再试一次，第二片 NACK 仍能复现</h2><p>间隔实验之后，又按步骤重建环境：卸载 transport，重新枚举，确认 PID、DA、DCR，再绑定 <code>mctp-i3c</code>、启用 IBI，恢复 Host EID 8、Target EID 9 路由和 PID 邻居。</p>
+<p>这一步完成时，接口 TX&#x2F;RX 都是 0，没有先夹带 GetEID 或其他分片。也就是说，后面的测试有一套较清楚的起点。</p>
+<p>随后只发一次不加延时的 69 + 6 字节组合。结果仍然是第一片成功，第二片失败：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">COUNTER_DELTAS:</span><br><span class="line">    tx_packets +1</span><br><span class="line">    tx_bytes   +68</span><br><span class="line">    tx_errors  +1</span><br><span class="line">    rx_packets +0</span><br><span class="line"></span><br><span class="line">I3C XFER FAIL rc=-6 recovery_required=0</span><br><span class="line">I3C XFER cmd=1 addr=0x44/W stage=address-nack rc=-6 stop_rc=0</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>stage=address-nack</code> 很关键。Host 已生成第二片 <code>01 09 08 58 3C</code>，但寻址 <code>0x44/W</code> 时没得到应答，不能说第二片的 <code>3C</code> 和 PEC 已经传给 Target。报错位置比“重组失败”更靠前。</p>
+<p><code>stop_rc=0</code> 表示本次错误后的 STOP 处理返回成功；<code>recovery_required=0</code> 是当前驱动的恢复判断。它们不能用来反推 Target 软件状态一定正常。</p>
+<p>重新枚举后仍出现相同现象，说明这次问题并没有随着这一轮 Host 环境重建而消失。至于 Target 的重组上下文、buffer 状态是否也恢复到了完全相同的起点，仍需对端日志证明。</p>
+<p>18:56 左右停止测试时，保持了枚举、绑定、IBI 与路由状态，没有继续重试。本文整理也没有重新操作板子。</p>
+<h2 id="11-今天到底验收到了哪一层"><a href="#11-今天到底验收到了哪一层" class="headerlink" title="11. 今天到底验收到了哪一层"></a>11. 今天到底验收到了哪一层</h2><table>
+<thead>
+<tr>
+<th>层次 &#x2F; 项目</th>
+<th>截至本轮结束的状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Host 内核与工具</td>
+<td><code>6.6.36-slim-mctp</code> 已运行，AF_MCTP 与 I3C transport 可用；请求工具收发契约已修正</td>
+</tr>
+<tr>
+<td>I3C 枚举</td>
+<td>多轮通过；进入 MCTP 模式后 PID、DA、BCR、DCR 读回符合本轮配置</td>
+</tr>
+<tr>
+<td>transport 与固定拓扑</td>
+<td><code>mctp-i3c</code> 绑定、ENEC、接口 up、EID 8 → 9 路由和 PID 邻居通过</td>
+</tr>
+<tr>
+<td>MCTP Control</td>
+<td>GetEID、GetVersion、GetMessageTypeSupport 三项端到端通过</td>
+</tr>
+<tr>
+<td>PLDM Base</td>
+<td>GetTID、GetPLDMTypes、GetPLDMVersion、GetPLDMCommands 四项端到端通过</td>
+</tr>
+<tr>
+<td>Host 本地分包重组</td>
+<td>63、64、65、129 字节消息回环，数据比较通过</td>
+</tr>
+<tr>
+<td>真实链路 68 &#x2F; 69 字节单包</td>
+<td>Host 驱动报告发送成功；Target 长度与 PEC 交叉验证待补</td>
+</tr>
+<tr>
+<td>真实链路 69 + 6 连续发送</td>
+<td>失败，第二片地址 NACK；重枚举后复现</td>
+</tr>
+<tr>
+<td>同样两片，间隔约 1 秒</td>
+<td>临时重放路径下 Host 两次发送成功；Target 重组未确认</td>
+</tr>
+<tr>
+<td>真实三包消息</td>
+<td>未完成验证</td>
+</tr>
+<tr>
+<td>69 字节满包响应读取</td>
+<td>未完成验证</td>
+</tr>
+<tr>
+<td>压力、异常与恢复</td>
+<td>尚未系统验证；有一次分包失败后 GetEID 成功的局部结果</td>
+</tr>
+<tr>
+<td>传感器 &#x2F; PDR &#x2F; FRU &#x2F; 固件更新</td>
+<td>不在今天的验证范围</td>
+</tr>
+</tbody></table>
+<p>今天的结论比昨天前进了一大步：小消息已经能从 Host 命令一路走到 Target，再带着有效响应回来。下一步不需要从“内核里有没有 MCTP”重新查起，要从连续两次 Private Write 的衔接处继续。</p>
+<h2 id="12-下次接着做，要先留住第一包之后的现场"><a href="#12-下次接着做，要先留住第一包之后的现场" class="headerlink" title="12. 下次接着做，要先留住第一包之后的现场"></a>12. 下次接着做，要先留住第一包之后的现场</h2><p>下一轮优先把两端观测对到同一笔事务上。需要留的并不只是第二片失败那一行错误，而是第一片结束到第二片地址应答之间发生了什么。</p>
+<p>Target 侧要看第一片实际接收长度、PEC 结果、SOM&#x2F;EOM 和序号；随后谁持有 buffer，何时归还，接收中断何时清除，RX 何时重新使能，以及主循环是否在等待一个不会到来的条件。这些都是待查方向，今天还没有哪一条被确认为根因。</p>
+<p>Host 侧保留每片的提交与完成、驱动统计和错误阶段；有条件时抓一组连续写与一组有间隔写的波形，把第一片 STOP、下一次 START、地址应答和 Target 日志时间点对应起来。不要只拿 Host 软件生成的包替代波形。</p>
+<p>待第二片能够连续接收，再检查 Target 是否只把重组后的完整消息交给上层、超时后能否清理半包、下一条正常消息能否继续。同时安排真实 69 字节响应和三包消息，补齐双向边界。</p>
+<p>交付前还有一件独立的事：从确定的源码状态重新打包，记录双端指纹，冷启动重新做枚举和 7 项查询。今天 Host 工作区的基底提交是 <code>c58292616eeed014c605d572ae3f58a5c7095b43</code>，MCTP 移植与今天的工具修正仍有未提交改动；这个提交号不能单独代表上板运行的全部源码。Target 当前固件的完整指纹，本轮材料也没有补齐。</p>
+<h2 id="13-留给后续复查的材料"><a href="#13-留给后续复查的材料" class="headerlink" title="13. 留给后续复查的材料"></a>13. 留给后续复查的材料</h2><p>关键原始输出整理在<a href="evidence.txt">本轮证据摘录</a>，包括修正版 GetEID、6 项后续查询、内核回环、包长边界、有间隔发送、重新枚举与最终 NACK。附件保留各阶段的结果，不把所有 PASS 合并成一次完整链路通过。</p>
+<p>本地工程中的主要定位入口如下。路径以 <code>code_wave_hw</code> 工程顶层为基准，便于之后在工作区里查找；源码仍以实际工作树和产物指纹为准。</p>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>工程内位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>历史 open 枚举记录</td>
+<td><code>deployments/open-2khz-3placeholder-20260924/</code></td>
+</tr>
+<tr>
+<td>11 月 18 日枚举成功与产物指纹</td>
+<td><code>verification/i3c-poll-write4-20261118/run03/</code></td>
+</tr>
+<tr>
+<td>本轮 Host 工作区</td>
+<td><code>worktrees/imx93-slim-mctp-20261125/</code></td>
+</tr>
+<tr>
+<td>请求工具修正</td>
+<td>工作区下 <code>linux/vendor/intellif/tools/mctp-host/mctp-pldm-request.c</code></td>
+</tr>
+<tr>
+<td>AF_MCTP 类型字节契约</td>
+<td>工作区下 <code>linux/net/mctp/af_mctp.c</code></td>
+</tr>
+<tr>
+<td>I3C transport、PEC、异步统计</td>
+<td>工作区下 <code>linux/drivers/net/mctp/mctp-i3c.c</code></td>
+</tr>
+<tr>
+<td>修正版与 GetEID 结果</td>
+<td><code>build/mctp-get-eid-fix-20261126-iG7pGX/</code></td>
+</tr>
+<tr>
+<td>后续 6 项只读查询</td>
+<td><code>build/mctp-readonly-regression-20261126-tncB2R/</code></td>
+</tr>
+<tr>
+<td>回环与包长边界</td>
+<td><code>build/mctp-boundary-20261126-zN2Jjh/</code></td>
+</tr>
+<tr>
+<td>约 1 秒间隔实验</td>
+<td><code>build/mctp-fragment-gap-1s-20261126-Ohl2Dk/</code></td>
+</tr>
+<tr>
+<td>重枚举与无间隔复现</td>
+<td><code>build/mctp-reenumeration-20261126-t2ENIx/</code></td>
+</tr>
+</tbody></table>
+<p>板端日志目录里出现了早于当天的日期，本轮日历日期按会话记录使用 2026-11-26，内核方括号时间按启动后的单调时间理解。不能拿板端目录名去重排今天的实验顺序。</p>
+<p>今天先记到这里。下次打开这份记录，先确认使用的是修正版请求工具，再对齐第一片结束后的 Target 状态，从第二片地址 NACK 这个现场继续。</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/25/axidma-basics/">AXIDMA：从参数配置到数据校验</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%88%E6%8A%8A%E5%8E%86%E5%8F%B2%E5%9F%BA%E7%BA%BF%E6%89%BE%E5%9B%9E%E6%9D%A5%EF%BC%9Aopen-%E6%88%90%E5%8A%9F%EF%BC%8C%E7%A9%B6%E7%AB%9F%E6%98%AF%E5%93%AA%E4%B8%80%E7%89%88"><span class="toc-text">1. 先把历史基线找回来：open 成功，究竟是哪一版</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%8E%9F%E6%9D%A5%E8%A3%B8%E5%86%99%E9%80%9A%E8%BF%87%EF%BC%8C%E5%B9%B6%E4%B8%8D%E5%8C%85%E5%90%AB%E4%BB%8A%E5%A4%A9%E7%9A%84-PEC-%E9%AA%8C%E8%AF%81"><span class="toc-text">1.1 原来裸写通过，并不包含今天的 PEC 验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BB%8A%E5%A4%A9%E7%9A%84%E6%9E%9A%E4%B8%BE%E5%88%86%E4%BA%86%E5%87%A0%E8%BD%AE%EF%BC%8CDCR-%E7%9A%84%E5%8F%98%E5%8C%96%E8%A6%81%E4%BF%9D%E7%95%99"><span class="toc-text">2. 今天的枚举分了几轮，DCR 的变化要保留</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9E%9A%E4%B8%BE%E6%97%A5%E5%BF%97%E9%87%8C%E7%9A%84-assigned-0-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%AE%97%E5%A4%B1%E8%B4%A5"><span class="toc-text">2.1 枚举日志里的 assigned&#x3D;0 为什么不算失败</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9E%9A%E4%B8%BE%E4%B9%8B%E5%90%8E%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%8A%8A%E4%B8%89%E5%B1%82%E5%9C%B0%E5%9D%80%E6%8E%A5%E8%B5%B7%E6%9D%A5"><span class="toc-text">3. 枚举之后，还需要把三层地址接起来</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%AC%AC%E4%B8%80%E7%AC%94-GetEID-%E8%B6%85%E6%97%B6%EF%BC%9A%E8%BF%99%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E5%B7%B2%E7%BB%8F%E5%88%B0-Target-%E4%BA%86"><span class="toc-text">4. 第一笔 GetEID 超时：这一次请求已经到 Target 了</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%A4%9A%E5%87%BA%E6%9D%A5%E7%9A%84-0x00%EF%BC%8C%E6%98%AF%E8%B0%81%E5%8A%A0%E7%9A%84"><span class="toc-text">4.1 多出来的 0x00，是谁加的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%8F%91%E9%80%81%E5%B0%91%E4%BA%A4%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%8C%E6%8E%A5%E6%94%B6%E4%B9%9F%E8%A6%81%E5%AF%B9%E5%BA%94%E5%A4%84%E7%90%86"><span class="toc-text">4.2 发送少交一个字节，接收也要对应处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E4%BF%AE%E6%AD%A3%E7%89%88%E5%85%88%E7%8B%AC%E7%AB%8B%E9%AA%8C%E8%AF%81%EF%BC%8C%E5%86%8D%E6%9B%BF%E6%8D%A2%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84"><span class="toc-text">4.3 修正版先独立验证，再替换默认路径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-7-%E9%A1%B9%E5%8F%AA%E8%AF%BB%E6%9F%A5%E8%AF%A2%EF%BC%8C%E5%AE%9E%E9%99%85%E8%B7%91%E9%80%9A%E4%BA%86%E5%93%AA%E4%BA%9B%E5%86%85%E5%AE%B9"><span class="toc-text">5. 7 项只读查询，实际跑通了哪些内容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%9B%9E%E5%8C%85%E7%BB%8F%E8%BF%87%E4%BA%86%E6%80%8E%E6%A0%B7%E4%B8%80%E6%9D%A1%E9%93%BE"><span class="toc-text">5.1 回包经过了怎样一条链</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%81%9A%E8%BE%B9%E7%95%8C%E6%B5%8B%E8%AF%95%E4%B9%8B%E5%89%8D%EF%BC%8C%E5%85%88%E6%8A%8A%E9%95%BF%E5%BA%A6%E5%8D%95%E4%BD%8D%E7%AE%97%E6%B8%85%E6%A5%9A"><span class="toc-text">6. 做边界测试之前，先把长度单位算清楚</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-64-%E5%AD%97%E8%8A%82%E6%B6%88%E6%81%AF%E7%9A%84%E5%8D%95%E5%8C%85%E5%B8%83%E5%B1%80"><span class="toc-text">6.1 64 字节消息的单包布局</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-65-%E5%AD%97%E8%8A%82%E6%B6%88%E6%81%AF%E4%B8%BA%E4%BB%80%E4%B9%88%E6%8B%86%E6%88%90-69-6"><span class="toc-text">6.2 65 字节消息为什么拆成 69 + 6</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-Host-%E5%86%85%E6%A0%B8%E5%9B%9E%E7%8E%AF%E9%80%9A%E8%BF%87%E4%BA%86%EF%BC%8C%E4%BD%86%E5%AE%83%E4%B8%8D%E7%BB%8F%E8%BF%87-I3C"><span class="toc-text">7. Host 内核回环通过了，但它不经过 I3C</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E7%9C%9F%E5%AE%9E-I3C-%E8%BE%B9%E7%95%8C%EF%BC%9A68%E3%80%8169-%E5%AD%97%E8%8A%82%E5%8F%91%E5%87%BA%EF%BC%8C%E7%AC%AC%E4%BA%8C%E7%89%87%E5%A4%B1%E8%B4%A5"><span class="toc-text">8. 真实 I3C 边界：68、69 字节发出，第二片失败</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-sendto-%E8%BF%94%E5%9B%9E%EF%BC%8C%E5%B9%B6%E4%B8%8D%E6%98%AF%E6%9C%80%E5%90%8E%E4%B8%80%E6%AC%A1%E6%88%90%E5%8A%9F%E5%88%A4%E5%AE%9A"><span class="toc-text">8.1 sendto 返回，并不是最后一次成功判定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E5%A4%B1%E8%B4%A5%E5%90%8E%EF%BC%8C%E5%B0%8F-GetEID-%E4%BB%8D%E7%84%B6%E9%80%9A%E8%BF%87"><span class="toc-text">8.2 失败后，小 GetEID 仍然通过</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E4%B8%A4%E7%89%87%E9%97%B4%E9%9A%94%E7%BA%A6-1-%E7%A7%92%EF%BC%9A%E4%B8%80%E4%B8%AA%E7%BC%A9%E5%B0%8F%E8%8C%83%E5%9B%B4%E7%9A%84%E5%AE%9E%E9%AA%8C"><span class="toc-text">9. 两片间隔约 1 秒：一个缩小范围的实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-Host-%E5%8F%91%E4%B8%A4%E7%89%87%EF%BC%8C%E4%B8%AD%E9%97%B4%E8%A6%81%E7%AD%89-IBI-%E5%90%97"><span class="toc-text">9.1 Host 发两片，中间要等 IBI 吗</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-%E9%87%8D%E6%96%B0%E6%9E%9A%E4%B8%BE%E5%90%8E%E5%86%8D%E8%AF%95%E4%B8%80%E6%AC%A1%EF%BC%8C%E7%AC%AC%E4%BA%8C%E7%89%87-NACK-%E4%BB%8D%E8%83%BD%E5%A4%8D%E7%8E%B0"><span class="toc-text">10. 重新枚举后再试一次，第二片 NACK 仍能复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E4%BB%8A%E5%A4%A9%E5%88%B0%E5%BA%95%E9%AA%8C%E6%94%B6%E5%88%B0%E4%BA%86%E5%93%AA%E4%B8%80%E5%B1%82"><span class="toc-text">11. 今天到底验收到了哪一层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-%E4%B8%8B%E6%AC%A1%E6%8E%A5%E7%9D%80%E5%81%9A%EF%BC%8C%E8%A6%81%E5%85%88%E7%95%99%E4%BD%8F%E7%AC%AC%E4%B8%80%E5%8C%85%E4%B9%8B%E5%90%8E%E7%9A%84%E7%8E%B0%E5%9C%BA"><span class="toc-text">12. 下次接着做，要先留住第一包之后的现场</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#13-%E7%95%99%E7%BB%99%E5%90%8E%E7%BB%AD%E5%A4%8D%E6%9F%A5%E7%9A%84%E6%9D%90%E6%96%99"><span class="toc-text">13. 留给后续复查的材料</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div></body></html>

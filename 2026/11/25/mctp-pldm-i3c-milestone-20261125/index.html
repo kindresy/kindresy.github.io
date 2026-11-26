@@ -28,7 +28,7 @@
 <meta property="og:description" content="记录裸机端点独立移植包、i.MX93 slim 内核回移、上板部署和首笔 Get Endpoint ID 失败的全过程。当前枚举与驱动绑定通过，MCTP&#x2F;PLDM 端到端尚未打通。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-24T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-11-25T14:05:32.415Z">
+<meta property="article:modified_time" content="2026-11-26T11:14:10.190Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="baremetal">
 <meta property="article:tag" content="bringup">
@@ -53,7 +53,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-25T00:00:00+08:00","dateModified":"2026-11-25T22:05:32+08:00","datePublished":"2026-11-25T00:00:00+08:00","description":"今天把 MCTP&#x2F;PLDM 接到了一条已有回归基础的 I3C 链路上。i.MX93 已经启动新内核，能创建 AF_MCTP socket；Target 枚举成功，绑定了 mctp-i3c，mctpi3c0 也出来了。但第一条 Get Endpoint ID 没有拿到响应：HOST 向动态地址 0x44 发起 Private Write，在地址阶段遇到了 NACK。\n截至 2026-11-25 本轮记录结束，MCTP&#x2F;PLDM over I3C 尚未 bring-up 成功。 已完成的部署、离线测试和枚举各有证据；PEC、响应 IBI、Private Read、PLDM Base 以及真实传感器业务，还没有得到这套双端组合的联通结果。","headline":"MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/","keywords":"baremetal, linux, i3c, mctp, pldm, bringup, debugging","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-25T00:00:00+08:00","dateModified":"2026-11-26T19:14:10+08:00","datePublished":"2026-11-25T00:00:00+08:00","description":"今天把 MCTP&#x2F;PLDM 接到了一条已有回归基础的 I3C 链路上。i.MX93 已经启动新内核，能创建 AF_MCTP socket；Target 枚举成功，绑定了 mctp-i3c，mctpi3c0 也出来了。但第一条 Get Endpoint ID 没有拿到响应：HOST 向动态地址 0x44 发起 Private Write，在地址阶段遇到了 NACK。\n截至 2026-11-25 本轮记录结束，MCTP&#x2F;PLDM over I3C 尚未 bring-up 成功。 已完成的部署、离线测试和枚举各有证据；PEC、响应 IBI、Private Read、PLDM Base 以及真实传感器业务，还没有得到这套双端组合的联通结果。","headline":"MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/","keywords":"baremetal, linux, i3c, mctp, pldm, bringup, debugging","image":[]}</script>
   
 </head>
 <body>
@@ -72,7 +72,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/"><span class="title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</span></a><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/06/pcie/pcie_ep_demo/"><span class="title">PCIe 加速卡驱动：结构与工作流程</span></a><a class="item title" href="/2026/03/23/pcie/pcie_fw/"><span class="title">PCIe Endpoint 固件初始化实例</span></a><a class="item title" href="/2026/03/03/pcie/pcie_introduction/"><span class="title">pcie_introduction</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/"><span class="title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</span></a><a class="item title" href="/2026/11/26/i3c-mctp-regression-milestone-20261126/"><span class="title">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</span></a><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a><a class="item title" href="/2026/03/06/pcie/pcie_ep_demo/"><span class="title">PCIe 加速卡驱动：结构与工作流程</span></a><a class="item title" href="/2026/03/23/pcie/pcie_fw/"><span class="title">PCIe Endpoint 固件初始化实例</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -85,7 +85,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/">I3C</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-24T16:00:00.000Z">2026-11-25</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-25T14:05:32.415Z">2026-11-25</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-24T16:00:00.000Z">2026-11-25</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-26T11:14:10.190Z">2026-11-26</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -100,6 +100,7 @@
 <p><strong>截至 2026-11-25 本轮记录结束，MCTP&#x2F;PLDM over I3C 尚未 bring-up 成功。</strong> 已完成的部署、离线测试和枚举各有证据；PEC、响应 IBI、Private Read、PLDM Base 以及真实传感器业务，还没有得到这套双端组合的联通结果。</p>
 <span id="more"></span>
 
+<p><strong>11 月 26 日进展：</strong> 后续已修正 Host 请求工具的类型字节处理，7 项只读管理查询通过；连续分包仍在第二包地址阶段 NACK。详见<a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">次日回归记录</a>。下文保留 11 月 25 日的移植过程和当时停点。</p>
 <p>这个停点值得留下来。否则过几天再看，很容易把“模块加载成功”“网口出现”“socket 发送返回”混成一句“协议已经通了”，然后从错误的位置继续排查。下面按今天实际走过的顺序，记下设计选择、代码移植、编译中碰到的问题、部署方法和最后的失败现场。</p>
 <h2 id="1-先把目标讲明白：总线上的字节，怎样变成管理命令"><a href="#1-先把目标讲明白：总线上的字节，怎样变成管理命令" class="headerlink" title="1. 先把目标讲明白：总线上的字节，怎样变成管理命令"></a>1. 先把目标讲明白：总线上的字节，怎样变成管理命令</h2><p>最初的问题是：Current Proj 已有 I2C、I3C、SMBus 等接口，也做过读写、中断、DMA 验证，现在想让外部主机通过标准协议管理芯片。</p>
 <p>可以先用一个很小的例子理解这件事。HOST 想问：“你的温度是多少？”</p>
