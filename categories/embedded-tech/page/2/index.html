@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-linux-kernel-and-libraries/">从一笔 GetTID 读懂 AF_MCTP、libmctp 与 libpldm</a></li><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -99,6 +99,15 @@
   <section class="list-intro"><span class="eyebrow">分类</span><h1>嵌入式开发</h1><p>在这里继续寻找相关的文章与实践记录。</p></section>
 
 <div class="post-list post engineering-post-list">
+  
+    <a class="post-card post" href="/2026/11/27/pcie-link-lane-ltssm/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Link、Lane 与 LTSSM：PCIe 链路怎样建立</h2>
+  <p class="engineering-excerpt">从时钟与复位走到 L0，串起速率、宽度协商、均衡和控制器观察点。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
   
     <a class="post-card post" href="/2026/11/27/pcie-memory-tlp-completion/">
 <article class="md-text engineering-entry">
@@ -177,15 +186,6 @@
   <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
   <h2 class="post-title">Linux Host、EPC 与 EPF：控制器驱动的职责边界</h2>
   <p class="engineering-excerpt">从 Linux 的通用主桥和测试 EPF 入手，沿一笔 BAR 命令和返回中断，看清两侧四类驱动的分工。</p>
-  <div class="entry-meta"><span>2026-11-27</span></div>
-</article>
-</a>
-  
-    <a class="post-card post" href="/2026/11/27/pcie-reset-recovery/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
-  <h2 class="post-title">Link Down、Hot Reset 与 FLR：恢复时该重建什么</h2>
-  <p class="engineering-excerpt">按复位作用域区分状态保留和恢复责任，解释为何不能对所有故障执行同一套初始化。</p>
   <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>

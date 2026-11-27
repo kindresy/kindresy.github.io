@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-linux-kernel-and-libraries/">从一笔 GetTID 读懂 AF_MCTP、libmctp 与 libpldm</a></li><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -95,6 +95,15 @@
 
 
 <div class="post-list post engineering-post-list">
+  
+    <a class="post-card post" href="/2026/11/27/pcie-reset-recovery/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Link Down、Hot Reset 与 FLR：恢复时该重建什么</h2>
+  <p class="engineering-excerpt">按复位作用域区分状态保留和恢复责任，解释为何不能对所有故障执行同一套初始化。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
   
     <a class="post-card post" href="/2026/11/27/pcie-cadence-register-programming/">
 <article class="md-text engineering-entry">
@@ -173,15 +182,6 @@
   <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
   <h2 class="post-title">PCIe 错误与 AER：从事务失败到系统恢复</h2>
   <p class="engineering-excerpt">区分链路、事务和设备错误，沿 Completion Status、Header Log 与恢复入口查找原因。</p>
-  <div class="entry-meta"><span>2026-11-27</span></div>
-</article>
-</a>
-  
-    <a class="post-card post" href="/2026/11/27/pcie-expansion-option-rom/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
-  <h2 class="post-title">Expansion ROM：驱动加载前，设备如何参与启动</h2>
-  <p class="engineering-excerpt">解释 ROM BAR、临时地址窗口、镜像读取与信任校验，区分标准机制和控制器实现。</p>
   <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
