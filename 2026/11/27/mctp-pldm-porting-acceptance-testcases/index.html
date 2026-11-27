@@ -20,15 +20,15 @@
   <title>MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试 - 庐山东林</title>
 
   
-    <meta name="description" content="按 Host 和 Target 两侧整理准备条件、操作步骤、预期结果和通过判据，覆盖基础查询、69B 边界、分包、异常处理与恢复，作为待执行的功能验收表。">
+    <meta name="description" content="按 Host 和 Target 两侧整理七项功能验收用例，并列出当前对 MIPI、DMTF 协议规范及常见管理工具的实现范围、验证证据和支持边界。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MCTP&#x2F;PLDM 移植验收：Host 与 Target 的七项功能测试">
 <meta property="og:url" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-acceptance-testcases/">
 <meta property="og:site_name" content="庐山东林">
-<meta property="og:description" content="按 Host 和 Target 两侧整理准备条件、操作步骤、预期结果和通过判据，覆盖基础查询、69B 边界、分包、异常处理与恢复，作为待执行的功能验收表。">
+<meta property="og:description" content="按 Host 和 Target 两侧整理七项功能验收用例，并列出当前对 MIPI、DMTF 协议规范及常见管理工具的实现范围、验证证据和支持边界。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-27T07:45:00.000Z">
-<meta property="article:modified_time" content="2026-11-27T07:50:11.165Z">
+<meta property="article:modified_time" content="2026-11-27T08:01:29.030Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="baremetal">
 <meta property="article:tag" content="i3c">
@@ -53,7 +53,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T15:45:00+08:00","dateModified":"2026-11-27T15:50:11+08:00","datePublished":"2026-11-27T15:45:00+08:00","description":"前面的架构文档说明了两端移植了什么。接下来需要回答一个更实际的问题：拿着现在这套软件，怎样判断主要功能已经可以用了？\n这一轮先收住范围，检查七件事：设备能接入，管理能力能查询，短消息能往返，69B 边界能收发，长消息能重组，错误能正确处理，异常之后还能继续通信。先把这些做扎实，再考虑传感器、固件升级和更复杂的拓扑。\n下面是待执行的验收设计，所有用例的本轮结果均为“未执行”。 历史上通过的查询、新工具的离线检查和板端安装，分别保留各自的结论，不提前填进这张表。","headline":"MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-acceptance-testcases/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-acceptance-testcases/","keywords":"tutorial, baremetal, linux, i3c, mctp, pldm, testing","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T15:45:00+08:00","dateModified":"2026-11-27T16:01:29+08:00","datePublished":"2026-11-27T15:45:00+08:00","description":"前面的架构文档说明了两端移植了什么。接下来需要回答一个更实际的问题：拿着现在这套软件，怎样判断主要功能已经可以用了？\n这一轮先收住范围，检查七件事：设备能接入，管理能力能查询，短消息能往返，69B 边界能收发，长消息能重组，错误能正确处理，异常之后还能继续通信。先把这些做扎实，再考虑传感器、固件升级和更复杂的拓扑。\n下面是待执行的验收设计，所有用例的本轮结果均为“未执行”。 历史上通过的查询、新工具的离线检查和板端安装，分别保留各自的结论，不提前填进这张表。","headline":"MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-acceptance-testcases/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-acceptance-testcases/","keywords":"tutorial, baremetal, linux, i3c, mctp, pldm, testing","image":[]}</script>
   
 </head>
 <body>
@@ -85,7 +85,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/mctp-pldm/">MCTP 与 PLDM</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/mctp-pldm/porting-regression/">移植与回归</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-27T07:45:00.000Z">2026-11-27</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-27T07:50:11.165Z">2026-11-27</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-27T07:45:00.000Z">2026-11-27</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-27T08:01:29.030Z">2026-11-27</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -390,6 +390,255 @@
 </tbody></table>
 <p>每轮至少留下用例编号、双端版本、实际配置、Host 命令与退出码、响应字段，以及对应的 Target 日志或截图。出现超时、PEC 错误、地址 NACK 或异常状态时，先停下来保存现场，再决定下一步。</p>
 <p>源码合入 master、重新构建、部署到板上和实际回归是四件事。即使工具已经安装、查询曾经通过，也要把这轮 testcase 的结果单独填清楚。</p>
+<h2 id="8-当前能力与标准支持清单"><a href="#8-当前能力与标准支持清单" class="headerlink" title="8. 当前能力与标准支持清单"></a>8. 当前能力与标准支持清单</h2><p>如果现在有人问“你们已经支持哪些业界协议，可以接什么应用”，我会先回答：<strong>我们已经用标准协议完成了一组基础管理查询，正在补齐通信边界和恢复验收；目前能交付的业务范围仍是设备识别与能力发现。</strong></p>
+<p>下表按 2026 年 11 月 27 日的源码、产物和已有日志整理。“标准”指 MIPI、DMTF 发布的规范；Linux API、OpenBMC 工具和 NVIDIA 工具分别注明来源，不把社区软件或厂商协议统称为国际标准。表中的规范用于说明功能归属，除明确写出的实现版本外，不代表工程已符合链接版本的全部条款。</p>
+<h3 id="8-1-先看支持程度，再看协议名称"><a href="#8-1-先看支持程度，再看协议名称" class="headerlink" title="8.1 先看支持程度，再看协议名称"></a>8.1 先看支持程度，再看协议名称</h3><table>
+<thead>
+<tr>
+<th>支持程度</th>
+<th>在本文中代表什么</th>
+<th>当前例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>局部功能已有实板证据</td>
+<td>指定版本和配置下，真实 Host 与 Target 完成过对应交互</td>
+<td>原 requester 的 3 项 Control、4 项 PLDM Base 查询</td>
+</tr>
+<tr>
+<td>已实现，尚缺实板验收</td>
+<td>源码或离线测试中有该能力，不能沿用其他用例的 PASS</td>
+<td>Target SetTID；MCTP 分包重组的组件实现</td>
+</tr>
+<tr>
+<td>工具已部署，实链路待回归</td>
+<td>程序能在板端启动，相关编码解析有离线检查；尚未用它对当前 Target 发请求</td>
+<td>新独立版 <code>pldmtool</code></td>
+</tr>
+<tr>
+<td>本链路未集成</td>
+<td>尚无对应业务 handler、服务或端到端流程</td>
+<td>传感器管理、固件更新、Redfish、SPDM、NSM</td>
+</tr>
+</tbody></table>
+<p>这里不填写“标准支持百分比”。没有先固定规范版本、角色、必选条款和测试集合，百分比没有可比较的含义；实现几个命令也不等于完成一致性认证。</p>
+<h3 id="8-2-协议、规范及我们实际做到的位置"><a href="#8-2-协议、规范及我们实际做到的位置" class="headerlink" title="8.2 协议、规范及我们实际做到的位置"></a>8.2 协议、规范及我们实际做到的位置</h3><table>
+<thead>
+<tr>
+<th>协议或功能</th>
+<th>标准组织与规范</th>
+<th>当前实现范围</th>
+<th>能验证到什么程度</th>
+<th>还不能据此宣称什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>I3C SDR 基础通信</td>
+<td>MIPI：<a target="_blank" rel="noopener" href="https://www.mipi.org/specifications/i3c-sensor-specification">I3C &#x2F; I3C Basic</a></td>
+<td>当前管理链路使用枚举、Private Transfer、IBI 和相关 CCC；Host 为 Controller，Target 为目标设备</td>
+<td>历史查询已经实际经过这条 I3C 链路；TC-01、TC-03 用于本轮复核</td>
+<td>没有据此完成整个 I3C 规范、电气时序、HDR 或多 Controller 的一致性验证</td>
+</tr>
+<tr>
+<td>MCTP 基础传输与 Control</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0236_1.3.3.pdf">DSP0236</a></td>
+<td>Host 内核 MCTP、Target libmctp；已有 EID、消息类型、Tag、包头与分包重组实现，当前按固定 EID 手工配置</td>
+<td>GetEID、GetVersion、GetMessageTypeSupport 有实板结果；连续分包、恢复等仍按各用例验收</td>
+<td>不能写成完整 MCTP 功能通过；没有部署自动 bus-owner 管理，也没有完成桥接、多端点或跨网络互通</td>
+</tr>
+<tr>
+<td>MCTP over I3C</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0233_1.0.0.pdf">DSP0233 1.0.0</a>；这是当前回移驱动注释引用的版本</td>
+<td>Linux v6.8 binding 回移到当前 6.6.36 工程；使用软件 PEC、实际长度和 MDB <code>0xAE</code> 通知；本轮固定 68B MTU &#x2F; 69B 含 PEC 数据区</td>
+<td>单包查询链路已有证据；TC-04、TC-05 专门检查满包及分包</td>
+<td>69B 是当前 binding 的容量边界，不是所有业务消息的固定长度；不能宣称已完成该规范的全部发现、协商与异常条款验证</td>
+</tr>
+<tr>
+<td>PLDM over MCTP</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0241_1.0.0.pdf">DSP0241 1.0.0</a></td>
+<td>使用 MCTP Message Type <code>0x01</code> 传递 PLDM 请求和响应，当前端点路径使用 IC&#x3D;0</td>
+<td>四项 Base 查询已有实板结果；新工具的 AF_MCTP 封装与匹配经过离线检查</td>
+<td>不代表所有 PLDM Type、所有消息长度和所有端点均已互通</td>
+</tr>
+<tr>
+<td>PLDM Base &#x2F; Type 0</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0240_1.1.0.pdf">DSP0240 1.1.0</a></td>
+<td>当前 Target handler 实现 SetTID、GetTID、GetPLDMTypes、GetPLDMVersion、GetPLDMCommands；返回 Base 1.1.0</td>
+<td>四项只读查询有历史实板结果；SetTID 有组件实现和离线测试，尚不记为本轮实板通过</td>
+<td>不能用命令位图代替逐项验证；没有据此实现新版本的全部协商和 PLDM 跨命令 multipart 功能</td>
+</tr>
+<tr>
+<td>PLDM 平台监控 &#x2F; Type 2</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0248_1.3.0.pdf">DSP0248</a></td>
+<td>当前链路未集成 PDR 仓库、真实 sensor &#x2F; effecter provider 和事件业务</td>
+<td>可以据 Target 的类型声明判断该业务不在当前范围；还不能读取真实温度、功耗或控制执行器</td>
+<td>不能说已实现服务器级传感器监控、功耗控制或告警</td>
+</tr>
+<tr>
+<td>PLDM FRU &#x2F; Type 4</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/standards/published_documents">DSP0257，见规范目录</a></td>
+<td>当前链路没有 FRU 记录表服务</td>
+<td>尚无板卡序列号、部件号等 FRU 业务查询结果</td>
+<td>不能把 EID、TID 或芯片 PID 当成已经实现 FRU 资产管理</td>
+</tr>
+<tr>
+<td>PLDM Firmware Update &#x2F; Type 5</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0267_1.2.0.pdf">DSP0267</a></td>
+<td>Host <code>pldmtool</code> 有 QueryDeviceIdentifiers、GetFirmwareParameters、GetStatus 查询前端；当前 Target 没有 Type 5 handler，双方没有完整更新流程</td>
+<td>Host 的查询编码和模拟响应解析可离线验证；没有对当前 Target 的 Type 5 成功互通记录</td>
+<td>不能说已经支持刷固件；镜像匹配、拉取、校验、激活、取消和失败恢复均未交付</td>
+</tr>
+<tr>
+<td>PLDM RDE &#x2F; Type 6</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0218_1.2.0.pdf">DSP0218</a></td>
+<td>当前链路未集成设备资源模型、字典与 RDE 操作</td>
+<td>没有设备通过 RDE 向 BMC 提供 Redfish 资源的结果</td>
+<td>不能将 PLDM Base 查询成功写成 Redfish Device Enablement 已完成</td>
+</tr>
+<tr>
+<td>SPDM 认证与度量</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/standards/spdm">DSP0274 &#x2F; SPDM</a></td>
+<td>当前链路没有 requester &#x2F; responder、证书或度量流程</td>
+<td>尚无本设备的身份认证、度量或会话验证结果</td>
+<td>PEC、版本 CRC32 都不是设备身份认证，也不能据此宣称安全会话已建立</td>
+</tr>
+<tr>
+<td>Redfish 管理 API</td>
+<td>DMTF：<a target="_blank" rel="noopener" href="https://www.dmtf.org/standards/redfish">DSP0266 &#x2F; Redfish</a></td>
+<td>当前工程没有把这张 Target 的资产、传感器或更新能力接入 Redfish 服务</td>
+<td>没有本设备对应的 Redfish 管理资源可用于验收</td>
+<td>不能因为 Host 能运行 Linux 工具，就把它视为已经具有完整 BMC 北向管理接口</td>
+</tr>
+<tr>
+<td>其他 MCTP binding</td>
+<td>DMTF：SMBus&#x2F;I²C DSP0237、PCIe VDM DSP0238、USB DSP0283；见<a target="_blank" rel="noopener" href="https://www.dmtf.org/standards/published_documents">规范目录</a></td>
+<td>本轮实际集成与验证对象只有 I3C</td>
+<td>这些通道需各自的硬件连接、驱动和配置，再单独验证</td>
+<td>不能把 I3C 查询结果外推为 SMBus、PCIe VDM 或 USB 兼容</td>
+</tr>
+<tr>
+<td>NVIDIA NSM 遥测</td>
+<td>NVIDIA：<a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nsmd">NSM 开源实现</a>，属于厂商协议，不是 PLDM Type 2</td>
+<td>当前 Host&#x2F;Target 链路未集成 NSM handler 或 <code>nsmd</code></td>
+<td>尚无本设备的 NSM 发现和遥测结果</td>
+<td>MCTP 能承载厂商消息，不代表当前 Target 已能响应 NVIDIA GPU 管理命令</td>
+</tr>
+</tbody></table>
+<p>上表中最容易混淆的是 Type 5：<strong>我们能准备标准查询请求，但当前设备没有提供相应业务。</strong> 这与“已经能给当前设备升级固件”之间，还隔着完整的双向更新状态机和实际固件存储、激活、恢复实现。</p>
+<h3 id="8-3-常见-App、服务和库的支持程度"><a href="#8-3-常见-App、服务和库的支持程度" class="headerlink" title="8.3 常见 App、服务和库的支持程度"></a>8.3 常见 App、服务和库的支持程度</h3><p>下面把可运行的工具、常驻服务和底层库分开标明。工具的参数与源码来自开源项目，不属于 DMTF 强制规定的统一 CLI；没有安装某个工具，也不直接等于协议不符合标准。</p>
+<table>
+<thead>
+<tr>
+<th>App &#x2F; 组件</th>
+<th>来源与类别</th>
+<th>当前工程的支持程度</th>
+<th>现在可以怎样验证</th>
+<th>需要注意的范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mctp</code></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/CodeConstruct/mctp">CodeConstruct&#x2F;mctp</a>，社区命令行工具</td>
+<td>已集成，当前使用固定版本 <code>34900256b183811b25ff4046aa9702cef54befc9</code></td>
+<td>查看 link、address、route、neigh；已有本地配置和实际查询链路记录</td>
+<td>show 查看的是本地状态，不替 Target 设置 EID，不是完整端点管理服务</td>
+</tr>
+<tr>
+<td><code>pldmtool</code></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/openbmc/pldm">OpenBMC pldm</a>，社区 PLDM requester</td>
+<td>OpenBMC 2.14 固定基线的独立 Host 适配已安装；包含 Base 四项查询、Type 5 三项信息查询与 raw</td>
+<td>原生及 AArch64 仿真各 36 项离线检查通过；板端文件校验和 help 通过；真实查询回归待执行</td>
+<td>这是明确裁剪的适配版，不是最新版完整前端；不包含 Type 2 前端、常驻管理或升级流程</td>
+</tr>
+<tr>
+<td><code>mctp-pldm-request</code></td>
+<td>本项目自研测试工具，不是行业通用 CLI</td>
+<td>已集成并用于历史联调，支持所列 Control 和 Base 请求</td>
+<td>11 月 26 日七项只读查询有实板日志，可与新工具串行对照</td>
+<td>当前 Base GetCommands 固定查询 1.1.0；不是通用的全部 PLDM 业务客户端</td>
+</tr>
+<tr>
+<td>Linux <code>AF_MCTP</code></td>
+<td><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/networking/mctp.html">Linux 内核接口</a>，不是一个 App</td>
+<td>当前 Host 内核已恢复该接口，工具直接使用它收发</td>
+<td>已有 socket、路由和真实查询记录；新工具的 socket 契约有离线检查</td>
+<td>需要对应 binding、路由、邻居和 Target 准备；socket 创建成功不能证明对端可达</td>
+</tr>
+<tr>
+<td><code>libmctp</code> &#x2F; <code>libpldm</code></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/openbmc/libmctp">OpenBMC libmctp</a>、<a target="_blank" rel="noopener" href="https://github.com/openbmc/libpldm">libpldm</a>，协议实现库</td>
+<td>Target 使用 libmctp 与 Base codec；Host requester 使用 libpldm，Host 的 MCTP 核心在内核中</td>
+<td>可核对固定源码、组件测试以及已走通的 Base 数据</td>
+<td>Host 没有因此部署用户态 libmctp；库中存在其他类型的编解码，不等于平台已有对应 handler 或业务 provider</td>
+</tr>
+<tr>
+<td><code>mctpd</code></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/CodeConstruct/mctp">CodeConstruct&#x2F;mctp</a>，端点管理服务</td>
+<td>当前 Host 未部署</td>
+<td>现阶段使用固定 EID 和手工拓扑配置</td>
+<td>尚无自动 bus-owner 发现、地址管理与服务级恢复结果</td>
+</tr>
+<tr>
+<td><code>pldmd</code></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/openbmc/pldm">OpenBMC pldm</a>，常驻 PLDM 服务</td>
+<td>当前 Host 未部署；独立 <code>pldmtool</code> 不依赖它</td>
+<td>目前使用一次请求、一次等待的手动工具</td>
+<td>没有常驻设备发现、传感器轮询、D-Bus 资产发布或更新代理服务</td>
+</tr>
+<tr>
+<td><code>bmcweb</code> &#x2F; Redfish 客户端</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/openbmc/bmcweb">OpenBMC bmcweb</a> 提供服务；HTTP 客户端用于访问服务</td>
+<td>当前链路没有集成本设备的 Redfish 服务端</td>
+<td>后续需先有设备资源和实际 API，再用客户端验收</td>
+<td>客户端能发 HTTP 请求，与设备是否提供 Redfish 是两件事</td>
+</tr>
+<tr>
+<td><code>ipmitool</code></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ipmitool/ipmitool">ipmitool 项目</a>，IPMI 客户端</td>
+<td>当前 Target 链路没有 IPMI 管理服务或适配</td>
+<td>不能直接用它替代当前 PLDM Base 验收</td>
+<td>IPMI 是另一套管理接口，安装客户端不会让 MCTP&#x2F;PLDM 设备自动成为 IPMI 设备</td>
+</tr>
+<tr>
+<td><code>nsmd</code> &#x2F; <code>nsmtool</code></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nsmd">NVIDIA&#x2F;nsmd</a>，厂商管理服务与客户端</td>
+<td>当前工程未集成</td>
+<td>等 Target 真正实现 NSM 并接入服务后，再安排互通</td>
+<td>不能把 NVIDIA 工具的可用性当作通用 PLDM 兼容判据</td>
+</tr>
+</tbody></table>
+<h3 id="8-4-这些结论可以回查什么"><a href="#8-4-这些结论可以回查什么" class="headerlink" title="8.4 这些结论可以回查什么"></a>8.4 这些结论可以回查什么</h3><p>“标准定义了什么”和“我们实际做到了什么”使用不同证据：前者看上表的官方规范，后者看对应源码、产物和运行记录。</p>
+<table>
+<thead>
+<tr>
+<th>当前结论</th>
+<th>可回查的依据</th>
+<th>它证明到哪里</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>I3C binding、地址和路由已建立过</td>
+<td><a href="/2026/11/27/mctp-pldm-porting-software-architecture/evidence/mctp-binding-and-route.log">绑定与本地配置日志</a></td>
+<td>当时配置下的绑定与本地状态，不是完整标准认证</td>
+</tr>
+<tr>
+<td>原 requester 的 Control &#x2F; Base 查询能往返</td>
+<td><a href="/2026/11/27/mctp-pldm-porting-software-architecture/evidence/get-eid.log">GetEID</a>、<a href="/2026/11/27/mctp-pldm-porting-software-architecture/evidence/03-base-get-tid.log">GetTID</a>、<a href="/2026/11/27/mctp-pldm-porting-software-architecture/evidence/05-base-get-version.log">版本与 CRC</a>、<a href="/2026/11/27/mctp-pldm-porting-software-architecture/evidence/06-base-get-commands.log">Base 命令位图</a></td>
+<td>已记录的具体查询；位图声明包含 SetTID，不等于 SetTID 已完成实板测试</td>
+</tr>
+<tr>
+<td>分包还需单独验收</td>
+<td><a href="/2026/11/27/mctp-pldm-porting-software-architecture/evidence/fragment-no-delay.log">连续分包原始记录</a></td>
+<td>历史第二包 NACK 的实际停点，不能沿用查询 PASS 覆盖它</td>
+</tr>
+<tr>
+<td>新 pldmtool 已完成集成准备</td>
+<td><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/pldmtool-validation-summary.txt">集成验证摘要</a></td>
+<td>固定版本、离线检查、板端安装与 help；摘要明确未做真实 Target 查询</td>
+</tr>
+</tbody></table>
+<p>对外介绍时，我会使用这样的表述：<strong>当前已打通基于 Linux AF_MCTP 的 MCTP over I3C 基础管理链路，完成过三项 MCTP Control 和四项 PLDM Base 查询；新工具已部署，完整通信验收仍按本文用例推进。</strong></p>
+<p>等后续补上真实传感器、PDR、更新状态机或 Redfish 服务，再逐项更新表格。没有新的实现和同轮证据，就不把支持范围往上加。</p>
 </article>
 <div class="article-footer">
     <section id="license">
@@ -415,7 +664,7 @@
 
 
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%88%E7%A1%AE%E5%AE%9A%E6%9C%AC%E8%BD%AE%E6%B5%8B%E4%BB%80%E4%B9%88"><span class="toc-text">1. 先确定本轮测什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%B8%83%E9%A1%B9%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E7%9A%84-TESTCASE-%E8%A1%A8%E6%A0%BC"><span class="toc-text">2. 七项主要功能的 TESTCASE 表格</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%B8%A4%E4%BE%A7%E6%80%8E%E6%A0%B7%E5%87%86%E5%A4%87%EF%BC%8C%E5%9C%A8%E5%93%AA%E9%87%8C%E5%81%9C%E4%B8%8B%E6%9D%A5%E7%AD%89%E5%BE%85"><span class="toc-text">3. 两侧怎样准备，在哪里停下来等待</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%AE%9E%E9%99%85%E5%91%BD%E4%BB%A4"><span class="toc-text">4. 基础查询的实际命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%8E%9F-requester-%E6%89%A7%E8%A1%8C-MCTP-Control"><span class="toc-text">4.1 原 requester 执行 MCTP Control</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E6%96%B0-pldmtool-%E6%89%A7%E8%A1%8C-PLDM-Base"><span class="toc-text">4.2 新 pldmtool 执行 PLDM Base</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E4%B8%80%E6%AC%A1%E4%BF%9D%E5%AD%98%E5%9B%9B%E9%A1%B9-Base-%E6%9F%A5%E8%AF%A2"><span class="toc-text">4.3 一次保存四项 Base 查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E4%B8%80%E6%9D%A1%E5%8F%AF%E6%98%8E%E7%A1%AE%E5%88%A4%E6%96%AD%E7%9A%84%E5%BC%82%E5%B8%B8%E8%AF%B7%E6%B1%82"><span class="toc-text">4.4 一条可明确判断的异常请求</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-69B%E3%80%81%E5%88%86%E5%8C%85%E5%92%8C%E7%9F%AD%E6%B6%88%E6%81%AF%E8%A6%81%E5%88%86%E5%88%AB%E8%AE%B0%E5%BD%95"><span class="toc-text">5. 69B、分包和短消息要分别记录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%91%BD%E4%BB%A4%E3%80%81%E5%86%85%E9%83%A8%E5%8A%A8%E4%BD%9C%E4%B8%8E%E6%80%BB%E7%BA%BF%E8%A1%8C%E4%B8%BA"><span class="toc-text">6. 命令、内部动作与总线行为</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%9B%9E%E5%BD%92%E7%BB%93%E6%9D%9F%E6%97%B6%E6%80%8E%E6%A0%B7%E5%A1%AB%E5%86%99%E7%BB%93%E6%9E%9C"><span class="toc-text">7. 回归结束时怎样填写结果</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%88%E7%A1%AE%E5%AE%9A%E6%9C%AC%E8%BD%AE%E6%B5%8B%E4%BB%80%E4%B9%88"><span class="toc-text">1. 先确定本轮测什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%B8%83%E9%A1%B9%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E7%9A%84-TESTCASE-%E8%A1%A8%E6%A0%BC"><span class="toc-text">2. 七项主要功能的 TESTCASE 表格</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%B8%A4%E4%BE%A7%E6%80%8E%E6%A0%B7%E5%87%86%E5%A4%87%EF%BC%8C%E5%9C%A8%E5%93%AA%E9%87%8C%E5%81%9C%E4%B8%8B%E6%9D%A5%E7%AD%89%E5%BE%85"><span class="toc-text">3. 两侧怎样准备，在哪里停下来等待</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%AE%9E%E9%99%85%E5%91%BD%E4%BB%A4"><span class="toc-text">4. 基础查询的实际命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%8E%9F-requester-%E6%89%A7%E8%A1%8C-MCTP-Control"><span class="toc-text">4.1 原 requester 执行 MCTP Control</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E6%96%B0-pldmtool-%E6%89%A7%E8%A1%8C-PLDM-Base"><span class="toc-text">4.2 新 pldmtool 执行 PLDM Base</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E4%B8%80%E6%AC%A1%E4%BF%9D%E5%AD%98%E5%9B%9B%E9%A1%B9-Base-%E6%9F%A5%E8%AF%A2"><span class="toc-text">4.3 一次保存四项 Base 查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E4%B8%80%E6%9D%A1%E5%8F%AF%E6%98%8E%E7%A1%AE%E5%88%A4%E6%96%AD%E7%9A%84%E5%BC%82%E5%B8%B8%E8%AF%B7%E6%B1%82"><span class="toc-text">4.4 一条可明确判断的异常请求</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-69B%E3%80%81%E5%88%86%E5%8C%85%E5%92%8C%E7%9F%AD%E6%B6%88%E6%81%AF%E8%A6%81%E5%88%86%E5%88%AB%E8%AE%B0%E5%BD%95"><span class="toc-text">5. 69B、分包和短消息要分别记录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%91%BD%E4%BB%A4%E3%80%81%E5%86%85%E9%83%A8%E5%8A%A8%E4%BD%9C%E4%B8%8E%E6%80%BB%E7%BA%BF%E8%A1%8C%E4%B8%BA"><span class="toc-text">6. 命令、内部动作与总线行为</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%9B%9E%E5%BD%92%E7%BB%93%E6%9D%9F%E6%97%B6%E6%80%8E%E6%A0%B7%E5%A1%AB%E5%86%99%E7%BB%93%E6%9E%9C"><span class="toc-text">7. 回归结束时怎样填写结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E5%BD%93%E5%89%8D%E8%83%BD%E5%8A%9B%E4%B8%8E%E6%A0%87%E5%87%86%E6%94%AF%E6%8C%81%E6%B8%85%E5%8D%95"><span class="toc-text">8. 当前能力与标准支持清单</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E5%85%88%E7%9C%8B%E6%94%AF%E6%8C%81%E7%A8%8B%E5%BA%A6%EF%BC%8C%E5%86%8D%E7%9C%8B%E5%8D%8F%E8%AE%AE%E5%90%8D%E7%A7%B0"><span class="toc-text">8.1 先看支持程度，再看协议名称</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E5%8D%8F%E8%AE%AE%E3%80%81%E8%A7%84%E8%8C%83%E5%8F%8A%E6%88%91%E4%BB%AC%E5%AE%9E%E9%99%85%E5%81%9A%E5%88%B0%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="toc-text">8.2 协议、规范及我们实际做到的位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-%E5%B8%B8%E8%A7%81-App%E3%80%81%E6%9C%8D%E5%8A%A1%E5%92%8C%E5%BA%93%E7%9A%84%E6%94%AF%E6%8C%81%E7%A8%8B%E5%BA%A6"><span class="toc-text">8.3 常见 App、服务和库的支持程度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-4-%E8%BF%99%E4%BA%9B%E7%BB%93%E8%AE%BA%E5%8F%AF%E4%BB%A5%E5%9B%9E%E6%9F%A5%E4%BB%80%E4%B9%88"><span class="toc-text">8.4 这些结论可以回查什么</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
