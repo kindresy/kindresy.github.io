@@ -27,14 +27,14 @@
 <meta property="og:site_name" content="搴愬北涓滄灄">
 <meta property="og:description" content="用六幅拓扑图，从单 Host 单 Target、同总线多设备，逐步扩展到多接口、MCTP bridge、多级跨介质转发和独立 network，解释 EID、下一跳、地址池与 PLDM 终端的关系。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg">
-<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-02-multi-target.svg">
-<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-03-multi-interface.svg">
-<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-04-bridge.svg">
-<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-05-multi-hop.svg">
-<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-06-independent-networks.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg?v=20261127-2">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-02-multi-target.svg?v=20261127-2">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-03-multi-interface.svg?v=20261127-2">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-04-bridge.svg?v=20261127-2">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-05-multi-hop.svg?v=20261127-2">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-06-independent-networks.svg?v=20261127-2">
 <meta property="article:published_time" content="2026-11-27T04:10:00.000Z">
-<meta property="article:modified_time" content="2026-11-27T04:09:41.261Z">
+<meta property="article:modified_time" content="2026-11-27T05:50:24.806Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="architecture">
 <meta property="article:tag" content="i3c">
@@ -43,7 +43,7 @@
 <meta property="article:tag" content="pldm">
 <meta property="article:tag" content="protocol">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg">
+<meta name="twitter:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg?v=20261127-2">
   
   
   
@@ -59,7 +59,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T12:10:00+08:00","dateModified":"2026-11-27T12:09:41+08:00","datePublished":"2026-11-27T12:10:00+08:00","description":"两端直连时，EID 和 I3C 地址看起来有些重复：Host 要找 EID 9，最后反正还是访问 0x44。把设备多接几个，再加一条总线，这两层地址的作用就开始分开了。\n这篇从我们已经验证过的 Host—Target 直连关系出发，一次只增加一种复杂度：先加设备，再加接口，然后引入桥接，最后比较一个大网络和两个独立网络。\n六幅图中的第一幅对应当前回归的连接关系；后五幅是为了讲清机制设计的教学拓扑，地址、桥接能力和地址池均为示例，没有声称 Current Proj 已实现这些扩展。每幅图都可以点击放大，也提供 PNG。","headline":"从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/","keywords":"linux, protocol, architecture, i3c, mctp, pldm","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T12:10:00+08:00","dateModified":"2026-11-27T13:50:24+08:00","datePublished":"2026-11-27T12:10:00+08:00","description":"两端直连时，EID 和 I3C 地址看起来有些重复：Host 要找 EID 9，最后反正还是访问 0x44。把设备多接几个，再加一条总线，这两层地址的作用就开始分开了。\n这篇从我们已经验证过的 Host—Target 直连关系出发，一次只增加一种复杂度：先加设备，再加接口，然后引入桥接，最后比较一个大网络和两个独立网络。\n六幅图中的第一幅对应当前回归的连接关系；后五幅是为了讲清机制设计的教学拓扑，地址、桥接能力和地址池均为示例，没有声称 Current Proj 已实现这些扩展。每幅图都可以点击放大，也提供 PNG。","headline":"从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/","keywords":"linux, protocol, architecture, i3c, mctp, pldm","image":[]}</script>
   
 </head>
 <body>
@@ -78,7 +78,7 @@
 
 
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/26/i3c-mctp-regression-milestone-20261126/"><span class="title">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</span></a><a class="item title" href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/"><span class="title">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</span></a><a class="item title" href="/2026/11/27/mctp-pldm-network-ids-packet-path/"><span class="title">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</span></a><a class="item title" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/"><span class="title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</span></a><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a></div></widget>
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/"><span class="title">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</span></a><a class="item title" href="/2026/11/26/i3c-mctp-regression-milestone-20261126/"><span class="title">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</span></a><a class="item title" href="/2026/11/27/mctp-pldm-network-ids-packet-path/"><span class="title">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</span></a><a class="item title" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/"><span class="title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</span></a><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -91,7 +91,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/">I3C</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-27T04:10:00.000Z">2026-11-27</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-27T04:09:41.261Z">2026-11-27</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-27T04:10:00.000Z">2026-11-27</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-27T05:50:24.806Z">2026-11-27</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -111,7 +111,7 @@
 <p><strong>MCTP network 边界</strong>决定 EID 在哪个地址空间里解释。同一 network 内的端点需要避免 EID 冲突；跨了总线，不意味着自动跨了 network。</p>
 <p><strong>PLDM 处理边界</strong>决定哪里真正接收管理命令、解释数据并生成响应。普通 MCTP bridge 的转发职责，并不要求它替最终 Target 执行 PLDM 命令。MCTP 将统一传输与底层 binding 分开，正是为了让上层不必跟着物理介质改写。<a target="_blank" rel="noopener" href="https://github.com/openbmc/docs/blob/master/designs/mctp/mctp.md">OpenBMC MCTP 设计说明</a></p>
 <p>如果还拿不准 network ID、EID、PID、DA、TID 的区别，可以先看<a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">沿一笔 GetTID 拆解 ID 与收发路径</a>，其中有一张可以切换封装、解析路径的总图。</p>
-<h2 id="1-两端直连：先让一条管理消息走完"><a href="#1-两端直连：先让一条管理消息走完" class="headerlink" title="1. 两端直连：先让一条管理消息走完"></a>1. 两端直连：先让一条管理消息走完</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg" alt="拓扑一：i.MX93 Host 与 Current Proj Target 经一条 I3C 总线直连，属于同一个 MCTP network"></p>
+<h2 id="1-两端直连：先让一条管理消息走完"><a href="#1-两端直连：先让一条管理消息走完" class="headerlink" title="1. 两端直连：先让一条管理消息走完"></a>1. 两端直连：先让一条管理消息走完</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg?v=20261127-2" alt="拓扑一：i.MX93 Host 与 Current Proj Target 经一条 I3C 总线直连，属于同一个 MCTP network"></p>
 <p><a href="topology-01-direct.png">查看 PNG</a></p>
 <p>这是我们当前最熟悉的组合：一个 Linux Host，一个裸机 Target，属于同一 MCTP network。Host 的本地 EID 是 8，Target 的 EID 是 9。Host 的配置工具把这套地址空间标记为 network 1。</p>
 <p>请求走：</p>
@@ -120,7 +120,7 @@
 <p>Target 响应时用 IBI 通知 Host 读取，成功返回 TID 1。TID 是 PLDM 身份，不是把 I3C DA 再编码一次。</p>
 <p>这个拓扑不用 bridge，Host 不需要替其他设备转发。当前使用固定 EID，Host 手动配置地址、路由和邻居；GetEID&#x2F;GetTID 是确认已有状态。11 月 26 日的 7 项只读查询通过，但连续分包、满包响应和压力测试仍有各自的验收边界，详见<a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">回归记录</a>。</p>
 <p>这里先形成一个判断方法：<strong>PLDM 命令选目标 EID，路由选接口，binding 再找到这一跳的物理设备。</strong></p>
-<h2 id="2-同一总线加多个-Target：EID-开始显出价值"><a href="#2-同一总线加多个-Target：EID-开始显出价值" class="headerlink" title="2. 同一总线加多个 Target：EID 开始显出价值"></a>2. 同一总线加多个 Target：EID 开始显出价值</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-02-multi-target.svg" alt="拓扑二：同一条 I3C 总线上有三个 Target，各自具有不同 EID、PID、DA 和 PLDM TID"></p>
+<h2 id="2-同一总线加多个-Target：EID-开始显出价值"><a href="#2-同一总线加多个-Target：EID-开始显出价值" class="headerlink" title="2. 同一总线加多个 Target：EID 开始显出价值"></a>2. 同一总线加多个 Target：EID 开始显出价值</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-02-multi-target.svg?v=20261127-2" alt="拓扑二：同一条 I3C 总线上有三个 Target，各自具有不同 EID、PID、DA 和 PLDM TID"></p>
 <p><a href="topology-02-multi-target.png">查看 PNG</a></p>
 <p>现在仍然只有一条 I3C 总线，但增加到三个 Target：</p>
 <table>
@@ -162,7 +162,7 @@
 <p>访问 EID 10 时，MCTP 头中的目的 EID 为 10，Controller 实际寻址 <code>0x45</code>。不能因为都连在同一个接口，就给三个 Target 配相同 EID。</p>
 <p>设备加入、退出或重新枚举时，还要分别维护物理身份与动态地址、EID 分配、路由邻居，以及 PLDM 终端状态。只看到 I3C 枚举成功，还不知道这个新设备使用什么 EID、支持哪些管理消息。</p>
 <p>这个阶段没有跨总线转发，新增的主要是设备发现、标识分配和表项维护，而不是桥接。</p>
-<h2 id="3-Host-接两条总线：多接口可以属于同一个-network"><a href="#3-Host-接两条总线：多接口可以属于同一个-network" class="headerlink" title="3. Host 接两条总线：多接口可以属于同一个 network"></a>3. Host 接两条总线：多接口可以属于同一个 network</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-03-multi-interface.svg" alt="拓扑三：一个 Host 的两条 MCTP 接口处于同一 network，分别连接不同 I3C 总线和端点"></p>
+<h2 id="3-Host-接两条总线：多接口可以属于同一个-network"><a href="#3-Host-接两条总线：多接口可以属于同一个-network" class="headerlink" title="3. Host 接两条总线：多接口可以属于同一个 network"></a>3. Host 接两条总线：多接口可以属于同一个 network</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-03-multi-interface.svg?v=20261127-2" alt="拓扑三：一个 Host 的两条 MCTP 接口处于同一 network，分别连接不同 I3C 总线和端点"></p>
 <p><a href="topology-03-multi-interface.png">查看 PNG</a></p>
 <p>接着给 Host 增加第二个接口。示例中，两条接口都归入 Linux network 1：</p>
 <table>
@@ -195,7 +195,7 @@
 
 <p>但这还没有证明 A 可以经 Host 访问 B。<strong>Host 能通过两个接口访问设备，与 Host 已经启用并完成跨接口 MCTP 转发，是两项能力。</strong> 若希望 Host 充当 bridge，还需要转发实现、双向路由和相应管理策略，不能仅靠把接口放进同一个 network。</p>
 <p>这一图要记住两句话：同一个 network 可以跨多个接口；不同物理总线可以复用 DA。</p>
-<h2 id="4-加入一个-MCTP-bridge：目的地址与下一跳分开"><a href="#4-加入一个-MCTP-bridge：目的地址与下一跳分开" class="headerlink" title="4. 加入一个 MCTP bridge：目的地址与下一跳分开"></a>4. 加入一个 MCTP bridge：目的地址与下一跳分开</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-04-bridge.svg" alt="拓扑四：Host 通过 MCTP bridge 访问下游 I3C Target，端到端 EID 保持不变，每跳使用各自 DA"></p>
+<h2 id="4-加入一个-MCTP-bridge：目的地址与下一跳分开"><a href="#4-加入一个-MCTP-bridge：目的地址与下一跳分开" class="headerlink" title="4. 加入一个 MCTP bridge：目的地址与下一跳分开"></a>4. 加入一个 MCTP bridge：目的地址与下一跳分开</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-04-bridge.svg?v=20261127-2" alt="拓扑四：Host 通过 MCTP bridge 访问下游 I3C Target，端到端 EID 保持不变，每跳使用各自 DA"></p>
 <p><a href="topology-04-bridge.png">查看 PNG</a></p>
 <p>现在 Host 不能直接接触最终 Target，中间加一颗具备两侧收发和 MCTP 转发能力的 bridge B。上游总线 A 连接 Host 与 bridge，下游总线 B 连接 bridge 与最终 Target。</p>
 <p>本例设定 bridge 上行管理端点 EID 9，下行管理端点 EID 16，最终 Target 为 EID 20。两个 bridge 端点的数字只是本图选用的模型，不是说所有 bridge 都必须照抄这两个值。</p>
@@ -241,7 +241,7 @@
 <p>响应反向返回时，也需要到 Host EID 8 的路由。只配去程，很可能看到 Target 已生成响应，Host 却收不到。</p>
 <h3 id="4-2-IBI-也不会作为一根中断线穿过-bridge"><a href="#4-2-IBI-也不会作为一根中断线穿过-bridge" class="headerlink" title="4.2 IBI 也不会作为一根中断线穿过 bridge"></a>4.2 IBI 也不会作为一根中断线穿过 bridge</h3><p>在两侧都用当前 I3C 通知模式的前提下，最终 Target 有响应时先通知下游 Controller，也就是 bridge；bridge 读取并转发数据，上游再使用自己的 Target 端通知 Host 来读。</p>
 <p>每跳有各自的 Private Transfer、IBI 和 PEC。不要把下游 Target 的 IBI 想象成直接进入 Host 的同一个硬件事件。<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0233_1.0.1.pdf">DSP0233：I3C 消息传输</a></p>
-<h2 id="5-多级-bridge、跨介质：同一条-PLDM-请求经过不同-binding"><a href="#5-多级-bridge、跨介质：同一条-PLDM-请求经过不同-binding" class="headerlink" title="5. 多级 bridge、跨介质：同一条 PLDM 请求经过不同 binding"></a>5. 多级 bridge、跨介质：同一条 PLDM 请求经过不同 binding</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-05-multi-hop.svg" alt="拓扑五：同一 MCTP network 中，PLDM 请求经 I3C、SMBus 和 PCIe VDM 及两级 bridge 到达最终端点"></p>
+<h2 id="5-多级-bridge、跨介质：同一条-PLDM-请求经过不同-binding"><a href="#5-多级-bridge、跨介质：同一条-PLDM-请求经过不同-binding" class="headerlink" title="5. 多级 bridge、跨介质：同一条 PLDM 请求经过不同 binding"></a>5. 多级 bridge、跨介质：同一条 PLDM 请求经过不同 binding</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-05-multi-hop.svg?v=20261127-2" alt="拓扑五：同一 MCTP network 中，PLDM 请求经 I3C、SMBus 和 PCIe VDM 及两级 bridge 到达最终端点"></p>
 <p><a href="topology-05-multi-hop.png">查看 PNG</a></p>
 <p>再增加一级 bridge，并让几段链路使用不同介质：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Host → I3C → bridge B → SMBus → bridge C → PCIe VDM → Target</span><br></pre></td></tr></table></figure>
@@ -281,7 +281,7 @@
 <p>地址池管理解决“谁可以用这些 EID”，转发表解决“到这些 EID 从哪里走”。分到地址池，不等于每条转发路径已经配置并验证完成。</p>
 <h3 id="5-2-PLDM-终端不会因为经过两座桥就多出两个"><a href="#5-2-PLDM-终端不会因为经过两座桥就多出两个" class="headerlink" title="5.2 PLDM 终端不会因为经过两座桥就多出两个"></a>5.2 PLDM 终端不会因为经过两座桥就多出两个</h3><p>这笔 GetTID 的 PLDM 处理点仍在最终 Target，返回的 TID 为 2。bridge 可以有自己的 PLDM 管理功能，但那是另一个可单独访问的终端，不是转发每条消息都必须进入的 handler。</p>
 <p>如果中间设备先终止原请求、解析业务，再以自己的身份向下游新发一条 PLDM 请求，它承担的是代理或网关行为。此时已经是两笔事务，不能继续套用“普通转发中源、目的 EID 保持不变”的描述。</p>
-<h2 id="6-两个独立-network：相同-EID-可以分别存在"><a href="#6-两个独立-network：相同-EID-可以分别存在" class="headerlink" title="6. 两个独立 network：相同 EID 可以分别存在"></a>6. 两个独立 network：相同 EID 可以分别存在</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-06-independent-networks.svg" alt="拓扑六：一个 Linux Host 连接两个独立 MCTP network，两个网络各有 EID 9，通过 network ID 区分"></p>
+<h2 id="6-两个独立-network：相同-EID-可以分别存在"><a href="#6-两个独立-network：相同-EID-可以分别存在" class="headerlink" title="6. 两个独立 network：相同 EID 可以分别存在"></a>6. 两个独立 network：相同 EID 可以分别存在</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-06-independent-networks.svg?v=20261127-2" alt="拓扑六：一个 Linux Host 连接两个独立 MCTP network，两个网络各有 EID 9，通过 network ID 区分"></p>
 <p><a href="topology-06-independent-networks.png">查看 PNG</a></p>
 <p>最后换一种扩展方式：两套管理系统不互通，各自保留自己的 EID 地址空间。Host 在 Linux 中把它们标为 network 1 和 network 2。</p>
 <table>
