@@ -1,0 +1,1408 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>从手工收发到双端回归：I3C Host 与 Target 的设计和实现 - 庐山东林的晚钟</title>
+
+  
+    <meta name="description" content="回看一套 i3c-host 与裸机 Target 验证框架：从字符设备、所有权和 FIFO，到 IBI 握手、复位恢复与历次回归的证据边界。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从手工收发到双端回归：I3C Host 与 Target 的设计和实现">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/27/i3c-host-target-architecture-regression/">
+<meta property="og:site_name" content="庐山东林的晚钟">
+<meta property="og:description" content="回看一套 i3c-host 与裸机 Target 验证框架：从字符设备、所有权和 FIFO，到 IBI 握手、复位恢复与历次回归的证据边界。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/i3c-host-target-architecture-regression/architecture.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/i3c-host-target-architecture-regression/lifecycle.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/i3c-host-target-architecture-regression/handshake.svg">
+<meta property="article:published_time" content="2026-11-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-27T09:03:06.018Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="baremetal">
+<meta property="article:tag" content="code-analysis">
+<meta property="article:tag" content="dma">
+<meta property="article:tag" content="hot-join">
+<meta property="article:tag" content="i3c">
+<meta property="article:tag" content="ibi">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="pio">
+<meta property="article:tag" content="regression">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.coffepattern.top/2026/11/27/i3c-host-target-architecture-regression/architecture.svg">
+  
+  
+  
+  <meta name="keywords" content="dma,baremetal,code-analysis,linux,i3c,pio,ibi,hot-join,regression">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+    <link rel="shortcut icon" href="/images/evening-bell.svg">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T00:00:00+08:00","dateModified":"2026-11-27T17:03:06+08:00","datePublished":"2026-11-27T00:00:00+08:00","description":"最早做 I3C 联调时，我们的操作很直接：Target 先准备接收或发送，Host 再写几个字节、读几个字节，两边各看一份日志。数据能对上，就继续往下做。\n真正让事情变复杂的，是后面的这些问题：Target 重新枚举以后，Host 之前打开的句柄还能不能用？一条 IBI 已经到达 Host，Target 的通知状态是不是也完成了？读到一半结束、修改最大长度、重启外设以后，谁负责把下一笔业务准备好？\n这篇文章把 MCTP&#x2F;PLDM 之前的那套工程重新整理一遍：Host 上是 Linux、i3c-host 和测试 companion 驱动；Target 上是 Current Proj 裸机固件、I3C Target 驱动和 i3c_test 执行器。范围覆盖枚举、CCC、PIO、IBI、独立 DMA 用例、Hot-Join 以及复位恢复。\n截至本文整理时，历史材料中已有多轮双端功能通过，也有失败、仅 Host 通过和证据不完整的记录。尤其是 11 月 19 日的 12 项独立回归，不能直接改写成“所有功能、所有版本、所有环境均通过”。下面按实际发生的阶段展开。","headline":"从手工收发到双端回归：I3C Host 与 Target 的设计和实现","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/i3c-host-target-architecture-regression/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/i3c-host-target-architecture-regression/","keywords":"dma, baremetal, code-analysis, linux, i3c, pio, ibi, hot-join, regression","image":[]}</script>
+  
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-1"><!-- hexo injector head_end end --></head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub cap">协议、驱动与调试现场</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<widget class="widget-wrapper engineering-related">
+  <div class="widget-header"><span class="name">I3C · 阅读顺序</span></div>
+  <ol>
+    
+      <li><a href="/2026/11/25/i3c-basic-spec/">MIPI I3C Basic v1.1.1 组内分享</a></li>
+    
+      <li><a href="/2026/11/25/i3c-controller-guide/">两根线，一笔事务：I3C 控制器学习手记</a></li>
+    
+      <li><a href="/2026/11/25/i3c-target-study/">DWC MIPI I3C Target 开发学习文档</a></li>
+    
+      <li><a href="/2026/11/25/i3c-linux-driver/">Linux I3C 驱动视角学习笔记</a></li>
+    
+      <li><a href="/2026/11/27/i3c-host-target-architecture-regression/" aria-current="page">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li>
+    
+  </ol>
+</widget>
+
+<widget class="widget-wrapper engineering-utilities"><a href="/categories/">所有专题</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<nav class="engineering-nav" aria-label="主导航">
+  
+    <a href="/">首页</a>
+  
+    <a href="/categories/">技术专题</a>
+  
+    <a href="/engineering/">工程记录</a>
+  
+    <a href="/categories/life-record/">生活</a>
+  
+    <a href="/about/">关于</a>
+  
+  <button type="button" data-site-search aria-label="打开站内搜索" title="搜索文章">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/">I3C</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/linux-driver/">Linux 驱动</a></div>
+<div class="engineering-dates">
+  <span>发布于 2026-11-27</span>
+  
+</div>
+</div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>从手工收发到双端回归：I3C Host 与 Target 的设计和实现</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div>
+
+  <div class="engineering-reading-tools">
+    <span>源码分析</span>
+    <button type="button" data-reading-width aria-pressed="false">宽屏阅读</button>
+  </div>
+
+<article class="md-text content"><p>最早做 I3C 联调时，我们的操作很直接：Target 先准备接收或发送，Host 再写几个字节、读几个字节，两边各看一份日志。数据能对上，就继续往下做。</p>
+<p>真正让事情变复杂的，是后面的这些问题：Target 重新枚举以后，Host 之前打开的句柄还能不能用？一条 IBI 已经到达 Host，Target 的通知状态是不是也完成了？读到一半结束、修改最大长度、重启外设以后，谁负责把下一笔业务准备好？</p>
+<p>这篇文章把 MCTP&#x2F;PLDM 之前的那套工程重新整理一遍：Host 上是 Linux、<code>i3c-host</code> 和测试 companion 驱动；Target 上是 Current Proj 裸机固件、I3C Target 驱动和 <code>i3c_test</code> 执行器。范围覆盖枚举、CCC、PIO、IBI、独立 DMA 用例、Hot-Join 以及复位恢复。</p>
+<p>截至本文整理时，历史材料中已有多轮双端功能通过，也有失败、仅 Host 通过和证据不完整的记录。尤其是 11 月 19 日的 12 项独立回归，不能直接改写成“所有功能、所有版本、所有环境均通过”。下面按实际发生的阶段展开。</p>
+<span id="more"></span>
+
+<h2 id="1-先看两端分别运行什么"><a href="#1-先看两端分别运行什么" class="headerlink" title="1. 先看两端分别运行什么"></a>1. 先看两端分别运行什么</h2><p><img src="/2026/11/27/i3c-host-target-architecture-regression/architecture.svg" alt="Host 与 Target 的分层架构，区分用户态、内核、裸机驱动与物理总线"></p>
+<p><a href="/2026/11/27/i3c-host-target-architecture-regression/architecture.png">查看高清 PNG</a> · <a href="/2026/11/27/i3c-host-target-architecture-regression/architecture.svg">下载 SVG</a></p>
+<p>Host 与 Target 是两台各自运行程序的机器。它们之间共享的是 SCL、SDA 上的协议，没有共享 APP 内存，也没有一个双方都能直接访问的软件队列。</p>
+<table>
+<thead>
+<tr>
+<th>一侧</th>
+<th>组件</th>
+<th>负责什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Host 用户态</td>
+<td><code>i3c-host</code></td>
+<td>解析命令，维持会话，检查结果，按自动执行表推进实验</td>
+</tr>
+<tr>
+<td>Host 驱动入口</td>
+<td>companion 字符设备与 ioctl</td>
+<td>管理 owner、长度、事件缓存和失败收尾，隔离用户态与内核对象</td>
+</tr>
+<tr>
+<td>Linux I3C core</td>
+<td>总线与设备模型</td>
+<td>管理地址、PID、设备描述符、枚举及描述符代次</td>
+</tr>
+<tr>
+<td>Host 控制器驱动</td>
+<td>SVC</td>
+<td>将 CCC、Private Transfer、IBI、Hot-Join 对应到控制器操作</td>
+</tr>
+<tr>
+<td>Target CLI 与执行器</td>
+<td><code>i3c_test</code>、auto&#x2F;full&#x2F;all 等</td>
+<td>设置本轮预期、运行测试、比较数据、准备通知与收尾</td>
+</tr>
+<tr>
+<td>Target 驱动</td>
+<td>生命周期、PIO、IBI、reset、独立 DMA 接口</td>
+<td>保护会话，服务队列，检查完成，保存错误和恢复状态</td>
+</tr>
+<tr>
+<td>Target BSP &#x2F; wrapper &#x2F; HAL</td>
+<td>平台环境与寄存器访问</td>
+<td>开钟、配置身份、复位、PAD 配置与具体 MMIO</td>
+</tr>
+</tbody></table>
+<p>这里的 <code>i3c-host</code> 是实验工具，不是 Linux I3C 子系统本身；companion 也不是另一个总线控制器。它利用 core 和 SVC 已有能力，给联调增加一个能明确控制、等待和记录结果的入口。</p>
+<p>本文讲解源码主要采用 Host <code>c053d9bb31abbd4a040dd4c2ae22765b931d5aa1</code> 与 Target <code>33e17bc171c09418eaa844797ef19a9976a27390</code>。这两份版本用于读架构；每轮实验实际运行什么，仍按后文的版本与日志关联判断。<a href="/2026/11/27/i3c-host-target-architecture-regression/source-reading-guide.txt">代码阅读摘录</a></p>
+<h2 id="2-Host-为什么从-sysfs-走到了会话化-APP"><a href="#2-Host-为什么从-sysfs-走到了会话化-APP" class="headerlink" title="2. Host 为什么从 sysfs 走到了会话化 APP"></a>2. Host 为什么从 sysfs 走到了会话化 APP</h2><p>早期 sysfs 入口适合人工单步操作。比如先解除本地门控，发一笔读写，再读结果。但用例多了以后，同一个实验里会同时存在设备状态、准备状态、IBI 订阅，以及用户还没取走的结果。只靠几次独立的文件写入，很难表达“这几步属于同一个调用者”。</p>
+<p>后来增加字符设备和 ioctl，一次打开的 FD 对应一个软件会话。短命令可以自动 claim、执行和 release；需要等待多条 IBI 或连续推进步骤时，则保持会话不关闭。</p>
+<h3 id="2-1-一份固定大小的数据契约"><a href="#2-1-一份固定大小的数据契约" class="headerlink" title="2.1 一份固定大小的数据契约"></a>2.1 一份固定大小的数据契约</h3><p>UAPI 的核心是 <code>struct i3ch_request</code>。这一版 APP 在编译时检查它的大小为 <strong>392 字节</strong>，内部数据区是 <strong>260 字节</strong>。请求和结果使用同一个结构，包含：</p>
+<ul>
+<li><code>abi/op</code>：接口版本和操作类型；</li>
+<li><code>epoch/session/pid</code>：设备描述符代次、调用者会话和身份；</li>
+<li><code>length/actual</code>：请求长度与这次操作能确认的实际长度；</li>
+<li><code>status/cleanup_error</code>：业务结果与收尾结果；</li>
+<li>能力、地址、IBI 状态及事件计数；</li>
+<li>固定长度数据区与必须为零的保留字段。</li>
+</ul>
+<p>它没有把用户态指针嵌进结构。这样 ABI 的大小、对齐和数据边界可以明确检查，内核也能先检查参数，再决定是否改变状态或上总线。</p>
+<p><strong>260 字节缓冲区不等于任何命令都能读 260 字节。</strong> 当前 companion 的读上限、控制器的终止长度、工具的结果导出，以及 Target 本轮声明的 MRL，都是不同层面的约束。</p>
+<h3 id="2-2-owner、session、epoch-各管一件事"><a href="#2-2-owner、session、epoch-各管一件事" class="headerlink" title="2.2 owner、session、epoch 各管一件事"></a>2.2 owner、session、epoch 各管一件事</h3><table>
+<thead>
+<tr>
+<th>标识或资源</th>
+<th>谁维护</th>
+<th>防止什么问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>owner</td>
+<td>companion</td>
+<td>两个进程同时改变同一个 Target 的测试现场</td>
+</tr>
+<tr>
+<td>session</td>
+<td>companion 的 FD 会话</td>
+<td>后来的调用者冒用之前的操作上下文</td>
+</tr>
+<tr>
+<td>epoch</td>
+<td>I3C core 的设备描述符</td>
+<td>同 PID、同地址重新发现后，旧会话继续操作新实例</td>
+</tr>
+<tr>
+<td>generation</td>
+<td>Target 外设会话</td>
+<td>Target 复位、重新打开后，旧 RX&#x2F;TX 或测试步骤继续推进</td>
+</tr>
+<tr>
+<td>run、step、nonce 等</td>
+<td>具体自动协议</td>
+<td>迟到通知或上一轮控制帧误推进这一轮</td>
+</tr>
+</tbody></table>
+<p>一个关键点是：<strong>地址相同，也可能已经不是同一代设备实例。</strong> Hot-Join 后若仍取得原来的 DA，仅比较 DA 不够；core 更新描述符后，Host 需要识别 epoch 的变化。Target 的 generation 则是另一端维护的编号，两者不能相等比较，也不保证同步递增。</p>
+<p>在 <code>recovery_ioctl()</code> 中，驱动先检查 ABI、保留字段、权限和长度，再取得业务锁。需要所有权的操作会核对当前 FD 是否为 owner、session 是否匹配，以及 epoch 是否仍有效。真正访问设备时，还需要 core 在受保护的路径里检查描述符，不能把用户态刚读过一次 info 当成永远有效的凭据。</p>
+<h3 id="2-3-为什么不自动重发失败命令"><a href="#2-3-为什么不自动重发失败命令" class="headerlink" title="2.3 为什么不自动重发失败命令"></a>2.3 为什么不自动重发失败命令</h3><p>有一种情况很容易误处理：业务已经上了总线，但将结果复制回用户空间时失败，APP 收到 <code>EFAULT</code>。</p>
+<p>这时可以确定“用户空间没拿到结果”，不能确定“Target 没收到数据”。所以驱动保留本 FD 的操作快照，APP 可以查询 <code>RESULT</code>；它不会自动再写一遍。重复写可能让 Target 多收一包，重复读则可能取走下一份数据。</p>
+<p>IBI 出队也采用相同的谨慎顺序：先取得队首快照，成功 <code>copy_to_user()</code> 后才从软件队列移除。用户拷贝失败，不应悄悄丢掉这条事件。<a href="/2026/11/27/i3c-host-target-architecture-regression/source-reading-guide.txt">Host 所有权、回调和出队代码</a></p>
+<h2 id="3-Target-不能只靠一个-open-close-布尔值"><a href="#3-Target-不能只靠一个-open-close-布尔值" class="headerlink" title="3. Target 不能只靠一个 open&#x2F;close 布尔值"></a>3. Target 不能只靠一个 open&#x2F;close 布尔值</h2><p>Target 在另一个时钟域里工作。CPU 已经写入使能请求，不意味着 I3C IP 已经完成使能；已经有动态地址，也不意味着业务队列和全部软件请求都已空闲。</p>
+<p><img src="/2026/11/27/i3c-host-target-architecture-regression/lifecycle.svg" alt="Target 生命周期与两端各自维护的代次"></p>
+<p><a href="/2026/11/27/i3c-host-target-architecture-regression/lifecycle.png">查看高清 PNG</a></p>
+<h3 id="3-1-初始化顺序为什么拆成几层"><a href="#3-1-初始化顺序为什么拆成几层" class="headerlink" title="3.1 初始化顺序为什么拆成几层"></a>3.1 初始化顺序为什么拆成几层</h3><p>这套实现将 BSP 与 wrapper 分开：BSP 管平台环境，wrapper 管本实验选择的身份和能力输入，Target 驱动再配置 IP 自己的状态。</p>
+<p>主要顺序是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">取得外设会话所有权</span><br><span class="line">  → BSP 开钟</span><br><span class="line">  → wrapper 配置身份与相关参数</span><br><span class="line">  → BSP 复位、屏障与 PAD/monitor 配置</span><br><span class="line">  → 读取初始快照，确认队列、地址和能力</span><br><span class="line">  → 配置 IP，读回验证</span><br><span class="line">  → 发布 ENABLE</span><br><span class="line">  → 等待使能确认、动态地址与空闲条件</span><br></pre></td></tr></table></figure>
+
+<p>wrapper 要放在开钟之后、外设复位之前，让 IP 的复位初始化使用本轮身份输入。发布 ENABLE 之前发生错误，可以在条件允许时回滚已修改项；已经尝试发布之后，就不能因为软件返回超时而立刻断钟、重置所有上下文。</p>
+<p>这里也有版本演进：9 月早期 case_004 使用专门的 DV 初始化路径；后来统一 open 中，<code>ADAPTIVE=0</code>，Hot-Join 由会话策略单独选择，响应分片配置为 32 字节。<strong>不能把早期某个寄存器值直接当成所有后续固件的初始化要求。</strong></p>
+<p>本机 DWC databook 的 §4.2.11、印刷页 217 说明：使能可能依赖 SCL；特定生成参数下，POR 后需要一次以 STOP 结束的 placeholder 传输来提供时钟。它解释了为什么 Target 先执行初始化后，仍可能需要 Host 配合供钟。它不意味着每一种 I3C IP 都必须执行我们早期那套三次供钟流程。</p>
+<h3 id="3-2-状态快照和推进动作要分开"><a href="#3-2-状态快照和推进动作要分开" class="headerlink" title="3.2 状态快照和推进动作要分开"></a>3.2 状态快照和推进动作要分开</h3><p><code>i3c_target_get_status()</code> 以快照判断 enable、DA、队列和错误；它不会替调用者 pop RX FIFO、消费发送完成，或发布 RESUME。</p>
+<p>收发请求由单独的有限推进接口处理，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RX：WAIT_RESPONSE → WAIT_DATA → WAIT_IDLE → DONE</span><br><span class="line">TX：WAIT_COMMAND  → WAIT_IDLE → DONE</span><br></pre></td></tr></table></figure>
+
+<p>RX 一次 step 至多消费一条响应和一个数据 word，避免同一次调用无限等待；已经消费过的条目保留在软件结果中，不会因下一次 poll 再消费一遍。<code>rx status</code>、<code>tx status</code> 则只查看缓存结果。</p>
+<p>如果命令返回 <code>-EINPROGRESS</code>，含义是这次请求还在推进，不是失败，也不是完成。若取消只结束了软件等待，也不能据此假定线上传输已被硬件终止。</p>
+<h3 id="3-3-close-为什么有两个阶段"><a href="#3-3-close-为什么有两个阶段" class="headerlink" title="3.3 close 为什么有两个阶段"></a>3.3 close 为什么有两个阶段</h3><p>正常 close 先确认没有活动 RX&#x2F;TX、IBI、DMA、reset 或长度恢复请求，再确认硬件 quiet。第一次调用请求关闭，进入 <code>CLOSING</code>；后续调用确认 disable 已生效，最后才由 BSP finish 归还时钟等资源。</p>
+<p>如果刚开始 enable 还没跨到目标时钟域，读到 ENABLE&#x3D;0 不应被误判成“关闭成功”。如果已经请求关闭但确认迟到，软件也要保留 CLOSING 和所有权，不能在错误返回后忘记自己已经发过 disable。</p>
+<p>这些状态看起来比一个布尔值麻烦，却让“请求已经提交”“硬件已经确认”“资源已经释放”三个时刻有了各自的位置。<a href="/2026/11/27/i3c-host-target-architecture-regression/source-reading-guide.txt">Target 初始化、PIO 契约与 close 摘录</a></p>
+<h2 id="4-用一笔-5-字节传输看数据到底经过哪里"><a href="#4-用一笔-5-字节传输看数据到底经过哪里" class="headerlink" title="4. 用一笔 5 字节传输看数据到底经过哪里"></a>4. 用一笔 5 字节传输看数据到底经过哪里</h2><p>先统一方向：<strong>Host Write 对应 Target RX，Host Read 对应 Target TX。</strong> Target 的 <code>tx 5</code> 是准备供 Host 读取的数据，不是主动发送一次普通 Private Transfer。</p>
+<h3 id="4-1-Host-写入，Target-接收"><a href="#4-1-Host-写入，Target-接收" class="headerlink" title="4.1 Host 写入，Target 接收"></a>4.1 Host 写入，Target 接收</h3><ol>
+<li>Target 执行 <code>i3c_test rx 5</code>，建立本轮期望并保存 generation、sequence 和地址。</li>
+<li>Host 把 <code>11 22 33 44 55</code> 交给 ioctl，companion 和 core 检查后，由 SVC 发起 Private Write。</li>
+<li>Target 硬件把数据放进 RX FIFO，把长度、分片和错误信息放进响应队列。</li>
+<li>Target 前台推进 RX 请求，消费响应和数据，检查 copied、长度、图样及最终空闲。</li>
+</ol>
+<p><strong>响应队列里的完成信息和 RX FIFO 中的字节是两份东西。</strong> 读到了响应，不代表已经把所有字节搬到软件缓存。</p>
+<p>在历史样本中，前四个字节对应数据 word <code>0x44332211</code>。这反映了该读口与软件拆字节的排列，不能把它当成总线上先发 44。对 5 字节数据，需要再取一个 word，但第二个 word 只复制一个有效字节。若每次都复制完整 4 字节，就可能越过本轮长度或破坏哨兵区。</p>
+<p>因此，1、3、4、5 字节是很有价值的一组长度：它们分别检查一个字节、不完整 word、完整 word，以及跨 word 后的单字节尾部。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e02.txt">9 月短包验证摘录</a></p>
+<h3 id="4-2-Target-备数，Host-读取"><a href="#4-2-Target-备数，Host-读取" class="headerlink" title="4.2 Target 备数，Host 读取"></a>4.2 Target 备数，Host 读取</h3><p>Target 发送路径先确认没有旧 completion，再把本轮数据复制到驱动持有的缓冲区、预填扩展 TX queue0，设置有限长度，最后发布命令。</p>
+<p>顺序不能倒过来：如果先宣布命令有效，再慢慢填数据，Host 的时钟可能已经到来。</p>
+<p>Host 读回以后，要检查 <code>actual</code> 和完整内容；Target 则检查本次新 completion、错误、remaining 和队列状态。这是两端不同的证据，不能互相替代。</p>
+<p>还有一个日志细节：Host Write 的 <code>actual=0</code> 在这一版接口里不提供 Target 已收字节数，它不表示“这次写了零字节”。写入长度要结合请求、控制器结果和 Target 的实收记录判断。11 月的失败定位中，这一点尤其容易造成误读。</p>
+<h2 id="5-IBI-有三个完成点"><a href="#5-IBI-有三个完成点" class="headerlink" title="5. IBI 有三个完成点"></a>5. IBI 有三个完成点</h2><p>IBI 可以把人工接力改成事件驱动，但通知本身也有生命周期。</p>
+<table>
+<thead>
+<tr>
+<th>观察点</th>
+<th>能证明什么</th>
+<th>还不能证明什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Target 打印 READY</td>
+<td>程序走到了某个本地准备位置</td>
+<td>SIR 已发布、总线发送完成或 Host 已取到事件</td>
+</tr>
+<tr>
+<td>Host 收到 IBI</td>
+<td>通知已经进入 Host 接收路径</td>
+<td>Target 软件已经完成本次通知收尾</td>
+</tr>
+<tr>
+<td>APP dequeue 并匹配成功</td>
+<td>本条消息交付给当前等待步骤</td>
+<td>下一步业务已经执行并完成</td>
+</tr>
+</tbody></table>
+<p>在参考实现里，Target 通过专门的 SIR 数据寄存器准备最多 4 字节 payload，MDB 另计。所以 MDB 加 4 字节 payload，是 Host 看见的 5 字节消息。这个供数限制来自当前实现，不能用 Host 的大缓存替它放宽。</p>
+<p>Host 一侧还有两层缓存：core&#x2F;控制器接收 slot，以及 companion 为 APP 保留的事件副本。这版 companion 申请 4 个 slot、单条容量 16 字节，另有 16 条软件事件缓存。字节数、slot 数、事件条数不能混算。</p>
+<p>IBI 回调只做长度检查、复制、计数和唤醒，使用短时队列锁，不取得业务 mutex。原因很具体：关闭 IBI 可能等待回调完成；如果回调反过来等待关闭者持有的业务锁，就可能相互等待。</p>
+<p>队列满记 <code>dropped</code>，非法长度记 <code>invalid</code>。这些是到达 companion 的消息统计，不能当成整个控制器所有错误的总账。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e04.txt">IBI 长度与超限实验</a></p>
+<h2 id="6-自动执行表怎样把人工步骤串起来"><a href="#6-自动执行表怎样把人工步骤串起来" class="headerlink" title="6. 自动执行表怎样把人工步骤串起来"></a>6. 自动执行表怎样把人工步骤串起来</h2><p>人工短包阶段，我们明确规定“Target READY 后 Host 才发”。自动化没有取消这个条件，而是把它写成控制帧和 IBI 握手。</p>
+<p><img src="/2026/11/27/i3c-host-target-architecture-regression/handshake.svg" alt="自动执行表的 Host 与 Target 双端交接"></p>
+<p><a href="/2026/11/27/i3c-host-target-architecture-regression/handshake.png">查看高清 PNG</a></p>
+<h3 id="6-1-PREPARE、READY、业务、DONE"><a href="#6-1-PREPARE、READY、业务、DONE" class="headerlink" title="6.1 PREPARE、READY、业务、DONE"></a>6.1 PREPARE、READY、业务、DONE</h3><p>以最早的 <code>auto normal</code> 为例，一轮固定包含 Write4、Read4、业务 IBI 和 GETSTATUS。Host 先发 PREPARE，Target 准备本步资源后发 READY；Host 匹配通知，才做这一笔业务。</p>
+<p>遇到需要显式确认的步骤，Host 再发 COMMIT。Target 完成本步并准备下一条控制接收后发 DONE。最后 Host 发 FINISH，等待 FINAL，再释放会话。</p>
+<p>“先准备下一条控制 RX，再发 DONE”并非排版习惯。Host 收到 DONE 后可能马上发下一帧，Target 若先通知、后准备，就人为制造了一个窗口。</p>
+<h3 id="6-2-16-字节控制帧装了什么"><a href="#6-2-16-字节控制帧装了什么" class="headerlink" title="6.2 16 字节控制帧装了什么"></a>6.2 16 字节控制帧装了什么</h3><p>Table 1 的控制帧布局如下，来自 <code>i3c_auto_protocol.h</code>：</p>
+<table>
+<thead>
+<tr>
+<th align="right">偏移</th>
+<th align="right">长度</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0～1</td>
+<td align="right">2 B</td>
+<td>magic：<code>A</code>、<code>U</code></td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="right">1 B</td>
+<td>协议版本</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="right">1 B</td>
+<td>PREPARE、COMMIT 或 FINISH</td>
+</tr>
+<tr>
+<td align="right">4～5</td>
+<td align="right">2 B</td>
+<td>本轮 run，小端序</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="right">1 B</td>
+<td>step</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td align="right">1 B</td>
+<td>table 版本</td>
+</tr>
+<tr>
+<td align="right">8～11</td>
+<td align="right">4 B</td>
+<td>Target generation，小端序</td>
+</tr>
+<tr>
+<td align="right">12～15</td>
+<td align="right">4 B</td>
+<td>前 12 字节的 32 位校验值</td>
+</tr>
+</tbody></table>
+<p>这里的校验采用源码中的逐字节异或、乘法算法，<strong>不是 CRC32</strong>；长包数据的 CRC32 是另一个协议字段，不能因为都叫“校验”就混用。</p>
+<p>Table 1 的通知是 <code>A5 + run低字节 + run高字节 + step + event</code>。10 月 1 日实测 run&#x3D;11873，即 <code>0x2e61</code>，因此第一条 READY 为 <code>a5 61 2e 01 01</code>。APP 还要与业务 IBI <code>a5 11 22 33 44</code> 区分，不能只见到 MDB&#x3D;A5 就推进。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e06.txt">自动四步实验与时序</a></p>
+<p>后来的 <code>all</code> 有自己的启动与阶段通知：BOOT 使用 <code>0xd7</code>，阶段通知使用 <code>0xd6</code>，控制帧及阶段编号也按自己的协议解释。<strong>auto&#x2F;full&#x2F;all 不是一个名字不同、格式完全相同的万能执行器。</strong> 两端必须使用匹配的表和协议版本。</p>
+<h3 id="6-3-状态修改步骤为什么需要特殊交接"><a href="#6-3-状态修改步骤为什么需要特殊交接" class="headerlink" title="6.3 状态修改步骤为什么需要特殊交接"></a>6.3 状态修改步骤为什么需要特殊交接</h3><p>第一个典型问题是 SETMRL。早期 full 在修改长度后马上 GET，Target 却进入了 HALT。之后改成：Target 设防，Host 只发送 SETMRL，Target 明确发布 RESUME 并检查完成，再通知 Host 回读及继续业务。</p>
+<p>第二个问题是 RSTDAA。Host 已收到 READY，随后清除了 DA，但 Target 的旧 IBI poll 还在要求原地址有效，于是把预期地址失效误判为错误。修复不是放宽所有 IBI 的地址检查，而是为这一步限定特殊会话：先有本次通知的成功完成证据，再允许观察到预期的 DA 失效。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e07.txt">33 步回归记录</a></p>
+<p>这两次都说明：业务表里如果包含“改变另一端前提”的动作，通知被收到与通知软件收尾之间的窗口就必须处理。</p>
+<h2 id="7-把“长度”拆成五个概念"><a href="#7-把“长度”拆成五个概念" class="headerlink" title="7. 把“长度”拆成五个概念"></a>7. 把“长度”拆成五个概念</h2><p>我们在这些实验里遇到过多次长度问题，它们其实落在不同层。</p>
+<table>
+<thead>
+<tr>
+<th>长度</th>
+<th>本工程中的例子</th>
+<th>容易混淆的地方</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>软件缓冲容量</td>
+<td>UAPI <code>data[260]</code></td>
+<td>不代表每种操作都接受 260 B</td>
+</tr>
+<tr>
+<td>接口允许上限</td>
+<td>短 PIO 接口 1～16 B；companion 参考读上限 255 B</td>
+<td>是具体接口约束，不是 I3C 协议的统一上限</td>
+</tr>
+<tr>
+<td>对端公布能力</td>
+<td>MRL、MWL，以及 IBI 长度</td>
+<td>本轮必须回读，不能只照抄旧日志</td>
+</tr>
+<tr>
+<td>硬件分片</td>
+<td>Target 响应分片配置 32 B</td>
+<td>一条长业务包可以产生多份硬件完成信息</td>
+</tr>
+<tr>
+<td>实际有效长度</td>
+<td>GETCAPS 实收 3 B、Private Read 的 actual</td>
+<td>最大读取容量不等于这次一定读满</td>
+</tr>
+</tbody></table>
+<p>9 月 GETCAPS 的问题很有代表性。旧 Linux 路径把 <code>0x95</code> 按一字节 GETHDRCAP 处理，而该实验实例按较新能力格式准备三字节 <code>01 f1 18</code>。日志中的 <code>rx=1/1</code> 只能说明“读满了软件要求的一字节”，不能说明对端整个响应自然结束。</p>
+<p>后续修改方向是允许最大容量、按实际长度解释，并保持旧设备响应的兼容；不是在 DTS 随便加一个“读取三字节”字段。历史日志里的 CCC ongoing 残留也不能未经证明就写成后续 NACK 的唯一根因。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e05.txt">长度定位与修复记录</a></p>
+<h2 id="8-DMA-加进来以后，完成条件还得再加一层"><a href="#8-DMA-加进来以后，完成条件还得再加一层" class="headerlink" title="8. DMA 加进来以后，完成条件还得再加一层"></a>8. DMA 加进来以后，完成条件还得再加一层</h2><p>普通 <code>i3c-host</code> Private 读写走 Host 的 SVC PIO。后来独立 DMA 用例改变的是 <strong>Target 内存与 Target I3C 数据端口之间的搬运</strong>，不能据此说 Host 也使用了 DMA。</p>
+<p>Target DMA RX 的源码把几个结果分开保存：<code>dma_done</code>、<code>protocol_done</code>、数据比较和 guard 检查。只有 DMA 搬运完成不够，I3C 协议响应也要表明长度、错误和分片状态正确，队列最后还得符合收尾条件。</p>
+<p>缓存也不能靠猜。参考用例让整条 cache line 归这次传输所有，DMA 范围外放 guard；交给设备前调用设备方向同步，完成并确认交接后，再同步给 CPU 做比较。否则 CPU 可能拿着旧 cache 内容，或缓存维护误伤旁边不属于该传输的数据。</p>
+<p>11 月 20 日留有多个 4、8、12、16 字节配合 DMA 用例的 Host 日志，读回图样和请求结果可以检查。但 Host 看不到 Target 是否真的完成了 DMA。<strong>单靠这些 Host 日志，不能补写 Target DMA 的最终验收状态。</strong><a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e17.txt">Host 记录脱敏汇集</a></p>
+<p><code>all smoke</code> 的范围声明则明确排除了 DMA 和 I²C。一个 9&#x2F;9 的 all 结果，不会自动覆盖独立 DMA 用例。</p>
+<h2 id="9-恢复不是一个-reset-命令"><a href="#9-恢复不是一个-reset-命令" class="headerlink" title="9. 恢复不是一个 reset 命令"></a>9. 恢复不是一个 reset 命令</h2><p>这套工程至少有四种需要分开记录的“恢复”。</p>
+<h3 id="9-1-提前结束有限读：丢弃旧包，重新准备新包"><a href="#9-1-提前结束有限读：丢弃旧包，重新准备新包" class="headerlink" title="9.1 提前结束有限读：丢弃旧包，重新准备新包"></a>9.1 提前结束有限读：丢弃旧包，重新准备新包</h3><p>Target 原来准备了更长的数据，Host 提前终止时，会留下完成信息、remaining 或 HALT 状态。可恢复 TX 接口只接受特定的“提前结束”条件，然后撤销旧命令、清理对应队列、发布一次 RESUME，再确认可以准备新包。</p>
+<p>恢复成功表示旧包已丢弃、新业务可开始，不表示旧包完整发送。</p>
+<p>11 月 19 日 M&#x3D;5 的实验先短读，再执行恢复，之后完整读回新的 16 B 和新的 5 B。两个新图样的读回，才是“没有继续吐旧数据”的业务证据。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e16.txt">独立回归中的提前终止步骤</a></p>
+<h3 id="9-2-软件外设复位：旧动态地址也要验证失效"><a href="#9-2-软件外设复位：旧动态地址也要验证失效" class="headerlink" title="9.2 软件外设复位：旧动态地址也要验证失效"></a>9.2 软件外设复位：旧动态地址也要验证失效</h3><p>10 月 13 日 swreset 实验在 DA&#x3D;<code>0x30</code> 完成业务，再预置一份不同的待发数据，执行 I3C 外设复位。重新 enable 后先确认 DA 尚未有效，并在重新枚举前探测旧地址。</p>
+<p>之后通过 ENTDAA 恢复，再迁移到 <code>0x31</code>，再次验证旧地址不能用，最后读回新的正常图样。这里故意不先发 RSTDAA，避免由它替一个本来没有清除 DA 的错误复位“擦屁股”。</p>
+<p>本轮两端功能通过，但旧地址 NACK 的完整外部波形未补齐，也没有据此证明传输中途强制复位、CPU&#x2F;SoC 重启或旧 Host 句柄隔离全部通过。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e09.txt">软件复位与旧地址隔离</a></p>
+<h3 id="9-3-总线请求触发复位：检测到了还不算应用了动作"><a href="#9-3-总线请求触发复位：检测到了还不算应用了动作" class="headerlink" title="9.3 总线请求触发复位：检测到了还不算应用了动作"></a>9.3 总线请求触发复位：检测到了还不算应用了动作</h3><p>早期 reset pattern 实验验证的是检测和 RSTACT00 解码。10 月 13 日另一轮 table4 才将 RSTACT01 与 pattern 的证据交给前台，由前台核对本轮 sequence 后，明确应用一次外设复位，再重新枚举和跑业务。</p>
+<p>ISR 不直接执行整套 BSP 复位。它保存证据，实际复位由可管理所有权和收尾的前台路径完成。该轮 33&#x2F;33 双端通过，范围仍是受控会话中的 I3C 外设复位，不是整机重启，也不包含任意动作有效期和 Timed Reset。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e08.txt">RSTACT01 回归</a></p>
+<h3 id="9-4-长写的坏-CRC-恢复：应用层错误与硬件错误分开"><a href="#9-4-长写的坏-CRC-恢复：应用层错误与硬件错误分开" class="headerlink" title="9.4 长写的坏 CRC 恢复：应用层错误与硬件错误分开"></a>9.4 长写的坏 CRC 恢复：应用层错误与硬件错误分开</h3><p>长写负载实验会检查 run、generation、sequence、长度、阶段和 CRC。注入一个应用 CRC 错误后，验证能捕获它、完成规定恢复，再继续验证后续包。</p>
+<p>这与 HALT、FIFO 溢出、地址消失、总线超时的硬件恢复不是同一个范围。</p>
+<p>而且长写协议自己也演进过：初版有批内连续发送；10 月 19 日又改为 v2 的逐包交接，排空并检查后才通知，Host 发 NEXT 后再等下一包 READY。不能拿 v1 的吞吐或失败节奏直接解释 v2，更不能只更新一端就跑。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e12.txt">长写设计与版本修订</a></p>
+<h2 id="10-Hot-Join-为何不能只看“地址又分配出来了”"><a href="#10-Hot-Join-为何不能只看“地址又分配出来了”" class="headerlink" title="10. Hot-Join 为何不能只看“地址又分配出来了”"></a>10. Hot-Join 为何不能只看“地址又分配出来了”</h2><p>Hot-Join 至少牵涉 Target 外设状态、SVC 的事件应答与工作项，以及 core 的 DAA 和地址槽管理。</p>
+<p>10 月中旬的重复实验先暴露了地址槽问题：同 PID 重连时，复用地址的占用状态没有在对应路径更新，临时槽逐轮消耗。修复后，原来大约第 24 轮的固定失败消失，但候选在另一次实验中仍于第 98 轮失败，正式记录为 97&#x2F;100。</p>
+<p>这说明“修复了一个确定的缺陷”和“整个用例已通过”必须分别记录。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e10.txt">地址槽与交接候选记录</a></p>
+<p>随后又调整 HJ 应答到 DAA 的交接：先等待应答控制与消息完成，再用 STOP helper 建立 IDLE 边界，确认相应完成后，才进入 core DAA。<strong>先读到完成位为零，不代表一个尚未到来的完成事件已经结束。</strong> 这正是只做 W1C 清零检查可能漏掉的时间窗口。</p>
+<p>该候选有一轮 Host 100&#x2F;100、600&#x2F;600 步通过，但对应报告明确说 Target 最终结果与返回 CLI 的确认待补，不能改成那一轮双端通过。报告中还有逐轮切换两个低频档的实验条件，也不能直接移作普通固定频率平台的长期稳定性结论。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e11.txt">STOP 交接实验</a></p>
+<p>11 月 19 日则有独立的两轮 Hot-Join 双端记录：generation 从 2 到 4，Host epoch 从 4 到 6，共 12 步通过。它补充了当时组合下的功能证据，不会反过来补齐 10 月那一轮缺失的 Target 原始终态。</p>
+<h2 id="11-把历次回归排在一起看"><a href="#11-把历次回归排在一起看" class="headerlink" title="11. 把历次回归排在一起看"></a>11. 把历次回归排在一起看</h2><p>下表按实验范围统计，不把一篇报告、一条日志、一条 case 编号或一个自动步骤混成同一种计数。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>做了什么</th>
+<th>历史结论与边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>9 月 24 日</td>
+<td>case_004 枚举、供钟、身份配置</td>
+<td>当轮枚举通过；低频 EMU 配置不是产品默认配置。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e01.txt">E01</a></td>
+</tr>
+<tr>
+<td>9 月 26 日</td>
+<td>1&#x2F;3&#x2F;4&#x2F;5 B 双向 PIO</td>
+<td>8 个方向&#x2F;长度点均有成功记录；其中 3 B Write 缺 Host 原始返回，不能补写为 0。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e02.txt">E02</a></td>
+</tr>
+<tr>
+<td>9 月 27 日</td>
+<td>RX&#x2F;response IRQ 屏蔽与开启对照</td>
+<td>两轮验证通过；只覆盖指定接收事件与观察窗口，不覆盖所有中断。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e03.txt">E03</a></td>
+</tr>
+<tr>
+<td>9 月 28 日</td>
+<td>MDB-only、payload 1～4 B 与超限拒绝</td>
+<td>Host 长度与数据可核对；部分 Target 字段仅为操作员确认，未补造成完整原始日志。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e04.txt">E04</a></td>
+</tr>
+<tr>
+<td>9 月 28 日</td>
+<td>GETCAPS 读长与后续枚举</td>
+<td>三字节对照与后续修复有记录；未抓波，不能写成全部终止时序已证明。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e05.txt">E05</a></td>
+</tr>
+<tr>
+<td>10 月 1 日</td>
+<td>auto normal 四步</td>
+<td>Write4、Read4、IBI、GETSTATUS 双端通过；不等于异常路径或完整 CCC 互操作通过。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e06.txt">E06</a></td>
+</tr>
+<tr>
+<td>10 月 6 日</td>
+<td>full 33 步</td>
+<td>当轮双端 33&#x2F;33；包括长度与 RSTDAA 交接，pattern 检测不等于总线触发整机复位。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e07.txt">E07</a></td>
+</tr>
+<tr>
+<td>10 月 13 日</td>
+<td>table4 RSTACT01</td>
+<td>33&#x2F;33 双端通过，验证受控 I3C 外设复位及业务恢复。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e08.txt">E08</a></td>
+</tr>
+<tr>
+<td>10 月 13 日</td>
+<td>独立 swreset、旧 DA 隔离</td>
+<td>双端功能通过；完整波形与其他复位范围仍未覆盖。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e09.txt">E09</a></td>
+</tr>
+<tr>
+<td>10 月 17 日</td>
+<td>Hot-Join 重复候选</td>
+<td>一轮 97&#x2F;100 失败；另一候选 Host 100&#x2F;100，但该轮 Target 终态待补。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e10.txt">E10</a>、<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e11.txt">E11</a></td>
+</tr>
+<tr>
+<td>10 月 19 日</td>
+<td>长写、负载与应用 CRC 恢复</td>
+<td>交付、模型与编译记录；当时硬件未运行。后来的实测要另挂证据。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e12.txt">E12</a></td>
+</tr>
+<tr>
+<td>11 月 3 日</td>
+<td>FPGA PIO 工作带宽摘要</td>
+<td>有六组截图摘要；完整正确性和运行版本关联待补，不算六组完整验收 PASS。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e13.txt">E13</a></td>
+</tr>
+<tr>
+<td>11 月 16 日</td>
+<td>all run03</td>
+<td>完成 1&#x2F;9，阶段 2 READY 等待超时；32 B 业务包未发送，后续阶段未执行。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e14.txt">E14</a></td>
+</tr>
+<tr>
+<td>11 月 18 日</td>
+<td>all run01</td>
+<td>机器记录为 Host 9&#x2F;9，Target UART 终态仍为 pending；波形与硬件故障恢复未验证。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e15.txt">E15</a></td>
+</tr>
+<tr>
+<td>11 月 19 日</td>
+<td>手动枚举、短包及九个复合阶段</td>
+<td>当轮 12 项双端通过，版本组合与独立 APP 差异需保留。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e16.txt">E16</a></td>
+</tr>
+<tr>
+<td>11 月 20 日</td>
+<td>配合独立 DMA 用例的 Host 收发</td>
+<td>Host 记录可查；仅凭这一组材料不授予 Target DMA 完成结论。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e17.txt">E17</a></td>
+</tr>
+</tbody></table>
+<h3 id="11-1-一次有价值的失败：打印-READY，却没有收到-READY"><a href="#11-1-一次有价值的失败：打印-READY，却没有收到-READY" class="headerlink" title="11.1 一次有价值的失败：打印 READY，却没有收到 READY"></a>11.1 一次有价值的失败：打印 READY，却没有收到 READY</h3><p>11 月 16 日 run03，IRQ 阶段两端通过。Host 发出阶段 2 控制包后，等待 READY 超时。Target 截图已经打印 <code>I3C_LONG_RX_READY</code>。</p>
+<p>如果只看这行日志，容易以为“Target 通知已成功，问题一定在 Host”。源码却显示，该打印位于通知调用之前。现有证据只能把失败位置限定到 READY 交接未完成，不能确定卡在发布前、总线完成，还是 Host 接收与交付。</p>
+<p>Host 也尚未执行 32 B 测试数据写。所以这轮既不能判“Long RX 数据错误”，也不能把未执行的阶段 3～9 都记为硬件失败。退出时的 DISEC NACK 是另一个收尾问题，需要与主等待超时分开。</p>
+<h3 id="11-2-为什么-11-月-19-日的通过仍要保留版本备注"><a href="#11-2-为什么-11-月-19-日的通过仍要保留版本备注" class="headerlink" title="11.2 为什么 11 月 19 日的通过仍要保留版本备注"></a>11.2 为什么 11 月 19 日的通过仍要保留版本备注</h3><p>该轮 Host 模块来自核对过的 master 构建，但现场 Target V95 固件使用的中断路由与候选 master ELF 不一致，现场 loader 的固件哈希和完整版本关联也没有补齐。因此结论属于那次实测组合，不能说指定的双端 master 新镜像已经完成了相同验收。</p>
+<p>独立两轮 Hot-Join 还使用了一份单独编译的 Host APP，只增加命令分派，调用既有循环执行函数。它的差异和产物指纹在原记录中单列；不能让“底层函数原来就有”抹掉这份实际执行入口的变化。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e16.txt">该轮版本与结果摘录</a></p>
+<h2 id="12-all、full、独立-case-的关系"><a href="#12-all、full、独立-case-的关系" class="headerlink" title="12. all、full、独立 case 的关系"></a>12. all、full、独立 case 的关系</h2><p>full 是一张综合执行表，all 则把多个现有功能组织为小规模 smoke。参考 all 的九个阶段是：</p>
+<ol>
+<li>IRQ 屏蔽&#x2F;开启检查；</li>
+<li>Long RX，32 B × 1；</li>
+<li>Long TX，32 B × 1；</li>
+<li>M&#x3D;5 的提前读终止及恢复；</li>
+<li>256 B 长写、应用 CRC 注入与后续验证；</li>
+<li>PIO 带宽写，16 B × 1，另有预热；</li>
+<li>PIO 带宽读，同样小规模；</li>
+<li>full 33 步；</li>
+<li>两轮 Hot-Join 循环。</li>
+</ol>
+<p><strong>它没有覆盖全部需求，也没有把每种独立命令入口都测一遍。</strong> 同一底层函数从 all 调用成功，不意味着单独 CLI 的参数解析、准备前提和收尾也已经验证。独立入口需要自己的记录。</p>
+<p>带宽也需要独立口径。11 月 3 日 FPGA 摘要中的数据调用吞吐约为 10.2 kB&#x2F;s，而含逐包握手吞吐低得多；它们分别测数据调用与包含通知、控制交接和软件负载的窗口。11 月 19 日 EMU 的单包 smoke 又是另一套环境、另一种样本规模，不能把两个数字画在一起就解释为性能退化。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence/e13.txt">带宽口径</a></p>
+<h2 id="13-再做回归时，哪些信息应该一起保存"><a href="#13-再做回归时，哪些信息应该一起保存" class="headerlink" title="13. 再做回归时，哪些信息应该一起保存"></a>13. 再做回归时，哪些信息应该一起保存</h2><p>这些历史实验最值得复用的，不只是命令清单，还有每个交接点的验收方法。</p>
+<table>
+<thead>
+<tr>
+<th>时刻</th>
+<th>要保存什么</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>构建后、上板前</td>
+<td>两端提交、未提交差异、固件&#x2F;APP&#x2F;KO 哈希、内核与模块兼容材料</td>
+<td>提交号与实际产物不一定一一对应</td>
+</tr>
+<tr>
+<td>枚举后</td>
+<td>身份、DA、Host epoch、Target generation、能力和队列状态</td>
+<td>确认这轮操作的是哪个实例</td>
+</tr>
+<tr>
+<td>每笔业务前</td>
+<td>Target 准备点、Host 请求参数</td>
+<td>不能从一次 NACK 反推对端一定重启</td>
+</tr>
+<tr>
+<td>每笔业务后</td>
+<td>请求结果、实收数据、协议完成及 Target 校验</td>
+<td>API 返回、硬件完成、内容正确分别核对</td>
+</tr>
+<tr>
+<td>状态修改后</td>
+<td>新地址&#x2F;长度&#x2F;事件状态，以及后续业务</td>
+<td>修改命令成功不等于业务已经恢复</td>
+</tr>
+<tr>
+<td>退出后</td>
+<td>ret、cleanup、active、队列和错误状态</td>
+<td>测试完成与资源释放可能一个成功、一个失败</td>
+</tr>
+</tbody></table>
+<p>日志里的日期也要谨慎使用。部分板卡时钟落后于实际实验日期，历史记录保留原始时间戳，再用 run、generation、epoch 和产物指纹关联，不能只靠文件名把两份结果拼成一轮。</p>
+<p>对于正常 Private Read&#x2F;Write，线上应有相应地址与方向、数据和结束条件；写方向的第九位与读方向 T-bit 不能都笼统叫 ACK。本文没有新增抓波或硬件操作，软件日志也不能代替电气与边沿时序合规验证。</p>
+<h2 id="14-从哪里开始读代码"><a href="#14-从哪里开始读代码" class="headerlink" title="14. 从哪里开始读代码"></a>14. 从哪里开始读代码</h2><p>若只想弄清架构，建议按下面顺序读，不必先背所有寄存器。</p>
+<table>
+<thead>
+<tr>
+<th align="right">顺序</th>
+<th>文件或主题</th>
+<th>先回答的问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td><code>i3c_host.h</code></td>
+<td>APP 和内核约定了哪些输入、结果及边界？</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td><code>i3c-host.c</code> 的 call、事件等待与自动执行</td>
+<td>一条命令如何转成 ioctl，失败后如何停下来？</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td><code>target_recovery.c</code> 的 ioctl、owner、release、poll</td>
+<td>谁持有资源，消息在哪儿等待，旧会话如何拒绝？</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td>I3C core 受保护操作与 SVC</td>
+<td>描述符、总线锁、FIFO 和控制器动作怎样衔接？</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td>Target 的 open&#x2F;get_status&#x2F;close</td>
+<td>软件请求、硬件确认和资源归还何时发生？</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td>Target PIO、IBI、独立 DMA</td>
+<td>内容、完成和缓存所有权由谁检查？</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td>auto&#x2F;full&#x2F;all 与各自协议头</td>
+<td>两端怎样在改长度、丢地址、重启后继续配合？</td>
+</tr>
+</tbody></table>
+<p><a href="/2026/11/27/i3c-host-target-architecture-regression/source-reading-guide.txt">下载脱敏代码摘录</a> · <a href="/2026/11/27/i3c-host-target-architecture-regression/source-index.json">代码版本与行号索引</a> · <a href="/2026/11/27/i3c-host-target-architecture-regression/material-catalog.txt">历史材料检索目录</a></p>
+<p>公开材料中的项目名统一写为 Current Proj，内部地址、账号、本机路径和部分前缀已泛化；历史日志与报告只发布脱敏摘录，不冒充未改动的原始证据。原始材料留在本地，公开文件的索引与校验值另行保存。<a href="/2026/11/27/i3c-host-target-architecture-regression/evidence-index.json">证据索引</a> · <a href="/2026/11/27/i3c-host-target-architecture-regression/SHA256SUMS">公开附件校验清单</a></p>
+<p>这次回看，我最想保留下来的设计经验是：<strong>把每一种“已经完成”说具体。</strong> 是 Host 发完了、Target 收完了、通知到了、APP 比较通过了，还是清理也做完了？这些边界写进接口和执行表以后，失败才能停在一个有证据的位置，下一轮也才知道从哪里接着查。</p>
+<p>如果想继续看它如何接到更上层的管理协议，可参阅 <a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP&#x2F;PLDM 移植后的双端软件架构</a>；I3C 子系统的基础分层见 <a href="/2026/11/25/i3c-linux-driver/">Linux I3C 驱动视角学习笔记</a>。</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="auto"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%88%E7%9C%8B%E4%B8%A4%E7%AB%AF%E5%88%86%E5%88%AB%E8%BF%90%E8%A1%8C%E4%BB%80%E4%B9%88"><span class="toc-text">1. 先看两端分别运行什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Host-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BB%8E-sysfs-%E8%B5%B0%E5%88%B0%E4%BA%86%E4%BC%9A%E8%AF%9D%E5%8C%96-APP"><span class="toc-text">2. Host 为什么从 sysfs 走到了会话化 APP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%B8%80%E4%BB%BD%E5%9B%BA%E5%AE%9A%E5%A4%A7%E5%B0%8F%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A5%91%E7%BA%A6"><span class="toc-text">2.1 一份固定大小的数据契约</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-owner%E3%80%81session%E3%80%81epoch-%E5%90%84%E7%AE%A1%E4%B8%80%E4%BB%B6%E4%BA%8B"><span class="toc-text">2.2 owner、session、epoch 各管一件事</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%87%AA%E5%8A%A8%E9%87%8D%E5%8F%91%E5%A4%B1%E8%B4%A5%E5%91%BD%E4%BB%A4"><span class="toc-text">2.3 为什么不自动重发失败命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Target-%E4%B8%8D%E8%83%BD%E5%8F%AA%E9%9D%A0%E4%B8%80%E4%B8%AA-open-close-%E5%B8%83%E5%B0%94%E5%80%BC"><span class="toc-text">3. Target 不能只靠一个 open&#x2F;close 布尔值</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F%E4%B8%BA%E4%BB%80%E4%B9%88%E6%8B%86%E6%88%90%E5%87%A0%E5%B1%82"><span class="toc-text">3.1 初始化顺序为什么拆成几层</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E7%8A%B6%E6%80%81%E5%BF%AB%E7%85%A7%E5%92%8C%E6%8E%A8%E8%BF%9B%E5%8A%A8%E4%BD%9C%E8%A6%81%E5%88%86%E5%BC%80"><span class="toc-text">3.2 状态快照和推进动作要分开</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-close-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%B8%A4%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="toc-text">3.3 close 为什么有两个阶段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%94%A8%E4%B8%80%E7%AC%94-5-%E5%AD%97%E8%8A%82%E4%BC%A0%E8%BE%93%E7%9C%8B%E6%95%B0%E6%8D%AE%E5%88%B0%E5%BA%95%E7%BB%8F%E8%BF%87%E5%93%AA%E9%87%8C"><span class="toc-text">4. 用一笔 5 字节传输看数据到底经过哪里</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Host-%E5%86%99%E5%85%A5%EF%BC%8CTarget-%E6%8E%A5%E6%94%B6"><span class="toc-text">4.1 Host 写入，Target 接收</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Target-%E5%A4%87%E6%95%B0%EF%BC%8CHost-%E8%AF%BB%E5%8F%96"><span class="toc-text">4.2 Target 备数，Host 读取</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-IBI-%E6%9C%89%E4%B8%89%E4%B8%AA%E5%AE%8C%E6%88%90%E7%82%B9"><span class="toc-text">5. IBI 有三个完成点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E8%87%AA%E5%8A%A8%E6%89%A7%E8%A1%8C%E8%A1%A8%E6%80%8E%E6%A0%B7%E6%8A%8A%E4%BA%BA%E5%B7%A5%E6%AD%A5%E9%AA%A4%E4%B8%B2%E8%B5%B7%E6%9D%A5"><span class="toc-text">6. 自动执行表怎样把人工步骤串起来</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-PREPARE%E3%80%81READY%E3%80%81%E4%B8%9A%E5%8A%A1%E3%80%81DONE"><span class="toc-text">6.1 PREPARE、READY、业务、DONE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-16-%E5%AD%97%E8%8A%82%E6%8E%A7%E5%88%B6%E5%B8%A7%E8%A3%85%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-text">6.2 16 字节控制帧装了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E7%8A%B6%E6%80%81%E4%BF%AE%E6%94%B9%E6%AD%A5%E9%AA%A4%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%89%B9%E6%AE%8A%E4%BA%A4%E6%8E%A5"><span class="toc-text">6.3 状态修改步骤为什么需要特殊交接</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E6%8A%8A%E2%80%9C%E9%95%BF%E5%BA%A6%E2%80%9D%E6%8B%86%E6%88%90%E4%BA%94%E4%B8%AA%E6%A6%82%E5%BF%B5"><span class="toc-text">7. 把“长度”拆成五个概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-DMA-%E5%8A%A0%E8%BF%9B%E6%9D%A5%E4%BB%A5%E5%90%8E%EF%BC%8C%E5%AE%8C%E6%88%90%E6%9D%A1%E4%BB%B6%E8%BF%98%E5%BE%97%E5%86%8D%E5%8A%A0%E4%B8%80%E5%B1%82"><span class="toc-text">8. DMA 加进来以后，完成条件还得再加一层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E6%81%A2%E5%A4%8D%E4%B8%8D%E6%98%AF%E4%B8%80%E4%B8%AA-reset-%E5%91%BD%E4%BB%A4"><span class="toc-text">9. 恢复不是一个 reset 命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-%E6%8F%90%E5%89%8D%E7%BB%93%E6%9D%9F%E6%9C%89%E9%99%90%E8%AF%BB%EF%BC%9A%E4%B8%A2%E5%BC%83%E6%97%A7%E5%8C%85%EF%BC%8C%E9%87%8D%E6%96%B0%E5%87%86%E5%A4%87%E6%96%B0%E5%8C%85"><span class="toc-text">9.1 提前结束有限读：丢弃旧包，重新准备新包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-2-%E8%BD%AF%E4%BB%B6%E5%A4%96%E8%AE%BE%E5%A4%8D%E4%BD%8D%EF%BC%9A%E6%97%A7%E5%8A%A8%E6%80%81%E5%9C%B0%E5%9D%80%E4%B9%9F%E8%A6%81%E9%AA%8C%E8%AF%81%E5%A4%B1%E6%95%88"><span class="toc-text">9.2 软件外设复位：旧动态地址也要验证失效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-3-%E6%80%BB%E7%BA%BF%E8%AF%B7%E6%B1%82%E8%A7%A6%E5%8F%91%E5%A4%8D%E4%BD%8D%EF%BC%9A%E6%A3%80%E6%B5%8B%E5%88%B0%E4%BA%86%E8%BF%98%E4%B8%8D%E7%AE%97%E5%BA%94%E7%94%A8%E4%BA%86%E5%8A%A8%E4%BD%9C"><span class="toc-text">9.3 总线请求触发复位：检测到了还不算应用了动作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-4-%E9%95%BF%E5%86%99%E7%9A%84%E5%9D%8F-CRC-%E6%81%A2%E5%A4%8D%EF%BC%9A%E5%BA%94%E7%94%A8%E5%B1%82%E9%94%99%E8%AF%AF%E4%B8%8E%E7%A1%AC%E4%BB%B6%E9%94%99%E8%AF%AF%E5%88%86%E5%BC%80"><span class="toc-text">9.4 长写的坏 CRC 恢复：应用层错误与硬件错误分开</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-Hot-Join-%E4%B8%BA%E4%BD%95%E4%B8%8D%E8%83%BD%E5%8F%AA%E7%9C%8B%E2%80%9C%E5%9C%B0%E5%9D%80%E5%8F%88%E5%88%86%E9%85%8D%E5%87%BA%E6%9D%A5%E4%BA%86%E2%80%9D"><span class="toc-text">10. Hot-Join 为何不能只看“地址又分配出来了”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E6%8A%8A%E5%8E%86%E6%AC%A1%E5%9B%9E%E5%BD%92%E6%8E%92%E5%9C%A8%E4%B8%80%E8%B5%B7%E7%9C%8B"><span class="toc-text">11. 把历次回归排在一起看</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-1-%E4%B8%80%E6%AC%A1%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E5%A4%B1%E8%B4%A5%EF%BC%9A%E6%89%93%E5%8D%B0-READY%EF%BC%8C%E5%8D%B4%E6%B2%A1%E6%9C%89%E6%94%B6%E5%88%B0-READY"><span class="toc-text">11.1 一次有价值的失败：打印 READY，却没有收到 READY</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-2-%E4%B8%BA%E4%BB%80%E4%B9%88-11-%E6%9C%88-19-%E6%97%A5%E7%9A%84%E9%80%9A%E8%BF%87%E4%BB%8D%E8%A6%81%E4%BF%9D%E7%95%99%E7%89%88%E6%9C%AC%E5%A4%87%E6%B3%A8"><span class="toc-text">11.2 为什么 11 月 19 日的通过仍要保留版本备注</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-all%E3%80%81full%E3%80%81%E7%8B%AC%E7%AB%8B-case-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-text">12. all、full、独立 case 的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#13-%E5%86%8D%E5%81%9A%E5%9B%9E%E5%BD%92%E6%97%B6%EF%BC%8C%E5%93%AA%E4%BA%9B%E4%BF%A1%E6%81%AF%E5%BA%94%E8%AF%A5%E4%B8%80%E8%B5%B7%E4%BF%9D%E5%AD%98"><span class="toc-text">13. 再做回归时，哪些信息应该一起保存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#14-%E4%BB%8E%E5%93%AA%E9%87%8C%E5%BC%80%E5%A7%8B%E8%AF%BB%E4%BB%A3%E7%A0%81"><span class="toc-text">14. 从哪里开始读代码</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `/js/vendor/jquery-3.7.1.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div><!-- hexo injector body_end start --><script defer src="/js/engineering.js?v=20261127-1"></script><!-- hexo injector body_end end --></body></html>

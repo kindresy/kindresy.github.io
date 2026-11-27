@@ -28,7 +28,7 @@
 <meta property="og:description" content="从 open 枚举基线追溯、MCTP 模式切换和 AF_MCTP 类型字节修正，到 7 项只读查询、69 字节边界与连续分包实验，记录 2026-11-26 的调试过程和未解决问题。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-26T11:00:00.000Z">
-<meta property="article:modified_time" content="2026-11-27T07:32:52.000Z">
+<meta property="article:modified_time" content="2026-11-27T08:50:01.820Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="baremetal">
 <meta property="article:tag" content="bringup">
@@ -56,7 +56,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-26T19:00:00+08:00","dateModified":"2026-11-27T15:32:52+08:00","datePublished":"2026-11-26T19:00:00+08:00","description":"2026 年 11 月 26 日，MCTP&#x2F;PLDM over I3C 的基础查询终于有了端到端结果：3 项 MCTP Control、4 项 PLDM Base，共 7 项只读查询全部通过。 Host 能读到 Target 的 EID、TID、协议版本和命令位图，响应版本列表的 CRC32 也通过了校验。\n接着往包长边界走，新的问题出现了。Host 连续发送一条拆成两包的消息时，第一包 69 字节发送成功，第二包 6 字节在 0x44/W 地址阶段收到 NACK。两包之间留约 1 秒，Host 驱动又都报告发送成功；重新枚举后去掉间隔，第二包 NACK 再次出现。\n今天可以把“单包管理查询打通”记为一个里程碑。连续分包、Target 重组和满包响应还没有完成验收，接下来要盯的是第一包结束后，Target 怎样准备好接下一包。","headline":"I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/","keywords":"baremetal, linux, i3c, mctp, pldm, debugging, bringup, milestone","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-26T19:00:00+08:00","dateModified":"2026-11-27T16:50:01+08:00","datePublished":"2026-11-26T19:00:00+08:00","description":"2026 年 11 月 26 日，MCTP&#x2F;PLDM over I3C 的基础查询终于有了端到端结果：3 项 MCTP Control、4 项 PLDM Base，共 7 项只读查询全部通过。 Host 能读到 Target 的 EID、TID、协议版本和命令位图，响应版本列表的 CRC32 也通过了校验。\n接着往包长边界走，新的问题出现了。Host 连续发送一条拆成两包的消息时，第一包 69 字节发送成功，第二包 6 字节在 0x44/W 地址阶段收到 NACK。两包之间留约 1 秒，Host 驱动又都报告发送成功；重新枚举后去掉间隔，第二包 NACK 再次出现。\n今天可以把“单包管理查询打通”记为一个里程碑。连续分包、Target 重组和满包响应还没有完成验收，接下来要盯的是第一包结束后，Target 怎样准备好接下一包。","headline":"I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/","keywords":"baremetal, linux, i3c, mctp, pldm, debugging, bringup, milestone","image":[]}</script>
   
 <!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-1"><!-- hexo injector head_end end --></head>
 <body>
