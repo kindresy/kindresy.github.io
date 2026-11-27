@@ -28,7 +28,7 @@
 <meta property="og:description" content="从 network ID、EID、PID、DA、TID 的来源讲起，沿一笔 PLDM GetTID 拆解 Host 与 Target 的路由、封装、PEC、IBI 和响应解析，附可切换路径的完整总图。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-27T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-11-27T07:32:52.000Z">
+<meta property="article:modified_time" content="2026-11-27T09:31:35.000Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="architecture">
 <meta property="article:tag" content="debugging">
@@ -55,7 +55,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T12:00:00+08:00","dateModified":"2026-11-27T15:32:52+08:00","datePublished":"2026-11-27T12:00:00+08:00","description":"调 I3C 时看到 mctpi3c0，再看到 route、neigh、MTU 和 socket，很容易犯嘀咕：我明明只接了两根线，怎么突然要配置网络了？\n这个问题是在小包查询跑通后冒出来的。Host 能读到 Target 的 EID 9、PLDM TID 1，但把配置命令和线上数据放在一起看，几个数字很容易串：network 1 是谁的地址？为什么 I3C 已经有 0x44，还需要 EID？GetTID 返回 1，又为什么要向 EID 9 发请求？\n下面就拿我们已经跑通的 GetTID，顺着启动、配置、发包和回包走一遍。实现细节以 11 月 26 日归档的这套 Host 为准；字节示例用于拆包，不补造 Tag 或 PEC 的实测值。","headline":"I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-network-ids-packet-path/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-network-ids-packet-path/","keywords":"tutorial, linux, i3c, mctp, pldm, debugging, architecture","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T12:00:00+08:00","dateModified":"2026-11-27T17:31:35+08:00","datePublished":"2026-11-27T12:00:00+08:00","description":"调 I3C 时看到 mctpi3c0，再看到 route、neigh、MTU 和 socket，很容易犯嘀咕：我明明只接了两根线，怎么突然要配置网络了？\n这个问题是在小包查询跑通后冒出来的。Host 能读到 Target 的 EID 9、PLDM TID 1，但把配置命令和线上数据放在一起看，几个数字很容易串：network 1 是谁的地址？为什么 I3C 已经有 0x44，还需要 EID？GetTID 返回 1，又为什么要向 EID 9 发请求？\n下面就拿我们已经跑通的 GetTID，顺着启动、配置、发包和回包走一遍。实现细节以 11 月 26 日归档的这套 Host 为准；字节示例用于拆包，不补造 Tag 或 PEC 的实测值。","headline":"I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-network-ids-packet-path/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-network-ids-packet-path/","keywords":"tutorial, linux, i3c, mctp, pldm, debugging, architecture","image":[]}</script>
   
 <!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-2"><!-- hexo injector head_end end --></head>
 <body>
@@ -388,7 +388,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></div></section></div>
 
 
 

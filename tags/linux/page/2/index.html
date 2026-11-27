@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -100,6 +100,70 @@
 
 <div class="post-list post engineering-post-list">
   
+    <a class="post-card post" href="/2026/11/27/pcie-cadence-register-programming/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
+  <h2 class="post-title">读 Linux Cadence Endpoint 驱动：BAR、出站窗口和一笔 MSI</h2>
+  <p class="engineering-excerpt">从测试 Function 的 BAR 后端出发，沿 Endpoint Framework 追踪控制器如何接住主机写、访问主机内存和发出 MSI。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-linux-pci-core/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Linux PCI Core：从枚举到驱动绑定</h2>
+  <p class="engineering-excerpt">沿 pci_host_bridge、pci_bus 和 pci_dev 理解配置访问、资源分配与 driver binding。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">工程里程碑</span><span>MCTP 与 PLDM</span></div>
+  <h2 class="post-title">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</h2>
+  <p class="engineering-excerpt">从 open 枚举基线追溯、MCTP 模式切换和 AF_MCTP 类型字节修正，到 7 项只读查询、69 字节边界与连续分包实验，记录 2026-11-26 的调试过程和未解决问题。</p>
+  <div class="entry-meta"><span>2026-11-26</span><span class="evidence-badge">基础查询通过 · 分包待回归</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/25/i3c-linux-driver/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>I3C</span></div>
+  <h2 class="post-title">Linux I3C 驱动视角学习笔记</h2>
+  <p class="engineering-excerpt">把 I3C 协议动作对应到 Linux core、controller driver 和 device driver，梳理设备模型与常用 API。</p>
+  <div class="entry-meta"><span>2026-11-25</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">工程里程碑</span><span>MCTP 与 PLDM</span></div>
+  <h2 class="post-title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</h2>
+  <p class="engineering-excerpt">记录裸机端点独立移植包、i.MX93 slim 内核回移、上板部署和首笔 Get Endpoint ID 失败的全过程。当前枚举与驱动绑定通过，MCTP/PLDM 端到端尚未打通。</p>
+  <div class="entry-meta"><span>2026-11-25</span><span class="evidence-badge">阶段记录 · 首包地址 NACK</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/03/25/pcie/pcie_software1/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</h2>
+  <p class="engineering-excerpt">主机是一台 x86 服务器，插槽里有一张 AI 加速卡。卡上的 SoC 作为 Endpoint，既要向主机提供寄存器和队列，也要主动读写主机内存。一次完整启动里，能在 lspci 看到它、能读到设备版本号、能收到第一笔 DMA 完成通知，…</p>
+  <div class="entry-meta"><span>2026-03-25</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/03/19/dma/linux_dma/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>DMA</span></div>
+  <h2 class="post-title">Linux DMA Engine Overview</h2>
+  <p class="engineering-excerpt">简介本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag。讨论dma framework，以及provider驱动之间的一些共性。
+Linux DMA Engine Ove…</p>
+  <div class="entry-meta"><span>2026-03-19</span></div>
+</article>
+</a>
+  
     <a class="post-card post" href="/2026/03/06/pcie/pcie_ep_demo/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
@@ -107,15 +171,6 @@
   <p class="engineering-excerpt">这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&amp;#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。
 项目概述这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6…</p>
   <div class="entry-meta"><span>2026-03-06</span></div>
-</article>
-</a>
-  
-    <a class="post-card post" href="/2026/03/03/pcie/pcie_software/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">pcie software</h2>
-  <p class="engineering-excerpt">简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与A…</p>
-  <div class="entry-meta"><span>2026-03-03</span></div>
 </article>
 </a>
   

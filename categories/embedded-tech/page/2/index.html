@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -100,115 +100,100 @@
 
 <div class="post-list post engineering-post-list">
   
-    <a class="post-card post" href="/2026/11/25/i3c-basic-spec/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>I3C</span></div>
-  <h2 class="post-title">MIPI I3C Basic v1.1.1 组内分享</h2>
-  <p class="engineering-excerpt">从 SDR、动态地址和 CCC 开始，梳理 I3C 协议，并记录 AST2600 QEMU 与 Linux 驱动调试过程。</p>
-  <div class="entry-meta"><span>2026-11-25</span></div>
-</article>
-</a>
-  
-    <a class="post-card post" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">工程里程碑</span><span>MCTP 与 PLDM</span></div>
-  <h2 class="post-title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</h2>
-  <p class="engineering-excerpt">记录裸机端点独立移植包、i.MX93 slim 内核回移、上板部署和首笔 Get Endpoint ID 失败的全过程。当前枚举与驱动绑定通过，MCTP/PLDM 端到端尚未打通。</p>
-  <div class="entry-meta"><span>2026-11-25</span><span class="evidence-badge">阶段记录 · 首包地址 NACK</span></div>
-</article>
-</a>
-  
-    <a class="post-card post" href="/2026/03/25/pcie/pcie_software1/">
+    <a class="post-card post" href="/2026/11/27/pcie-memory-tlp-completion/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
-  <h2 class="post-title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</h2>
-  <p class="engineering-excerpt">简介本文从软件视角系统梳理 PCIe 在 Linux 场景下的完整工作流。
-PCIe 设备在系统中通常扮演两种角色：
-
-RC，Root Complex，根复合体
-EP，Endpoint，端点设备
-
-两者职责完全不同，软件栈也完全不同。
-如…</p>
-  <div class="entry-meta"><span>2026-03-25</span></div>
+  <h2 class="post-title">Memory TLP 与 Completion：PCIe 怎样完成一次读写</h2>
+  <p class="engineering-excerpt">从 Posted Write 和 Non-Posted Read 出发，解释请求头、Byte Enable、Tag 与分段返回。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/23/pcie/pcie_fw/">
+    <a class="post-card post" href="/2026/11/27/pcie-message-atomic-prefix/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">PCIe Endpoint 固件初始化实例</h2>
-  <p class="engineering-excerpt">pcie fw程序demo项目头文件名已脱敏，下面的 Current Proj_mcu.h 是占位名称，编译时需使用实际工程头文件。
-1234567891011121314151617181920212223242526272829303…</p>
-  <div class="entry-meta"><span>2026-03-23</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Message、AtomicOp 与 TLP Prefix：数据读写之外的 PCIe</h2>
+  <p class="engineering-excerpt">理解事件消息、原子事务及附加上下文，并核对路径和具体 IP 的支持条件。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/19/dma/linux_dma/">
+    <a class="post-card post" href="/2026/11/27/pcie-mps-mrrs-ordering/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>DMA</span></div>
-  <h2 class="post-title">Linux DMA Engine Overview</h2>
-  <p class="engineering-excerpt">简介本文介绍linux内核下的DMA Engine概述，cyclic传输，以及DMA_PREP_FENCE这类传输flag。讨论dma framework，以及provider驱动之间的一些共性。
-Linux DMA Engine Ove…</p>
-  <div class="entry-meta"><span>2026-03-19</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">MPS、MRRS 与 Ordering：包长和顺序怎样影响性能</h2>
+  <p class="engineering-excerpt">把单包负载、读请求长度、Completion 边界、流控和事务顺序放在同一次传输中理解。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/17/dma/axidma/">
+    <a class="post-card post" href="/2026/11/27/pcie-ntb-multi-host/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>DMA</span></div>
-  <h2 class="post-title">axidma硬件介绍与软件实现</h2>
-  <p class="engineering-excerpt">通用特性核心时钟与通道配置​独立的核心、从接口和主接口时钟​Independent core, slave interface and master interface clocks最多支持 32 个通道​Up to 32 channel…</p>
-  <div class="entry-meta"><span>2026-03-17</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">NTB 与多 Host：两棵 PCIe 树怎样通信</h2>
+  <p class="engineering-excerpt">通过窗口、地址翻译、doorbell 和 scratchpad，理解独立枚举域之间的数据交换。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/10/low-speed/i2c_controller_1/">
+    <a class="post-card post" href="/2026/11/27/pcie-tc-vc-qos-ptm-acs/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>I2C</span></div>
-  <h2 class="post-title">DW APB I2C Controller 第二篇</h2>
-  <p class="engineering-excerpt">简介本文主要是针对新思的I2C控制器的学习的第二篇文章
-本文涉及:Uboot下I2C控制器驱动实现分析
-OPS12345678910111213141516171819202122static const struct dm_i2c_op…</p>
-  <div class="entry-meta"><span>2026-03-10</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">TC、VC、PTM 与 ACS：分类、时钟和隔离各管什么</h2>
+  <p class="engineering-excerpt">把服务标签、缓冲资源、时间测量与访问控制拆开，核对 Capability 和实际构建配置。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/06/pcie/pcie_ep_demo/">
+    <a class="post-card post" href="/2026/11/27/pcie-dma-linux-api/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">PCIe 加速卡驱动：结构与工作流程</h2>
-  <p class="engineering-excerpt">这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&amp;#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。
-项目概述这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6…</p>
-  <div class="entry-meta"><span>2026-03-06</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">PCIe DMA 与 Linux DMA API：引擎、地址和缓存</h2>
+  <p class="engineering-excerpt">区分搬运引擎、总线主设备与 DMA API，解释 coherent、streaming、IOMMU 和数据所有权。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/06/low-speed/i2c_controller/">
+    <a class="post-card post" href="/2026/11/27/pcie-intx-msi-msix/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>I2C</span></div>
-  <h2 class="post-title">DW APB I2C Controller</h2>
-  <p class="engineering-excerpt">简介本文主要是针对新思的I2C控制器的学习，翻译。
-本文涉及：chapter1，2，3。主要包括协议部分，操作模式以及编程方式，特性介绍，Timing参数以及计算方式，clocks&amp;amp;resets，DMA接口，控制器主要信号介绍。
-…</p>
-  <div class="entry-meta"><span>2026-03-06</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">INTx、MSI 与 MSI-X：中断怎样沿 PCIe 到达 CPU</h2>
+  <p class="engineering-excerpt">从传统 IRQ 直觉出发，解释消息中断、Capability、Table、Mask 和 Linux 投递路径。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/04/low-speed/i2c/">
+    <a class="post-card post" href="/2026/11/27/pcie-linux-function-driver/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>I2C</span></div>
-  <h2 class="post-title">i2c_introduction</h2>
-  <p class="engineering-excerpt">参考文档官方标准文档NXP（原飞利浦半导体）官方规范​I2C-bus specification and user manualUM10204 Rev. 7.0 — 这是最权威的官方技术手册
-NXP I2C 资源中心​I2C-bus官方主…</p>
-  <div class="entry-meta"><span>2026-03-04</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Linux PCI 功能驱动：probe、MMIO 与生命周期</h2>
+  <p class="engineering-excerpt">把 enable、region claim、BAR mapping、BME、DMA、IRQ 和 remove 连成驱动主线。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-linux-host-controller/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Linux Host、EPC 与 EPF：控制器驱动的职责边界</h2>
+  <p class="engineering-excerpt">从 Linux 的通用主桥和测试 EPF 入手，沿一笔 BAR 命令和返回中断，看清两侧四类驱动的分工。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-reset-recovery/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Link Down、Hot Reset 与 FLR：恢复时该重建什么</h2>
+  <p class="engineering-excerpt">按复位作用域区分状态保留和恢复责任，解释为何不能对所有故障执行同一套初始化。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
 </div>
 
   <div class='paginator-wrap dis-select'>
-  <a class="extend prev" rel="prev" href="/categories/embedded-tech/"></a><a class="page-number" href="/categories/embedded-tech/">1</a><span class="page-number current">2</span><a class="page-number" href="/categories/embedded-tech/page/3/">3</a><a class="extend next" rel="next" href="/categories/embedded-tech/page/3/"></a>
+  <a class="extend prev" rel="prev" href="/categories/embedded-tech/"></a><a class="page-number" href="/categories/embedded-tech/">1</a><span class="page-number current">2</span><a class="page-number" href="/categories/embedded-tech/page/3/">3</a><a class="page-number" href="/categories/embedded-tech/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/categories/embedded-tech/page/6/">6</a><a class="extend next" rel="next" href="/categories/embedded-tech/page/3/"></a>
   </div>
 
 

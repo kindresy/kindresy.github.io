@@ -1,0 +1,1018 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>Link Down、Hot Reset 与 FLR：恢复时该重建什么 - 庐山东林的晚钟</title>
+
+  
+    <meta name="description" content="按复位作用域区分状态保留和恢复责任，解释为何不能对所有故障执行同一套初始化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Link Down、Hot Reset 与 FLR：恢复时该重建什么">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/27/pcie-reset-recovery/">
+<meta property="og:site_name" content="庐山东林的晚钟">
+<meta property="og:description" content="按复位作用域区分状态保留和恢复责任，解释为何不能对所有故障执行同一套初始化。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-26T16:00:00.000Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="architecture">
+<meta property="article:tag" content="pcie">
+<meta property="article:tag" content="tutorial">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  <meta name="keywords" content="tutorial,architecture,pcie">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+    <link rel="shortcut icon" href="/images/evening-bell.svg">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T00:00:00+08:00","dateModified":"2026-11-27T00:00:00+08:00","datePublished":"2026-11-27T00:00:00+08:00","description":"","headline":"Link Down、Hot Reset 与 FLR：恢复时该重建什么","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/pcie-reset-recovery/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/pcie-reset-recovery/","keywords":"tutorial, architecture, pcie","image":[]}</script>
+  
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-2"><!-- hexo injector head_end end --></head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub cap">协议、驱动与调试现场</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<widget class="widget-wrapper engineering-related">
+  <div class="widget-header"><span class="name">PCIe · 阅读顺序</span></div>
+  <ol>
+    
+      <li><a href="/2026/03/03/pcie/pcie_introduction/">PCIe 入门：拓扑、角色与三层协议</a></li>
+    
+      <li><a href="/2026/11/27/pcie-configuration-ecam-routing/">配置空间与 ECAM：主机怎样发现 PCIe 设备</a></li>
+    
+      <li><a href="/2026/11/27/pcie-bdf-requester-id/">BDF、Requester ID 与 PCIe 层次路由</a></li>
+    
+      <li><a href="/2026/11/27/pcie-bar-address-translation/">BAR 与地址翻译：一笔访问怎样到达设备内部</a></li>
+    
+      <li><a href="/2026/11/27/pcie-endpoint-transaction-walkthrough/">一块 Endpoint 的完整旅程：从上电到 DMA 与 MSI-X</a></li>
+    
+      <li><a href="/2026/11/27/pcie-memory-tlp-completion/">Memory TLP 与 Completion：PCIe 怎样完成一次读写</a></li>
+    
+      <li><a href="/2026/11/27/pcie-data-link-replay-flow-control/">Data Link：ACK、重放与逐跳流控</a></li>
+    
+      <li><a href="/2026/11/27/pcie-link-lane-ltssm/">Link、Lane 与 LTSSM：PCIe 链路怎样建立</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dma-linux-api/">PCIe DMA 与 Linux DMA API：引擎、地址和缓存</a></li>
+    
+      <li><a href="/2026/11/27/pcie-intx-msi-msix/">INTx、MSI 与 MSI-X：中断怎样沿 PCIe 到达 CPU</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-pci-core/">Linux PCI Core：从枚举到驱动绑定</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-function-driver/">Linux PCI 功能驱动：probe、MMIO 与生命周期</a></li>
+    
+      <li><a href="/2026/03/25/pcie/pcie_software1/">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-host-controller/">Linux Host、EPC 与 EPF：控制器驱动的职责边界</a></li>
+    
+      <li><a href="/2026/11/27/pcie-cadence-core-architecture/">读 Linux Cadence PCIe Host 驱动：一次配置读怎样找到 Endpoint</a></li>
+    
+      <li><a href="/2026/11/27/pcie-cadence-register-programming/">读 Linux Cadence Endpoint 驱动：BAR、出站窗口和一笔 MSI</a></li>
+    
+      <li><a href="/2026/03/23/pcie/pcie_fw/">PCIe Endpoint 固件初始化实例</a></li>
+    
+      <li><a href="/2026/03/06/pcie/pcie_ep_demo/">PCIe 加速卡驱动：结构与工作流程</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li>
+    
+      <li><a href="/2026/11/27/pcie-iommu-ats-pasid-pri/">IOMMU、ATS、PASID 与 PRI：设备怎样访问进程地址空间</a></li>
+    
+      <li><a href="/2026/11/27/pcie-message-atomic-prefix/">Message、AtomicOp 与 TLP Prefix：数据读写之外的 PCIe</a></li>
+    
+      <li><a href="/2026/11/27/pcie-mps-mrrs-ordering/">MPS、MRRS 与 Ordering：包长和顺序怎样影响性能</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ntb-multi-host/">NTB 与多 Host：两棵 PCIe 树怎样通信</a></li>
+    
+      <li><a href="/2026/11/27/pcie-tc-vc-qos-ptm-acs/">TC、VC、PTM 与 ACS：分类、时钟和隔离各管什么</a></li>
+    
+      <li><a href="/2026/11/27/pcie-reset-recovery/" aria-current="page">Link Down、Hot Reset 与 FLR：恢复时该重建什么</a></li>
+    
+      <li><a href="/2026/11/27/pcie-capability-safe-walking/">PCIe Capability：发现能力与安全遍历</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dpc-recovery/">DPC：先隔离下游故障，再恢复设备</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dynamic-power-allocation/">DPA：设备保持 D0 时怎样调整功耗预算</a></li>
+    
+      <li><a href="/2026/11/27/pcie-error-model-aer/">PCIe 错误与 AER：从事务失败到系统恢复</a></li>
+    
+      <li><a href="/2026/11/27/pcie-expansion-option-rom/">Expansion ROM：驱动加载前，设备如何参与启动</a></li>
+    
+      <li><a href="/2026/11/27/pcie-hotplug-removal/">PCIe 热插拔：有序移除与意外掉卡</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ltr-obff/">LTR 与 OBFF：设备和平台怎样协商省电时机</a></li>
+    
+      <li><a href="/2026/11/27/pcie-power-aspm-pme/">PCIe 电源管理：D-state、ASPM、L1SS 与 PME</a></li>
+    
+      <li><a href="/2026/11/27/pcie-slot-power-budget/">Slot Power Limit 与 Power Budgeting：功耗需求和额度怎样对接</a></li>
+    
+  </ol>
+</widget>
+
+<widget class="widget-wrapper engineering-utilities"><a href="/categories/">所有专题</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<nav class="engineering-nav" aria-label="主导航">
+  
+    <a href="/">首页</a>
+  
+    <a href="/categories/">技术专题</a>
+  
+    <a href="/engineering/">工程记录</a>
+  
+    <a href="/categories/life-record/">生活</a>
+  
+    <a href="/about/">关于</a>
+  
+  <button type="button" data-site-search aria-label="打开站内搜索" title="搜索文章">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/">PCIe</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/endpoint-firmware/">Endpoint 固件</a></div>
+<div class="engineering-dates">
+  <span>发布于 2026-11-27</span>
+  
+</div>
+</div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Link Down、Hot Reset 与 FLR：恢复时该重建什么</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div>
+
+  <div class="engineering-reading-tools">
+    <span>教程</span>
+    <button type="button" data-reading-width aria-pressed="false">宽屏阅读</button>
+  </div>
+
+<article class="md-text content"><p>一张多功能卡上，Function 0 的队列卡住了，Function 1 还在处理业务。Host 若能只复位 Function 0，固件就不能顺手把全卡共享的引擎也清掉。反过来，如果整条链路已经丢失，只重新初始化一个队列也恢复不了访问。恢复流程首先要回答两个问题：<strong>谁受了影响，现在还可以通过什么路径访问设备？</strong></p>
+<h2 id="看事件的作用域"><a href="#看事件的作用域" class="headerlink" title="看事件的作用域"></a>看事件的作用域</h2><table>
+<thead>
+<tr>
+<th>观察到的事件或操作</th>
+<th>哪些对象要考虑</th>
+<th>首先核对什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Link Down</td>
+<td>经过这条链路的所有下游事务</td>
+<td>链路何时丢失、上游报告了什么、哪些请求仍在途</td>
+</tr>
+<tr>
+<td>链路重训</td>
+<td>该链路的两端以及等待它恢复的访问</td>
+<td>训练是否成功，配置访问何时恢复</td>
+</tr>
+<tr>
+<td>Hot Reset &#x2F; Secondary Bus Reset</td>
+<td>对应桥下游的设备和功能</td>
+<td>受影响的子树、哪些其他驱动也需要参与</td>
+</tr>
+<tr>
+<td>FLR（Function Level Reset）</td>
+<td>指定 Function 及其私有状态</td>
+<td>是否声明支持 FLR，哪些队列和上下文属于它</td>
+</tr>
+<tr>
+<td>Fundamental Reset</td>
+<td>相应硬件复位域内的组件</td>
+<td>平台怎样提供复位，功能状态和链路如何重新建立</td>
+</tr>
+<tr>
+<td>热拔或永久失联</td>
+<td>被移除设备及其驱动持有的资源</td>
+<td>通知上层终止业务，防止继续提交或等待设备</td>
+</tr>
+</tbody></table>
+<p>Link Down 是链路状态的观察结果。掉电、拔卡、主动复位或链路故障都可能造成这个结果。仅凭一条 Link Down 日志推断“某个队列头已经清零”，依据不够。重训恢复了物理链路，同样不能说明复位之前的命令已成功完成。</p>
+<h2 id="FLR-时，固件应该重建谁的状态"><a href="#FLR-时，固件应该重建谁的状态" class="headerlink" title="FLR 时，固件应该重建谁的状态"></a>FLR 时，固件应该重建谁的状态</h2><p>Host 对支持 FLR 的 Function 启动复位，目的在于让该功能恢复到可以重新配置的状态。Endpoint 固件通常需要有一个按 Function 索引的状态视图，至少能指出提交队列、完成队列、门铃状态和中断来源归谁。对于多个功能共用的执行单元，设计上还要能分别停止接收目标功能的新命令、隔离旧工作产生的迟到完成。</p>
+<p>假设功能 0 复位前，队列槽 6 里有一笔写回。复位后驱动重新设置环基址、又用到槽 6。若旧任务的完成还能按旧索引写进新环，即使链路上每个包都传对了，应用看到的也会是一次假的完成。设备可以在启动新队列前排空旧任务，或按硬件设计采用能够区分队列世代的机制。判断恢复成功，要在业务边界检查旧工作确实不能污染新队列。</p>
+<p>Linux 的 <code>pci_reset_function()</code> 会在适用的条件下对功能执行复位，并围绕复位保存、恢复 PCI 状态。它可能使用该设备支持的不同复位方法。驱动自己的描述符、队列语义、重提策略仍由功能驱动和设备协议处理。<a target="_blank" rel="noopener" href="https://docs.kernel.org/6.12/driver-api/pci/pci.html">Linux PCI reset 接口</a></p>
+<h2 id="一条链路断开时，恢复的单位扩大了"><a href="#一条链路断开时，恢复的单位扩大了" class="headerlink" title="一条链路断开时，恢复的单位扩大了"></a>一条链路断开时，恢复的单位扩大了</h2><p>链路断开后，Host 对下游的正常配置读或 MMIO 可能无法完成。以“等设备寄存器某一位变回 0”为唯一退出条件的等待在这里尤其危险。Host 侧应阻止新业务进入，给未完成请求留下可解释的结束状态；EP 侧若能从本地观察链路，也应记录仍在途的工作。对于已经发出、结果不明的写，业务层需要先判断是否能安全重试。</p>
+<p>Hot Reset 会影响下游的多个功能。恢复时要同时考虑共享资源和每个功能的私有资源。若有多个驱动实例，公共初始化应由约定的执行者完成，随后再由各实例恢复自己的队列和中断来源。Linux 的 PCI 错误恢复文档专门讨论了多功能卡上这一点。<a target="_blank" rel="noopener" href="https://docs.kernel.org/6.12/PCI/pci-error-recovery.html">Linux PCI Error Recovery</a></p>
+<h2 id="Host-回调和设备固件怎样对上"><a href="#Host-回调和设备固件怎样对上" class="headerlink" title="Host 回调和设备固件怎样对上"></a>Host 回调和设备固件怎样对上</h2><p>Linux 6.12 的 PCI 错误恢复接口允许驱动通过 <code>struct pci_error_handlers</code> 反馈恢复条件。典型流程会依严重程度、平台和驱动返回值分支。<a target="_blank" rel="noopener" href="https://docs.kernel.org/6.12/PCI/pci-error-recovery.html">PCI 错误恢复阶段</a> <a target="_blank" rel="noopener" href="https://docs.kernel.org/6.12/PCI/pcieaer-howto.html">PCIe AER 驱动指南</a></p>
+<ul>
+<li><strong><code>error_detected()</code></strong> 收到通道状态，先停上层提交并判断是否需要复位。通道已冻结时，应避免依赖常规 MMIO 去确认停机。</li>
+<li><strong><code>mmio_enabled()</code> 或 <code>slot_reset()</code></strong> 在对应条件满足后进入。驱动可以检查恢复的访问条件、重新设置设备；Endpoint 此时应能按其接口约定接受初始化。</li>
+<li><strong><code>resume()</code></strong> 代表平台允许恢复正常业务。适合此时开放队列，并验证一次新请求能取走、写回且只完成一次。</li>
+</ul>
+<p>故障记录里最值得留下的是四个时间点：最后一笔已确认完成的命令、停止新提交、首次重新读到可靠的设备状态、第一笔重新完成的业务。它们能区分“Link 已回来”“Host 已可访问设备”和“数据面已恢复”这三个结论。</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/pcie-linux-host-controller/">Linux Host、EPC 与 EPF：控制器驱动的职责边界</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/pcie-cadence-register-programming/">读 Linux Cadence Endpoint 驱动：BAR、出站窗口和一笔 MSI</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="auto"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9C%8B%E4%BA%8B%E4%BB%B6%E7%9A%84%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="toc-text">看事件的作用域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FLR-%E6%97%B6%EF%BC%8C%E5%9B%BA%E4%BB%B6%E5%BA%94%E8%AF%A5%E9%87%8D%E5%BB%BA%E8%B0%81%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-text">FLR 时，固件应该重建谁的状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E6%9D%A1%E9%93%BE%E8%B7%AF%E6%96%AD%E5%BC%80%E6%97%B6%EF%BC%8C%E6%81%A2%E5%A4%8D%E7%9A%84%E5%8D%95%E4%BD%8D%E6%89%A9%E5%A4%A7%E4%BA%86"><span class="toc-text">一条链路断开时，恢复的单位扩大了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Host-%E5%9B%9E%E8%B0%83%E5%92%8C%E8%AE%BE%E5%A4%87%E5%9B%BA%E4%BB%B6%E6%80%8E%E6%A0%B7%E5%AF%B9%E4%B8%8A"><span class="toc-text">Host 回调和设备固件怎样对上</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `/js/vendor/jquery-3.7.1.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div><!-- hexo injector body_end start --><script defer src="/js/engineering.js?v=20261127-1"></script><!-- hexo injector body_end end --></body></html>

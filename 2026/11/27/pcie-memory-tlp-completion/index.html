@@ -1,0 +1,1294 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>Memory TLP 与 Completion：PCIe 怎样完成一次读写 - 庐山东林的晚钟</title>
+
+  
+    <meta name="description" content="从 Posted Write 和 Non-Posted Read 出发，解释请求头、Byte Enable、Tag 与分段返回。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Memory TLP 与 Completion：PCIe 怎样完成一次读写">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/27/pcie-memory-tlp-completion/">
+<meta property="og:site_name" content="庐山东林的晚钟">
+<meta property="og:description" content="从 Posted Write 和 Non-Posted Read 出发，解释请求头、Byte Enable、Tag 与分段返回。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-26T16:00:00.000Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="architecture">
+<meta property="article:tag" content="pcie">
+<meta property="article:tag" content="tutorial">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  <meta name="keywords" content="tutorial,architecture,pcie">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+    <link rel="shortcut icon" href="/images/evening-bell.svg">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T00:00:00+08:00","dateModified":"2026-11-27T00:00:00+08:00","datePublished":"2026-11-27T00:00:00+08:00","description":"","headline":"Memory TLP 与 Completion：PCIe 怎样完成一次读写","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/pcie-memory-tlp-completion/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/pcie-memory-tlp-completion/","keywords":"tutorial, architecture, pcie","image":[]}</script>
+  
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-2"><!-- hexo injector head_end end --></head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub cap">协议、驱动与调试现场</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<widget class="widget-wrapper engineering-related">
+  <div class="widget-header"><span class="name">PCIe · 阅读顺序</span></div>
+  <ol>
+    
+      <li><a href="/2026/03/03/pcie/pcie_introduction/">PCIe 入门：拓扑、角色与三层协议</a></li>
+    
+      <li><a href="/2026/11/27/pcie-configuration-ecam-routing/">配置空间与 ECAM：主机怎样发现 PCIe 设备</a></li>
+    
+      <li><a href="/2026/11/27/pcie-bdf-requester-id/">BDF、Requester ID 与 PCIe 层次路由</a></li>
+    
+      <li><a href="/2026/11/27/pcie-bar-address-translation/">BAR 与地址翻译：一笔访问怎样到达设备内部</a></li>
+    
+      <li><a href="/2026/11/27/pcie-endpoint-transaction-walkthrough/">一块 Endpoint 的完整旅程：从上电到 DMA 与 MSI-X</a></li>
+    
+      <li><a href="/2026/11/27/pcie-memory-tlp-completion/" aria-current="page">Memory TLP 与 Completion：PCIe 怎样完成一次读写</a></li>
+    
+      <li><a href="/2026/11/27/pcie-data-link-replay-flow-control/">Data Link：ACK、重放与逐跳流控</a></li>
+    
+      <li><a href="/2026/11/27/pcie-link-lane-ltssm/">Link、Lane 与 LTSSM：PCIe 链路怎样建立</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dma-linux-api/">PCIe DMA 与 Linux DMA API：引擎、地址和缓存</a></li>
+    
+      <li><a href="/2026/11/27/pcie-intx-msi-msix/">INTx、MSI 与 MSI-X：中断怎样沿 PCIe 到达 CPU</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-pci-core/">Linux PCI Core：从枚举到驱动绑定</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-function-driver/">Linux PCI 功能驱动：probe、MMIO 与生命周期</a></li>
+    
+      <li><a href="/2026/03/25/pcie/pcie_software1/">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-host-controller/">Linux Host、EPC 与 EPF：控制器驱动的职责边界</a></li>
+    
+      <li><a href="/2026/11/27/pcie-cadence-core-architecture/">读 Linux Cadence PCIe Host 驱动：一次配置读怎样找到 Endpoint</a></li>
+    
+      <li><a href="/2026/11/27/pcie-cadence-register-programming/">读 Linux Cadence Endpoint 驱动：BAR、出站窗口和一笔 MSI</a></li>
+    
+      <li><a href="/2026/03/23/pcie/pcie_fw/">PCIe Endpoint 固件初始化实例</a></li>
+    
+      <li><a href="/2026/03/06/pcie/pcie_ep_demo/">PCIe 加速卡驱动：结构与工作流程</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li>
+    
+      <li><a href="/2026/11/27/pcie-iommu-ats-pasid-pri/">IOMMU、ATS、PASID 与 PRI：设备怎样访问进程地址空间</a></li>
+    
+      <li><a href="/2026/11/27/pcie-message-atomic-prefix/">Message、AtomicOp 与 TLP Prefix：数据读写之外的 PCIe</a></li>
+    
+      <li><a href="/2026/11/27/pcie-mps-mrrs-ordering/">MPS、MRRS 与 Ordering：包长和顺序怎样影响性能</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ntb-multi-host/">NTB 与多 Host：两棵 PCIe 树怎样通信</a></li>
+    
+      <li><a href="/2026/11/27/pcie-tc-vc-qos-ptm-acs/">TC、VC、PTM 与 ACS：分类、时钟和隔离各管什么</a></li>
+    
+      <li><a href="/2026/11/27/pcie-reset-recovery/">Link Down、Hot Reset 与 FLR：恢复时该重建什么</a></li>
+    
+      <li><a href="/2026/11/27/pcie-capability-safe-walking/">PCIe Capability：发现能力与安全遍历</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dpc-recovery/">DPC：先隔离下游故障，再恢复设备</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dynamic-power-allocation/">DPA：设备保持 D0 时怎样调整功耗预算</a></li>
+    
+      <li><a href="/2026/11/27/pcie-error-model-aer/">PCIe 错误与 AER：从事务失败到系统恢复</a></li>
+    
+      <li><a href="/2026/11/27/pcie-expansion-option-rom/">Expansion ROM：驱动加载前，设备如何参与启动</a></li>
+    
+      <li><a href="/2026/11/27/pcie-hotplug-removal/">PCIe 热插拔：有序移除与意外掉卡</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ltr-obff/">LTR 与 OBFF：设备和平台怎样协商省电时机</a></li>
+    
+      <li><a href="/2026/11/27/pcie-power-aspm-pme/">PCIe 电源管理：D-state、ASPM、L1SS 与 PME</a></li>
+    
+      <li><a href="/2026/11/27/pcie-slot-power-budget/">Slot Power Limit 与 Power Budgeting：功耗需求和额度怎样对接</a></li>
+    
+  </ol>
+</widget>
+
+<widget class="widget-wrapper engineering-utilities"><a href="/categories/">所有专题</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<nav class="engineering-nav" aria-label="主导航">
+  
+    <a href="/">首页</a>
+  
+    <a href="/categories/">技术专题</a>
+  
+    <a href="/engineering/">工程记录</a>
+  
+    <a href="/categories/life-record/">生活</a>
+  
+    <a href="/about/">关于</a>
+  
+  <button type="button" data-site-search aria-label="打开站内搜索" title="搜索文章">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/">PCIe</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/architecture/">基础架构</a></div>
+<div class="engineering-dates">
+  <span>发布于 2026-11-27</span>
+  
+</div>
+</div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Memory TLP 与 Completion：PCIe 怎样完成一次读写</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div>
+
+  <div class="engineering-reading-tools">
+    <span>教程</span>
+    <button type="button" data-reading-width aria-pressed="false">宽屏阅读</button>
+  </div>
+
+<article class="md-text content"><h2 id="1-Transaction-Layer-在解决什么"><a href="#1-Transaction-Layer-在解决什么" class="headerlink" title="1. Transaction Layer 在解决什么"></a>1. Transaction Layer 在解决什么</h2><p>PCIe 允许很多请求同时在途，目标响应时间也各不相同。它不采用“发一个请求就霸住总线等结果”的老办法，而使用 pipelined full split-transaction protocol：Request 先走，Completion 之后独立返回。</p>
+<p>这带来较高的并发能力，也要求 TLP 显式携带足够的信息：谁发起请求、目标在哪里、请求多长、哪些 byte 有效、返回对应哪个请求，以及事务是否成功。</p>
+<p>Base Spec 5.0 §2.1 把 Transaction Layer 的核心职责概括为 TLP 构造&#x2F;处理、ordering、Traffic Class&#x2F;VC 与 credit-based flow control。来源：printed&#x2F;PDF pp.103–104。</p>
+<h2 id="2-四种地址空间、四类事务"><a href="#2-四种地址空间、四类事务" class="headerlink" title="2. 四种地址空间、四类事务"></a>2. 四种地址空间、四类事务</h2><table>
+<thead>
+<tr>
+<th>Address Space</th>
+<th>Request</th>
+<th>基本用途</th>
+<th>正常 Completion？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Memory</td>
+<td>Read &#x2F; Write &#x2F; AtomicOp</td>
+<td>BAR MMIO、Host Memory、DMA</td>
+<td>Read&#x2F;Atomic 需要；Write 不需要</td>
+</tr>
+<tr>
+<td>I&#x2F;O</td>
+<td>Read &#x2F; Write</td>
+<td>legacy I&#x2F;O port</td>
+<td>都需要</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td>Read &#x2F; Write</td>
+<td>Function 配置空间</td>
+<td>都需要</td>
+</tr>
+<tr>
+<td>Message</td>
+<td>Msg &#x2F; MsgD</td>
+<td>中断、电源、错误、厂商消息等 in-band event</td>
+<td>不以普通 Completion 应答</td>
+</tr>
+</tbody></table>
+<p>来源：Base Spec §§2.1.1–2.1.2、2.2.9。</p>
+<h2 id="3-TLP-的组成"><a href="#3-TLP-的组成" class="headerlink" title="3. TLP 的组成"></a>3. TLP 的组成</h2><p>一条 TLP 从前到后可能包含：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[optional TLP Prefix(es)]</span><br><span class="line">[3 DW or 4 DW Header]</span><br><span class="line">[optional Data Payload]</span><br><span class="line">[optional 1 DW TLP Digest / ECRC]</span><br></pre></td></tr></table></figure>
+
+<p>所有 TLP header 最先出现 Fmt 和 Type：</p>
+<ul>
+<li><strong>Fmt</strong> 决定 3DW&#x2F;4DW、是否带 data；</li>
+<li><strong>Type</strong> 决定 Memory&#x2F;Config&#x2F;Completion&#x2F;Message 等类型和路由语义。</li>
+</ul>
+<p>常用组合：</p>
+<table>
+<thead>
+<tr>
+<th>TLP</th>
+<th align="right">Fmt</th>
+<th align="right">Type</th>
+<th>Header &#x2F; Data</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>32-bit Memory Read</td>
+<td align="right"><code>000b</code></td>
+<td align="right"><code>00000b</code></td>
+<td>3DW，无 data</td>
+</tr>
+<tr>
+<td>64-bit Memory Read</td>
+<td align="right"><code>001b</code></td>
+<td align="right"><code>00000b</code></td>
+<td>4DW，无 data</td>
+</tr>
+<tr>
+<td>32-bit Memory Write</td>
+<td align="right"><code>010b</code></td>
+<td align="right"><code>00000b</code></td>
+<td>3DW，有 data</td>
+</tr>
+<tr>
+<td>64-bit Memory Write</td>
+<td align="right"><code>011b</code></td>
+<td align="right"><code>00000b</code></td>
+<td>4DW，有 data</td>
+</tr>
+<tr>
+<td>Completion without Data</td>
+<td align="right"><code>000b</code></td>
+<td align="right"><code>01010b</code></td>
+<td>3DW，无 data</td>
+</tr>
+<tr>
+<td>Completion with Data</td>
+<td align="right"><code>010b</code></td>
+<td align="right"><code>01010b</code></td>
+<td>3DW，有 data</td>
+</tr>
+</tbody></table>
+<p>来源：Base Spec Tables 2-2&#x2F;2-3，printed&#x2F;PDF pp.108–110。</p>
+<h2 id="4-Memory-Request-header-中真正要盯的字段"><a href="#4-Memory-Request-header-中真正要盯的字段" class="headerlink" title="4. Memory Request header 中真正要盯的字段"></a>4. Memory Request header 中真正要盯的字段</h2><h3 id="Common-fields"><a href="#Common-fields" class="headerlink" title="Common fields"></a>Common fields</h3><ul>
+<li><strong>Length[9:0]</strong>：以 DW（4 B）为单位；编码 0 对有 payload&#x2F;引用 data 的请求表示 1024 DW。</li>
+<li><strong>TC</strong>：Traffic Class。</li>
+<li><strong>Attr</strong>：含 Relaxed Ordering、No Snoop、IDO 等语义。</li>
+<li><strong>TD</strong>：尾部是否带 ECRC digest。</li>
+<li><strong>EP</strong>：Error Poisoned，不是 Endpoint 的缩写。</li>
+</ul>
+<h3 id="Request-specific-fields"><a href="#Request-specific-fields" class="headerlink" title="Request-specific fields"></a>Request-specific fields</h3><ul>
+<li><strong>Requester ID</strong>：发请求的 Function 身份，传统格式就是 Bus&#x2F;Device&#x2F;Function。</li>
+<li><strong>Tag</strong>：给 Non-Posted outstanding request 编号，Completion 原样带回。</li>
+<li><strong>First DW BE &#x2F; Last DW BE</strong>：第一个和最后一个 DW 哪些 byte 有效。</li>
+<li><strong>Address</strong>：32-bit request 用 3DW header，64-bit request 用 4DW header。</li>
+</ul>
+<h3 id="Byte-Enable-规则"><a href="#Byte-Enable-规则" class="headerlink" title="Byte Enable 规则"></a>Byte Enable 规则</h3><p>对 Length&#x3D;1 DW：</p>
+<ul>
+<li><code>Last DW BE</code> 必须为 <code>0000b</code>；</li>
+<li><code>First DW BE</code> 可非连续，例如 <code>0101b</code>；</li>
+<li>bit 0 对应最低地址 byte，bit 3 对应该 DW 的最高地址 byte。</li>
+</ul>
+<p>对多 DW request，首尾有效 byte 通常要与中间完整 DW 组成连续范围；QW-aligned、Length&#x3D;2 DW 有特别许可。详见 Base Spec §2.2.5，printed&#x2F;PDF pp.117–119。</p>
+<h2 id="5-Memory-Write：Posted-Request"><a href="#5-Memory-Write：Posted-Request" class="headerlink" title="5. Memory Write：Posted Request"></a>5. Memory Write：Posted Request</h2><h3 id="5-1-为什么没有正常-Completion"><a href="#5-1-为什么没有正常-Completion" class="headerlink" title="5.1 为什么没有正常 Completion"></a>5.1 为什么没有正常 Completion</h3><p>Memory Write 是 Posted：Requester 把 header + payload 发出去，协议正常路径不要求 Completer 回一条 Completion。这降低了延迟和返回流量，很适合 doorbell、descriptor&#x2F;data write。</p>
+<p>但“没有 Completion”不等于“没有任何可靠性”：</p>
+<ul>
+<li>Data Link ACK&#x2F;NAK 仍保证每一跳 TLP 传输；</li>
+<li>malformed&#x2F;poison&#x2F;error 仍可能进入错误上报；</li>
+<li>设备业务协议可以另设完成状态或 interrupt。</li>
+</ul>
+<p>只是不能拿一条普通 Completion 来证明 MWr 已经在最终寄存器生效。</p>
+<h3 id="5-2-具体例子：CPU-写-EP-BAR0-0x100"><a href="#5-2-具体例子：CPU-写-EP-BAR0-0x100" class="headerlink" title="5.2 具体例子：CPU 写 EP BAR0+0x100"></a>5.2 具体例子：CPU 写 EP BAR0+0x100</h3><p>假设：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">EP:                    01:00.0</span><br><span class="line">BAR0 assigned:         0x8000_0000–0x8000_FFFF</span><br><span class="line">CPU operation:         writel(0x12345678, bar0 + 0x100)</span><br><span class="line">PCIe target address:   0x8000_0100</span><br></pre></td></tr></table></figure>
+
+<p>对应 32-bit Memory Write Request 的关键字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fmt &#x2F; Type</td>
+<td><code>010b / 00000b</code></td>
+<td>3DW Memory Write with data</td>
+</tr>
+<tr>
+<td>Length</td>
+<td>1 DW</td>
+<td>写 4 B</td>
+</tr>
+<tr>
+<td>Address</td>
+<td><code>0x8000_0100</code></td>
+<td>BAR 基址 + offset；header 保存 DW-aligned address</td>
+</tr>
+<tr>
+<td>First DW BE</td>
+<td><code>1111b</code></td>
+<td>四个 byte 全有效</td>
+</tr>
+<tr>
+<td>Last DW BE</td>
+<td><code>0000b</code></td>
+<td>Length&#x3D;1 时必须为 0</td>
+</tr>
+<tr>
+<td>Requester ID</td>
+<td>RC 生成请求所使用的身份</td>
+<td>它不是目标 EP 的 BDF；精确值由 RC 实现&#x2F;路径决定</td>
+</tr>
+<tr>
+<td>Tag</td>
+<td>header 中存在，但不用于等待普通 MWr Completion</td>
+<td>Posted request 没有对应完成配对</td>
+</tr>
+<tr>
+<td>Payload</td>
+<td><code>0x12345678</code></td>
+<td>低地址 byte 先进入数据布局；具体链路序列还经过物理层编码</td>
+</tr>
+</tbody></table>
+<p>完整硬件路径：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">writel</span><br><span class="line"> → CPU virtual __iomem</span><br><span class="line"> → CPU physical MMIO aperture</span><br><span class="line"> → RC outbound AXI/host window</span><br><span class="line"> → 3DW MWr TLP, PCIe address 0x8000_0100</span><br><span class="line"> → Link Layer: Sequence Number + LCRC，ACK/NAK/replay</span><br><span class="line"> → EP BAR0 hit</span><br><span class="line"> → EP 将 BAR 内的偏移映射到本地寄存器</span><br><span class="line"> → AXI AW/W，WSTRB 对应 First/Last BE</span><br><span class="line"> → device register</span><br></pre></td></tr></table></figure>
+
+<p>这也是 Posted Write 调试困难的根源之一：Requester 端看不到普通 completion status，需要 EP 本地 AXI&#x2F;error&#x2F;AER 观察点帮忙。</p>
+<h2 id="6-Memory-Read：Non-Posted-Request-Completion-with-Data"><a href="#6-Memory-Read：Non-Posted-Request-Completion-with-Data" class="headerlink" title="6. Memory Read：Non-Posted Request + Completion with Data"></a>6. Memory Read：Non-Posted Request + Completion with Data</h2><h3 id="6-1-请求"><a href="#6-1-请求" class="headerlink" title="6.1 请求"></a>6.1 请求</h3><p>仍读 <code>BAR0 + 0x100</code>，执行 <code>readl()</code>：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fmt &#x2F; Type</td>
+<td><code>000b / 00000b</code>（3DW MRd，无 payload）</td>
+</tr>
+<tr>
+<td>Length</td>
+<td>1 DW</td>
+</tr>
+<tr>
+<td>Address</td>
+<td><code>0x8000_0100</code></td>
+</tr>
+<tr>
+<td>First DW BE</td>
+<td><code>1111b</code></td>
+</tr>
+<tr>
+<td>Last DW BE</td>
+<td><code>0000b</code></td>
+</tr>
+<tr>
+<td>Requester ID</td>
+<td>RC requester identity</td>
+</tr>
+<tr>
+<td>Tag</td>
+<td>RC 从空闲 outstanding entry 分配，例如 <code>0x15</code></td>
+</tr>
+</tbody></table>
+<p>Requester 发出后不能忘掉这笔事：它要保存 Requester ID、Tag、address&#x2F;length、TC&#x2F;Attr 等上下文，并启动 Completion Timeout 相关管理。</p>
+<h3 id="6-2-EP-内部"><a href="#6-2-EP-内部" class="headerlink" title="6.2 EP 内部"></a>6.2 EP 内部</h3><p>EP 先用地址选中 BAR，再按 BAR 内偏移读本地寄存器。此时需要把读出的数据和最初的 Requester ID、Tag 联系起来。如果两个读同时到达，返回数据的先后可以不同，请求身份必须保留。</p>
+<h3 id="6-3-Completion-header"><a href="#6-3-Completion-header" class="headerlink" title="6.3 Completion header"></a>6.3 Completion header</h3><p>Completion 总是 ID-routed、使用 3DW header。关键字段：</p>
+<ul>
+<li><strong>Completer ID</strong>：谁完成请求；本例通常是 <code>01:00.0</code>，传统编码值 <code>0x0100</code>。</li>
+<li><strong>Completion Status</strong>：<code>000 SC</code>、<code>001 UR</code>、<code>010 CRS</code>、<code>100 CA</code>。</li>
+<li><strong>Byte Count</strong>：包括本 Completion 在内，完成原请求还剩多少 byte。</li>
+<li><strong>Requester ID + Tag</strong>：复制原请求，Requester 用它找到 outstanding entry。</li>
+<li><strong>Lower Address</strong>：本 Completion 返回的第一个有效 byte 的低 7 bit。</li>
+<li><strong>Length</strong>：这条 Completion 实际携带的 DW 数。</li>
+</ul>
+<p>对本例的一条成功 CplD：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>示例值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fmt &#x2F; Type</td>
+<td><code>010b / 01010b</code></td>
+</tr>
+<tr>
+<td>Length</td>
+<td>1 DW</td>
+</tr>
+<tr>
+<td>Completion Status</td>
+<td>SC</td>
+</tr>
+<tr>
+<td>Byte Count</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Lower Address</td>
+<td><code>0x00</code>（<code>0x80000100 &amp; 0x7f</code>）</td>
+</tr>
+<tr>
+<td>Completer ID</td>
+<td><code>01:00.0</code> → <code>0x0100</code></td>
+</tr>
+<tr>
+<td>Requester ID &#x2F; Tag</td>
+<td>原请求的值 &#x2F; <code>0x15</code></td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>目标寄存器的 4 B 数据</td>
+</tr>
+</tbody></table>
+<p>来源：Base Spec §2.2.9、Figure 2-38、Table 2-35，printed&#x2F;PDF pp.153–156。</p>
+<h2 id="7-一个-MRd-可以对应多个-CplD"><a href="#7-一个-MRd-可以对应多个-CplD" class="headerlink" title="7. 一个 MRd 可以对应多个 CplD"></a>7. 一个 MRd 可以对应多个 CplD</h2><p>大读请求可能被拆成多个 Completion。Requester 用同一 Transaction ID 收集它们，并检查：</p>
+<ul>
+<li>数据地址递增；</li>
+<li>Byte Count 逐步减少；</li>
+<li>Lower Address&#x2F;Length 正确；</li>
+<li>所有成功 Completion payload 总和满足请求；</li>
+<li>不违反 RCB（Read Completion Boundary）切分规则。</li>
+</ul>
+<p>RCB 对 Root Complex 可以是 64 B 或 128 B，其他 system element 为 128 B。它约束允许的 Completion 边界，不等于 MPS 或 MRRS。</p>
+<h2 id="8-同一笔读写会遇到哪几种确认"><a href="#8-同一笔读写会遇到哪几种确认" class="headerlink" title="8. 同一笔读写会遇到哪几种确认"></a>8. 同一笔读写会遇到哪几种确认</h2><table>
+<thead>
+<tr>
+<th>机制</th>
+<th>范围</th>
+<th>它证明什么</th>
+<th>它不证明什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Data Link ACK</td>
+<td>相邻一条 Link</td>
+<td>带 Sequence&#x2F;LCRC 的 TLP 已被下一跳正确接收</td>
+<td>最终 Completer 已执行业务</td>
+</tr>
+<tr>
+<td>PCIe Completion</td>
+<td>Requester ↔ Completer 事务端到端</td>
+<td>Non-Posted Request 的成功&#x2F;错误和可能的数据</td>
+<td>Posted MWr 的普通业务完成</td>
+</tr>
+<tr>
+<td>AXI RRESP&#x2F;BRESP</td>
+<td>控制器与本地 AXI 设备之间</td>
+<td>这笔本地读写的响应</td>
+<td>远端应用是否完成处理</td>
+</tr>
+</tbody></table>
+<h2 id="9-收到的-Completion-对得上哪笔请求"><a href="#9-收到的-Completion-对得上哪笔请求" class="headerlink" title="9. 收到的 Completion 对得上哪笔请求"></a>9. 收到的 Completion 对得上哪笔请求</h2><p>Requester 按 Transaction ID 找到未完成的请求，再检查 Completion Status。成功的读还要核对 Byte Count、Lower Address 和实际返回长度；遇到错误状态，驱动可能从设备状态或平台错误日志看到它的后果。<br>如果 Completion 的 Transaction ID 根本匹配不到 outstanding request，Spec 称为 <strong>Unexpected Completion</strong>，接收者应丢弃并报告相应错误；原 Requester 还可能最终触发 Completion Timeout。来源：Base Spec §2.3.2，printed&#x2F;PDF p.175 起。</p>
+<h2 id="10-Debug-方法"><a href="#10-Debug-方法" class="headerlink" title="10. Debug 方法"></a>10. Debug 方法</h2><h3 id="Memory-Write-没效果"><a href="#Memory-Write-没效果" class="headerlink" title="Memory Write 没效果"></a>Memory Write 没效果</h3><ol>
+<li>确认 MSE、BAR&#x2F;resource 与 host outbound window。</li>
+<li>抓 TLP：地址、Length、First&#x2F;Last BE、payload 是否正确。</li>
+<li>查 EP BAR&#x2F;function hit 与 inbound translation。</li>
+<li>查 AXI AW&#x2F;W&#x2F;WSTRB&#x2F;BRESP；Requester 不应等待规范并未要求返回的 Completion。</li>
+</ol>
+<h3 id="Memory-Read-超时"><a href="#Memory-Read-超时" class="headerlink" title="Memory Read 超时"></a>Memory Read 超时</h3><ol>
+<li>请求是否真的发出，Tag 是否耗尽？</li>
+<li>EP 是否收到并 BAR hit？</li>
+<li>AXI AR 请求&#x2F;返回是否完成？</li>
+<li>是否生成 CplD&#x2F;UR&#x2F;CA？</li>
+<li>返回路径 Requester ID + Tag 是否正确？</li>
+<li>是否被 Switch&#x2F;RC 当 Unexpected Completion 丢掉？</li>
+<li>Completion Timeout status&#x2F;AER header log 记录了什么？</li>
+</ol>
+<h2 id="11-参考资料"><a href="#11-参考资料" class="headerlink" title="11. 参考资料"></a>11. 参考资料</h2><ul>
+<li>PCIe Base Specification 5.0 r1.0, §§2.1–2.2.1, pp.103–110。</li>
+<li>PCIe Base Specification 5.0 r1.0, §2.2.5, pp.117–119。</li>
+<li>PCIe Base Specification 5.0 r1.0, §2.2.7, pp.127–133。</li>
+<li>PCIe Base Specification 5.0 r1.0, §2.2.9, pp.153–156。</li>
+<li>PCIe Base Specification 5.0 r1.0, §§2.3.1.1–2.3.2, pp.169–176。</li>
+</ul>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/pcie-link-lane-ltssm/">Link、Lane 与 LTSSM：PCIe 链路怎样建立</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/pcie-message-atomic-prefix/">Message、AtomicOp 与 TLP Prefix：数据读写之外的 PCIe</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="auto"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Transaction-Layer-%E5%9C%A8%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88"><span class="toc-text">1. Transaction Layer 在解决什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%9B%9B%E7%A7%8D%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E3%80%81%E5%9B%9B%E7%B1%BB%E4%BA%8B%E5%8A%A1"><span class="toc-text">2. 四种地址空间、四类事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-TLP-%E7%9A%84%E7%BB%84%E6%88%90"><span class="toc-text">3. TLP 的组成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Memory-Request-header-%E4%B8%AD%E7%9C%9F%E6%AD%A3%E8%A6%81%E7%9B%AF%E7%9A%84%E5%AD%97%E6%AE%B5"><span class="toc-text">4. Memory Request header 中真正要盯的字段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Common-fields"><span class="toc-text">Common fields</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Request-specific-fields"><span class="toc-text">Request-specific fields</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Byte-Enable-%E8%A7%84%E5%88%99"><span class="toc-text">Byte Enable 规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-Memory-Write%EF%BC%9APosted-Request"><span class="toc-text">5. Memory Write：Posted Request</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B2%A1%E6%9C%89%E6%AD%A3%E5%B8%B8-Completion"><span class="toc-text">5.1 为什么没有正常 Completion</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%85%B7%E4%BD%93%E4%BE%8B%E5%AD%90%EF%BC%9ACPU-%E5%86%99-EP-BAR0-0x100"><span class="toc-text">5.2 具体例子：CPU 写 EP BAR0+0x100</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-Memory-Read%EF%BC%9ANon-Posted-Request-Completion-with-Data"><span class="toc-text">6. Memory Read：Non-Posted Request + Completion with Data</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E8%AF%B7%E6%B1%82"><span class="toc-text">6.1 请求</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-EP-%E5%86%85%E9%83%A8"><span class="toc-text">6.2 EP 内部</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-Completion-header"><span class="toc-text">6.3 Completion header</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E4%B8%80%E4%B8%AA-MRd-%E5%8F%AF%E4%BB%A5%E5%AF%B9%E5%BA%94%E5%A4%9A%E4%B8%AA-CplD"><span class="toc-text">7. 一个 MRd 可以对应多个 CplD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E5%90%8C%E4%B8%80%E7%AC%94%E8%AF%BB%E5%86%99%E4%BC%9A%E9%81%87%E5%88%B0%E5%93%AA%E5%87%A0%E7%A7%8D%E7%A1%AE%E8%AE%A4"><span class="toc-text">8. 同一笔读写会遇到哪几种确认</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E6%94%B6%E5%88%B0%E7%9A%84-Completion-%E5%AF%B9%E5%BE%97%E4%B8%8A%E5%93%AA%E7%AC%94%E8%AF%B7%E6%B1%82"><span class="toc-text">9. 收到的 Completion 对得上哪笔请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-Debug-%E6%96%B9%E6%B3%95"><span class="toc-text">10. Debug 方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Memory-Write-%E6%B2%A1%E6%95%88%E6%9E%9C"><span class="toc-text">Memory Write 没效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Memory-Read-%E8%B6%85%E6%97%B6"><span class="toc-text">Memory Read 超时</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-text">11. 参考资料</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `/js/vendor/jquery-3.7.1.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div><!-- hexo injector body_end start --><script defer src="/js/engineering.js?v=20261127-1"></script><!-- hexo injector body_end end --></body></html>

@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -114,7 +114,7 @@
     
       <a href="/categories/embedded-tech/mctp-pldm/"><span class="topic-mark">M/P</span><strong>MCTP 与 PLDM</strong><span>6 篇 · 从原理到实践</span></a>
     
-      <a href="/categories/embedded-tech/pcie/"><span class="topic-mark">PCIe</span><strong>PCIe</strong><span>5 篇 · 从原理到实践</span></a>
+      <a href="/categories/embedded-tech/pcie/"><span class="topic-mark">PCIe</span><strong>PCIe</strong><span>34 篇 · 从原理到实践</span></a>
     
       <a href="/categories/embedded-tech/dma/"><span class="topic-mark">DMA</span><strong>DMA</strong><span>3 篇 · 从原理到实践</span></a>
     
@@ -162,15 +162,6 @@
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/11/27/mctp-pldm-porting-software-architecture/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>MCTP 与 PLDM</span></div>
-  <h2 class="post-title">MCTP/PLDM 移植后的双端软件架构：验收设计基线</h2>
-  <p class="engineering-excerpt">对照 Host 源码、Target 独立交付包和已有联调记录，梳理双端移植动作、软件分层、收发调用链、缓冲区所有权和后续验收边界。</p>
-  <div class="entry-meta"><span>2026-11-27</span><span class="evidence-badge">架构基线 · 范围已说明</span></div>
-</article>
-</a>
-  
     <a class="post-card post" href="/2026/11/27/i3c-host-target-architecture-regression/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">源码分析</span><span>I3C</span></div>
@@ -180,55 +171,64 @@
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">
+    <a class="post-card post" href="/2026/11/27/mctp-pldm-porting-software-architecture/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">工程里程碑</span><span>MCTP 与 PLDM</span></div>
-  <h2 class="post-title">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</h2>
-  <p class="engineering-excerpt">从 open 枚举基线追溯、MCTP 模式切换和 AF_MCTP 类型字节修正，到 7 项只读查询、69 字节边界与连续分包实验，记录 2026-11-26 的调试过程和未解决问题。</p>
-  <div class="entry-meta"><span>2026-11-26</span><span class="evidence-badge">基础查询通过 · 分包待回归</span></div>
+  <div class="entry-kicker"><span class="article-type">源码分析</span><span>MCTP 与 PLDM</span></div>
+  <h2 class="post-title">MCTP/PLDM 移植后的双端软件架构：验收设计基线</h2>
+  <p class="engineering-excerpt">对照 Host 源码、Target 独立交付包和已有联调记录，梳理双端移植动作、软件分层、收发调用链、缓冲区所有权和后续验收边界。</p>
+  <div class="entry-meta"><span>2026-11-27</span><span class="evidence-badge">架构基线 · 范围已说明</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/11/25/axidma-basics/">
+    <a class="post-card post" href="/2026/11/27/pcie-ari-sriov/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>DMA</span></div>
-  <h2 class="post-title">AXIDMA：从参数配置到数据校验</h2>
-  <p class="engineering-excerpt">从一笔 SRAM 搬运出发，理解 AXIDMA 参数、AXI 总线、单块与 LLI、外设握手、缓存同步和测试定位。</p>
-  <div class="entry-meta"><span>2026-11-25</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">ARI 与 SR-IOV：从多 Function 到 PF、VF</h2>
+  <p class="engineering-excerpt">理解扩展 Function 编号、VF 资源分配与隔离，区分标准机制和平台启用条件。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/11/25/i3c-controller-guide/">
+    <a class="post-card post" href="/2026/11/27/pcie-cadence-core-architecture/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>I3C</span></div>
-  <h2 class="post-title">两根线，一笔事务：I3C 控制器学习手记</h2>
-  <p class="engineering-excerpt">从测试用例和一笔收发事务出发，理解 I3C Target 的队列、寄存器、完成条件和恢复流程。</p>
-  <div class="entry-meta"><span>2026-11-25</span></div>
+  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
+  <h2 class="post-title">读 Linux Cadence PCIe Host 驱动：一次配置读怎样找到 Endpoint</h2>
+  <p class="engineering-excerpt">用一次 Vendor ID 读取串起 PCI Core、Cadence 配置窗口和下游链路，再看同一块设备的 BAR 访问走哪条路。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/11/25/i3c-target-study/">
+    <a class="post-card post" href="/2026/11/27/pcie-data-link-replay-flow-control/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>I3C</span></div>
-  <h2 class="post-title">DWC MIPI I3C Target 开发学习文档</h2>
-  <p class="engineering-excerpt">对照 DWC Databook 学习 Target 的初始化、收发、中断、IBI、Hot-Join 和错误恢复。</p>
-  <div class="entry-meta"><span>2026-11-25</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Data Link：ACK、重放与逐跳流控</h2>
+  <p class="engineering-excerpt">区分链路 ACK 与业务 Completion，解释重放、LCRC 和逐跳 Credit。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/11/25/i3c-linux-driver/">
+    <a class="post-card post" href="/2026/11/27/pcie-iommu-ats-pasid-pri/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">教程</span><span>I3C</span></div>
-  <h2 class="post-title">Linux I3C 驱动视角学习笔记</h2>
-  <p class="engineering-excerpt">把 I3C 协议动作对应到 Linux core、controller driver 和 device driver，梳理设备模型与常用 API。</p>
-  <div class="entry-meta"><span>2026-11-25</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">IOMMU、ATS、PASID 与 PRI：设备怎样访问进程地址空间</h2>
+  <p class="engineering-excerpt">从普通 DMA 的 IOVA 开始，解释翻译缓存、进程身份、缺页请求及失效通知。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-link-lane-ltssm/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Link、Lane 与 LTSSM：PCIe 链路怎样建立</h2>
+  <p class="engineering-excerpt">从时钟与复位走到 L0，串起速率、宽度协商、均衡和控制器观察点。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
 </div>
 
   <div class='paginator-wrap dis-select'>
-  <span class="extend prev" rel="prev"></span><span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"></a>
+  <span class="extend prev" rel="prev"></span><span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/"></a>
   </div>
 
 

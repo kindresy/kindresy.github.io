@@ -34,17 +34,17 @@
   --gap-max: calc(var(--gap-margin) + var(--gap-padding));
 }
 :root {
-  --hue: 192deg;
-  --sat: 98%;
-  --light: 55%;
+  --hue: 173.33333333333331deg;
+  --sat: 35.59322033898305%;
+  --light: 34.705882352941174%;
   --alpha: 1;
   --theme: hsla(var(--hue) var(--sat) var(--light) / 1);
   --theme-a10: hsla(var(--hue) var(--sat) var(--light) / 0.1);
   --theme-a20: hsla(var(--hue) var(--sat) var(--light) / 0.2);
   --theme-a30: hsla(var(--hue) var(--sat) var(--light) / 0.3);
-  --accent: #ff5724;
-  --link: hsla(207deg 90% 54% / 1);
-  --link-a20: hsla(207deg 90% 54% / 0.2);
+  --accent: #a57b4f;
+  --link: hsla(172.17391304347825deg 40.35087719298245% 33.529411764705884% / 1);
+  --link-a20: hsla(172.17391304347825deg 40.35087719298245% 33.529411764705884% / 0.2);
   --background: hsla(210deg 20% 98% / 1);
   --card: #fff;
   --bg-a20: hsla(210deg 0% 100% / 0.2);
@@ -333,50 +333,50 @@
   --link-a20: hsla(291.24087591240874deg 95% 32% / 0.2);
 }
 .colorful[color='theme'] {
-  --hue: 192deg;
-  --sat: 98%;
-  --light: 55%;
+  --hue: 173.33333333333331deg;
+  --sat: 35.59322033898305%;
+  --light: 34.705882352941174%;
   --alpha: 1;
   --theme: hsla(var(--hue) var(--sat) var(--light) / 1);
   --theme-a10: hsla(var(--hue) var(--sat) var(--light) / 0.1);
   --theme-a20: hsla(var(--hue) var(--sat) var(--light) / 0.2);
   --theme-a30: hsla(var(--hue) var(--sat) var(--light) / 0.3);
-  --link: hsla(192deg 98% 55% / 1);
-  --link-a20: hsla(192deg 98% 55% / 0.2);
-  --theme-border: hsla(192deg 50% 80% / var(--alpha));
-  --theme-block: hsla(192deg 90% 92% / var(--alpha));
-  --theme-mark: hsla(192deg 95% 80% / var(--alpha));
-  --theme-codeblock: hsla(192deg 50% 95% / var(--alpha));
-  --text: hsla(192deg 55% 16% / 1);
-  --text-p1: hsla(192deg 90% 20% / 1);
-  --text-p2: hsla(192deg 90% 20% / 0.8);
-  --text-p3: hsla(192deg 90% 20% / 0.6);
-  --text-p4: hsla(192deg 90% 20% / 0.4);
-  --link: hsla(192deg 95% 32% / 1);
-  --link-a20: hsla(192deg 95% 32% / 0.2);
+  --link: hsla(173.33333333333331deg 35.59322033898305% 34.705882352941174% / 1);
+  --link-a20: hsla(173.33333333333331deg 35.59322033898305% 34.705882352941174% / 0.2);
+  --theme-border: hsla(173.33333333333331deg 50% 80% / var(--alpha));
+  --theme-block: hsla(173.33333333333331deg 90% 92% / var(--alpha));
+  --theme-mark: hsla(173.33333333333331deg 95% 80% / var(--alpha));
+  --theme-codeblock: hsla(173.33333333333331deg 50% 95% / var(--alpha));
+  --text: hsla(173.33333333333331deg 55% 16% / 1);
+  --text-p1: hsla(173.33333333333331deg 90% 20% / 1);
+  --text-p2: hsla(173.33333333333331deg 90% 20% / 0.8);
+  --text-p3: hsla(173.33333333333331deg 90% 20% / 0.6);
+  --text-p4: hsla(173.33333333333331deg 90% 20% / 0.4);
+  --link: hsla(173.33333333333331deg 95% 32% / 1);
+  --link-a20: hsla(173.33333333333331deg 95% 32% / 0.2);
 }
 .colorful[color='accent'] {
-  --hue: 14deg;
-  --sat: 100%;
-  --light: 57%;
+  --hue: 30.69767441860465deg;
+  --sat: 35.24590163934426%;
+  --light: 47.84313725490196%;
   --alpha: 1;
   --theme: hsla(var(--hue) var(--sat) var(--light) / 1);
   --theme-a10: hsla(var(--hue) var(--sat) var(--light) / 0.1);
   --theme-a20: hsla(var(--hue) var(--sat) var(--light) / 0.2);
   --theme-a30: hsla(var(--hue) var(--sat) var(--light) / 0.3);
-  --link: hsla(14deg 100% 57% / 1);
-  --link-a20: hsla(14deg 100% 57% / 0.2);
-  --theme-border: hsla(14deg 50% 80% / var(--alpha));
-  --theme-block: hsla(14deg 90% 92% / var(--alpha));
-  --theme-mark: hsla(14deg 95% 80% / var(--alpha));
-  --theme-codeblock: hsla(14deg 50% 95% / var(--alpha));
-  --text: hsla(14deg 55% 16% / 1);
-  --text-p1: hsla(14deg 90% 20% / 1);
-  --text-p2: hsla(14deg 90% 20% / 0.8);
-  --text-p3: hsla(14deg 90% 20% / 0.6);
-  --text-p4: hsla(14deg 90% 20% / 0.4);
-  --link: hsla(14deg 95% 32% / 1);
-  --link-a20: hsla(14deg 95% 32% / 0.2);
+  --link: hsla(30.69767441860465deg 35.24590163934426% 47.84313725490196% / 1);
+  --link-a20: hsla(30.69767441860465deg 35.24590163934426% 47.84313725490196% / 0.2);
+  --theme-border: hsla(30.69767441860465deg 50% 80% / var(--alpha));
+  --theme-block: hsla(30.69767441860465deg 90% 92% / var(--alpha));
+  --theme-mark: hsla(30.69767441860465deg 95% 80% / var(--alpha));
+  --theme-codeblock: hsla(30.69767441860465deg 50% 95% / var(--alpha));
+  --text: hsla(30.69767441860465deg 55% 16% / 1);
+  --text-p1: hsla(30.69767441860465deg 90% 20% / 1);
+  --text-p2: hsla(30.69767441860465deg 90% 20% / 0.8);
+  --text-p3: hsla(30.69767441860465deg 90% 20% / 0.6);
+  --text-p4: hsla(30.69767441860465deg 90% 20% / 0.4);
+  --link: hsla(30.69767441860465deg 95% 32% / 1);
+  --link-a20: hsla(30.69767441860465deg 95% 32% / 0.2);
 }
 .colorful[color='light'] {
   --theme: #fff;
@@ -536,27 +536,27 @@
   }
 }
 :root[data-theme="dark"] .tag-plugin.tag {
-  --hue: 192deg;
-  --sat: 98%;
-  --light: 55%;
+  --hue: 173.33333333333331deg;
+  --sat: 35.59322033898305%;
+  --light: 34.705882352941174%;
   --alpha: 1;
   --theme: hsla(var(--hue) var(--sat) var(--light) / 1);
   --theme-a10: hsla(var(--hue) var(--sat) var(--light) / 0.1);
   --theme-a20: hsla(var(--hue) var(--sat) var(--light) / 0.2);
   --theme-a30: hsla(var(--hue) var(--sat) var(--light) / 0.3);
-  --link: hsla(192deg 98% 55% / 1);
-  --link-a20: hsla(192deg 98% 55% / 0.2);
-  --theme-border: hsla(192deg 40% 24% / var(--alpha));
-  --theme-block: hsla(192deg 24% 24% / var(--alpha));
-  --theme-mark: hsla(192deg 24% 24% / var(--alpha));
-  --theme-codeblock: hsla(192deg 12% 24% / var(--alpha));
-  --text: hsla(192deg 50% 75% / 1);
-  --text-p1: hsla(192deg 80% 80% / 1);
-  --text-p2: hsla(192deg 80% 80% / 0.8);
-  --text-p3: hsla(192deg 80% 80% / 0.6);
-  --text-p4: hsla(192deg 80% 80% / 0.4);
-  --link: hsla(192deg 80% 60% / 1);
-  --link-a20: hsla(192deg 80% 60% / 0.2);
+  --link: hsla(173.33333333333331deg 35.59322033898305% 34.705882352941174% / 1);
+  --link-a20: hsla(173.33333333333331deg 35.59322033898305% 34.705882352941174% / 0.2);
+  --theme-border: hsla(173.33333333333331deg 40% 24% / var(--alpha));
+  --theme-block: hsla(173.33333333333331deg 24% 24% / var(--alpha));
+  --theme-mark: hsla(173.33333333333331deg 24% 24% / var(--alpha));
+  --theme-codeblock: hsla(173.33333333333331deg 12% 24% / var(--alpha));
+  --text: hsla(173.33333333333331deg 50% 75% / 1);
+  --text-p1: hsla(173.33333333333331deg 80% 80% / 1);
+  --text-p2: hsla(173.33333333333331deg 80% 80% / 0.8);
+  --text-p3: hsla(173.33333333333331deg 80% 80% / 0.6);
+  --text-p4: hsla(173.33333333333331deg 80% 80% / 0.4);
+  --link: hsla(173.33333333333331deg 80% 60% / 1);
+  --link-a20: hsla(173.33333333333331deg 80% 60% / 0.2);
 }
 :root[data-theme="dark"] .colorful[color='red'] {
   --hue: 4.105263157894738deg;
@@ -744,27 +744,27 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .tag-plugin.tag {
-    --hue: 192deg;
-    --sat: 98%;
-    --light: 55%;
+    --hue: 173.33333333333331deg;
+    --sat: 35.59322033898305%;
+    --light: 34.705882352941174%;
     --alpha: 1;
     --theme: hsla(var(--hue) var(--sat) var(--light) / 1);
     --theme-a10: hsla(var(--hue) var(--sat) var(--light) / 0.1);
     --theme-a20: hsla(var(--hue) var(--sat) var(--light) / 0.2);
     --theme-a30: hsla(var(--hue) var(--sat) var(--light) / 0.3);
-    --link: hsla(192deg 98% 55% / 1);
-    --link-a20: hsla(192deg 98% 55% / 0.2);
-    --theme-border: hsla(192deg 40% 24% / var(--alpha));
-    --theme-block: hsla(192deg 24% 24% / var(--alpha));
-    --theme-mark: hsla(192deg 24% 24% / var(--alpha));
-    --theme-codeblock: hsla(192deg 12% 24% / var(--alpha));
-    --text: hsla(192deg 50% 75% / 1);
-    --text-p1: hsla(192deg 80% 80% / 1);
-    --text-p2: hsla(192deg 80% 80% / 0.8);
-    --text-p3: hsla(192deg 80% 80% / 0.6);
-    --text-p4: hsla(192deg 80% 80% / 0.4);
-    --link: hsla(192deg 80% 60% / 1);
-    --link-a20: hsla(192deg 80% 60% / 0.2);
+    --link: hsla(173.33333333333331deg 35.59322033898305% 34.705882352941174% / 1);
+    --link-a20: hsla(173.33333333333331deg 35.59322033898305% 34.705882352941174% / 0.2);
+    --theme-border: hsla(173.33333333333331deg 40% 24% / var(--alpha));
+    --theme-block: hsla(173.33333333333331deg 24% 24% / var(--alpha));
+    --theme-mark: hsla(173.33333333333331deg 24% 24% / var(--alpha));
+    --theme-codeblock: hsla(173.33333333333331deg 12% 24% / var(--alpha));
+    --text: hsla(173.33333333333331deg 50% 75% / 1);
+    --text-p1: hsla(173.33333333333331deg 80% 80% / 1);
+    --text-p2: hsla(173.33333333333331deg 80% 80% / 0.8);
+    --text-p3: hsla(173.33333333333331deg 80% 80% / 0.6);
+    --text-p4: hsla(173.33333333333331deg 80% 80% / 0.4);
+    --link: hsla(173.33333333333331deg 80% 60% / 1);
+    --link-a20: hsla(173.33333333333331deg 80% 60% / 0.2);
   }
   :root:not([data-theme]) .colorful[color='red'] {
     --hue: 4.105263157894738deg;
@@ -7227,13 +7227,13 @@ details.toc[open] >div.body section .header+.doc_tree {
   background-position: center;
   background-size: cover;
   --inset: 32px;
-  --background-opacity: 0.8;
-  background-image: url("https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.13/image/sidebar-bg1@small.jpg");
+  --background-opacity: 1;
+  background-image: none;
   filter: saturate(var(--saturate)) blur(var(--blur-px)) opacity(var(--background-opacity));
 }
 @media screen and (prefers-color-scheme: dark) {
   .l_left .sidebg {
-    --background-opacity: 0.6;
+    --background-opacity: 0.75;
   }
 }
 .l_left .leftbar-container {
@@ -8261,7 +8261,7 @@ details.toc[open] >div.body section .header+.doc_tree {
   display: inline-block;
   width: 12px;
   height: 1.2em;
-  background: #ff5724;
+  background: #a57b4f;
   transform: skewX(-20deg);
   margin: 0 0.5em;
   vertical-align: top;

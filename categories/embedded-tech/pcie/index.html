@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">PCIe · 继续阅读</span></div>
-  <ul><li><a href="/2026/03/03/pcie/pcie_introduction/">pcie_introduction</a></li><li><a href="/2026/03/03/pcie/pcie_software/">pcie software</a></li><li><a href="/2026/03/25/pcie/pcie_software1/">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</a></li><li><a href="/2026/03/06/pcie/pcie_ep_demo/">PCIe 加速卡驱动：结构与工作流程</a></li><li><a href="/2026/03/23/pcie/pcie_fw/">PCIe Endpoint 固件初始化实例</a></li></ul>
+  <ul><li><a href="/2026/03/03/pcie/pcie_introduction/">PCIe 入门：拓扑、角色与三层协议</a></li><li><a href="/2026/11/27/pcie-configuration-ecam-routing/">配置空间与 ECAM：主机怎样发现 PCIe 设备</a></li><li><a href="/2026/11/27/pcie-bdf-requester-id/">BDF、Requester ID 与 PCIe 层次路由</a></li><li><a href="/2026/11/27/pcie-bar-address-translation/">BAR 与地址翻译：一笔访问怎样到达设备内部</a></li><li><a href="/2026/11/27/pcie-endpoint-transaction-walkthrough/">一块 Endpoint 的完整旅程：从上电到 DMA 与 MSI-X</a></li><li><a href="/2026/11/27/pcie-memory-tlp-completion/">Memory TLP 与 Completion：PCIe 怎样完成一次读写</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -98,23 +98,37 @@
 
   
 <section class="topic-intro">
-  <span class="eyebrow">专题阅读 · 5 篇</span>
+  <span class="eyebrow">专题阅读 · 34 篇</span>
   <h1>PCIe</h1>
-  <p>把枚举、资源分配、RC/EP、驱动和固件连成一条线。</p>
+  <p>从拓扑、枚举与地址开始，沿事务、DMA 和中断读到 Linux 驱动与控制器。入门先读下面的主线，进阶内容按四个分类继续查阅。</p>
   
     <details class="reading-route" open>
       <summary>建议从这里开始</summary>
       <ol>
         
-          <li><a href="/2026/03/03/pcie/pcie_introduction/">pcie_introduction</a><span class="route-type">教程</span></li>
+          <li><a href="/2026/03/03/pcie/pcie_introduction/">PCIe 入门：拓扑、角色与三层协议</a><span class="route-type">教程</span></li>
         
-          <li><a href="/2026/03/03/pcie/pcie_software/">pcie software</a><span class="route-type">源码分析</span></li>
+          <li><a href="/2026/11/27/pcie-configuration-ecam-routing/">配置空间与 ECAM：主机怎样发现 PCIe 设备</a><span class="route-type">教程</span></li>
         
-          <li><a href="/2026/03/25/pcie/pcie_software1/">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</a><span class="route-type">教程</span></li>
+          <li><a href="/2026/11/27/pcie-bdf-requester-id/">BDF、Requester ID 与 PCIe 层次路由</a><span class="route-type">教程</span></li>
         
-          <li><a href="/2026/03/06/pcie/pcie_ep_demo/">PCIe 加速卡驱动：结构与工作流程</a><span class="route-type">源码分析</span></li>
+          <li><a href="/2026/11/27/pcie-bar-address-translation/">BAR 与地址翻译：一笔访问怎样到达设备内部</a><span class="route-type">教程</span></li>
         
-          <li><a href="/2026/03/23/pcie/pcie_fw/">PCIe Endpoint 固件初始化实例</a><span class="route-type">源码分析</span></li>
+          <li><a href="/2026/11/27/pcie-endpoint-transaction-walkthrough/">一块 Endpoint 的完整旅程：从上电到 DMA 与 MSI-X</a><span class="route-type">教程</span></li>
+        
+          <li><a href="/2026/11/27/pcie-memory-tlp-completion/">Memory TLP 与 Completion：PCIe 怎样完成一次读写</a><span class="route-type">教程</span></li>
+        
+          <li><a href="/2026/11/27/pcie-data-link-replay-flow-control/">Data Link：ACK、重放与逐跳流控</a><span class="route-type">教程</span></li>
+        
+          <li><a href="/2026/11/27/pcie-link-lane-ltssm/">Link、Lane 与 LTSSM：PCIe 链路怎样建立</a><span class="route-type">教程</span></li>
+        
+          <li><a href="/2026/11/27/pcie-dma-linux-api/">PCIe DMA 与 Linux DMA API：引擎、地址和缓存</a><span class="route-type">教程</span></li>
+        
+          <li><a href="/2026/11/27/pcie-intx-msi-msix/">INTx、MSI 与 MSI-X：中断怎样沿 PCIe 到达 CPU</a><span class="route-type">教程</span></li>
+        
+          <li><a href="/2026/11/27/pcie-linux-pci-core/">Linux PCI Core：从枚举到驱动绑定</a><span class="route-type">教程</span></li>
+        
+          <li><a href="/2026/11/27/pcie-linux-function-driver/">Linux PCI 功能驱动：probe、MMIO 与生命周期</a><span class="route-type">教程</span></li>
         
       </ol>
     </details>
@@ -125,62 +139,101 @@
 
 <div class="post-list post engineering-post-list">
   
-    <a class="post-card post" href="/2026/03/25/pcie/pcie_software1/">
+    <a class="post-card post" href="/2026/11/27/pcie-ari-sriov/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
-  <h2 class="post-title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</h2>
-  <p class="engineering-excerpt">简介本文从软件视角系统梳理 PCIe 在 Linux 场景下的完整工作流。
-PCIe 设备在系统中通常扮演两种角色：
-
-RC，Root Complex，根复合体
-EP，Endpoint，端点设备
-
-两者职责完全不同，软件栈也完全不同。
-如…</p>
-  <div class="entry-meta"><span>2026-03-25</span></div>
+  <h2 class="post-title">ARI 与 SR-IOV：从多 Function 到 PF、VF</h2>
+  <p class="engineering-excerpt">理解扩展 Function 编号、VF 资源分配与隔离，区分标准机制和平台启用条件。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/23/pcie/pcie_fw/">
+    <a class="post-card post" href="/2026/11/27/pcie-cadence-core-architecture/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">PCIe Endpoint 固件初始化实例</h2>
-  <p class="engineering-excerpt">pcie fw程序demo项目头文件名已脱敏，下面的 Current Proj_mcu.h 是占位名称，编译时需使用实际工程头文件。
-1234567891011121314151617181920212223242526272829303…</p>
-  <div class="entry-meta"><span>2026-03-23</span></div>
+  <h2 class="post-title">读 Linux Cadence PCIe Host 驱动：一次配置读怎样找到 Endpoint</h2>
+  <p class="engineering-excerpt">用一次 Vendor ID 读取串起 PCI Core、Cadence 配置窗口和下游链路，再看同一块设备的 BAR 访问走哪条路。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/06/pcie/pcie_ep_demo/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">PCIe 加速卡驱动：结构与工作流程</h2>
-  <p class="engineering-excerpt">这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&amp;#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。
-项目概述这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6…</p>
-  <div class="entry-meta"><span>2026-03-06</span></div>
-</article>
-</a>
-  
-    <a class="post-card post" href="/2026/03/03/pcie/pcie_introduction/">
+    <a class="post-card post" href="/2026/11/27/pcie-data-link-replay-flow-control/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
-  <h2 class="post-title">pcie_introduction</h2>
-  <p class="engineering-excerpt">本文简介本文主要介绍pci&amp;#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系。
-PCI 和 PCIePCI &amp;#x3D; Peripheral Componen…</p>
-  <div class="entry-meta"><span>2026-03-03</span></div>
+  <h2 class="post-title">Data Link：ACK、重放与逐跳流控</h2>
+  <p class="engineering-excerpt">区分链路 ACK 与业务 Completion，解释重放、LCRC 和逐跳 Credit。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/03/pcie/pcie_software/">
+    <a class="post-card post" href="/2026/11/27/pcie-iommu-ats-pasid-pri/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">pcie software</h2>
-  <p class="engineering-excerpt">简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与A…</p>
-  <div class="entry-meta"><span>2026-03-03</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">IOMMU、ATS、PASID 与 PRI：设备怎样访问进程地址空间</h2>
+  <p class="engineering-excerpt">从普通 DMA 的 IOVA 开始，解释翻译缓存、进程身份、缺页请求及失效通知。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-link-lane-ltssm/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Link、Lane 与 LTSSM：PCIe 链路怎样建立</h2>
+  <p class="engineering-excerpt">从时钟与复位走到 L0，串起速率、宽度协商、均衡和控制器观察点。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-memory-tlp-completion/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Memory TLP 与 Completion：PCIe 怎样完成一次读写</h2>
+  <p class="engineering-excerpt">从 Posted Write 和 Non-Posted Read 出发，解释请求头、Byte Enable、Tag 与分段返回。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-message-atomic-prefix/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Message、AtomicOp 与 TLP Prefix：数据读写之外的 PCIe</h2>
+  <p class="engineering-excerpt">理解事件消息、原子事务及附加上下文，并核对路径和具体 IP 的支持条件。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-mps-mrrs-ordering/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">MPS、MRRS 与 Ordering：包长和顺序怎样影响性能</h2>
+  <p class="engineering-excerpt">把单包负载、读请求长度、Completion 边界、流控和事务顺序放在同一次传输中理解。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-ntb-multi-host/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">NTB 与多 Host：两棵 PCIe 树怎样通信</h2>
+  <p class="engineering-excerpt">通过窗口、地址翻译、doorbell 和 scratchpad，理解独立枚举域之间的数据交换。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-tc-vc-qos-ptm-acs/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">TC、VC、PTM 与 ACS：分类、时钟和隔离各管什么</h2>
+  <p class="engineering-excerpt">把服务标签、缓冲资源、时间测量与访问控制拆开，核对 Capability 和实际构建配置。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
 </div>
+
+  <div class='paginator-wrap dis-select'>
+  <span class="extend prev" rel="prev"></span><span class="page-number current">1</span><a class="page-number" href="/categories/embedded-tech/pcie/page/2/">2</a><a class="page-number" href="/categories/embedded-tech/pcie/page/3/">3</a><a class="page-number" href="/categories/embedded-tech/pcie/page/4/">4</a><a class="extend next" rel="next" href="/categories/embedded-tech/pcie/page/2/"></a>
+  </div>
 
 
 

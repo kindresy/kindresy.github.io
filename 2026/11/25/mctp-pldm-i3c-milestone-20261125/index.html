@@ -28,7 +28,7 @@
 <meta property="og:description" content="记录裸机端点独立移植包、i.MX93 slim 内核回移、上板部署和首笔 Get Endpoint ID 失败的全过程。当前枚举与驱动绑定通过，MCTP&#x2F;PLDM 端到端尚未打通。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-24T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-11-27T07:32:52.000Z">
+<meta property="article:modified_time" content="2026-11-27T09:31:35.000Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="baremetal">
 <meta property="article:tag" content="bringup">
@@ -56,7 +56,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-25T00:00:00+08:00","dateModified":"2026-11-27T15:32:52+08:00","datePublished":"2026-11-25T00:00:00+08:00","description":"今天把 MCTP&#x2F;PLDM 接到了一条已有回归基础的 I3C 链路上。i.MX93 已经启动新内核，能创建 AF_MCTP socket；Target 枚举成功，绑定了 mctp-i3c，mctpi3c0 也出来了。但第一条 Get Endpoint ID 没有拿到响应：HOST 向动态地址 0x44 发起 Private Write，在地址阶段遇到了 NACK。\n截至 2026-11-25 本轮记录结束，MCTP&#x2F;PLDM over I3C 尚未 bring-up 成功。 已完成的部署、离线测试和枚举各有证据；PEC、响应 IBI、Private Read、PLDM Base 以及真实传感器业务，还没有得到这套双端组合的联通结果。","headline":"MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/","keywords":"baremetal, linux, i3c, mctp, pldm, debugging, bringup, milestone","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-25T00:00:00+08:00","dateModified":"2026-11-27T17:31:35+08:00","datePublished":"2026-11-25T00:00:00+08:00","description":"今天把 MCTP&#x2F;PLDM 接到了一条已有回归基础的 I3C 链路上。i.MX93 已经启动新内核，能创建 AF_MCTP socket；Target 枚举成功，绑定了 mctp-i3c，mctpi3c0 也出来了。但第一条 Get Endpoint ID 没有拿到响应：HOST 向动态地址 0x44 发起 Private Write，在地址阶段遇到了 NACK。\n截至 2026-11-25 本轮记录结束，MCTP&#x2F;PLDM over I3C 尚未 bring-up 成功。 已完成的部署、离线测试和枚举各有证据；PEC、响应 IBI、Private Read、PLDM Base 以及真实传感器业务，还没有得到这套双端组合的联通结果。","headline":"MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/25/mctp-pldm-i3c-milestone-20261125/","keywords":"baremetal, linux, i3c, mctp, pldm, debugging, bringup, milestone","image":[]}</script>
   
 <!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-2"><!-- hexo injector head_end end --></head>
 <body>

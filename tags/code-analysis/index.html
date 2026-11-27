@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -100,6 +100,15 @@
 
 <div class="post-list post engineering-post-list">
   
+    <a class="post-card post" href="/2026/11/27/i3c-host-target-architecture-regression/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">源码分析</span><span>I3C</span></div>
+  <h2 class="post-title">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</h2>
+  <p class="engineering-excerpt">回看一套 i3c-host 与裸机 Target 验证框架：从字符设备、所有权和 FIFO，到 IBI 握手、复位恢复与历次回归的证据边界。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
     <a class="post-card post" href="/2026/11/27/mctp-pldm-porting-software-architecture/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">源码分析</span><span>MCTP 与 PLDM</span></div>
@@ -109,11 +118,20 @@
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/11/27/i3c-host-target-architecture-regression/">
+    <a class="post-card post" href="/2026/11/27/pcie-cadence-core-architecture/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>I3C</span></div>
-  <h2 class="post-title">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</h2>
-  <p class="engineering-excerpt">回看一套 i3c-host 与裸机 Target 验证框架：从字符设备、所有权和 FIFO，到 IBI 握手、复位恢复与历次回归的证据边界。</p>
+  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
+  <h2 class="post-title">读 Linux Cadence PCIe Host 驱动：一次配置读怎样找到 Endpoint</h2>
+  <p class="engineering-excerpt">用一次 Vendor ID 读取串起 PCI Core、Cadence 配置窗口和下游链路，再看同一块设备的 BAR 访问走哪条路。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-cadence-register-programming/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
+  <h2 class="post-title">读 Linux Cadence Endpoint 驱动：BAR、出站窗口和一笔 MSI</h2>
+  <p class="engineering-excerpt">从测试 Function 的 BAR 后端出发，沿 Endpoint Framework 追踪控制器如何接住主机写、访问主机内存和发出 MSI。</p>
   <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
@@ -155,15 +173,6 @@ OPS12345678910111213141516171819202122static const struct dm_i2c_op…</p>
   <p class="engineering-excerpt">这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&amp;#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。
 项目概述这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6…</p>
   <div class="entry-meta"><span>2026-03-06</span></div>
-</article>
-</a>
-  
-    <a class="post-card post" href="/2026/03/03/pcie/pcie_software/">
-<article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">pcie software</h2>
-  <p class="engineering-excerpt">简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与A…</p>
-  <div class="entry-meta"><span>2026-03-03</span></div>
 </article>
 </a>
   

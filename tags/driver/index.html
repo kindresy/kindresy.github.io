@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -122,14 +122,7 @@
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
   <h2 class="post-title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</h2>
-  <p class="engineering-excerpt">简介本文从软件视角系统梳理 PCIe 在 Linux 场景下的完整工作流。
-PCIe 设备在系统中通常扮演两种角色：
-
-RC，Root Complex，根复合体
-EP，Endpoint，端点设备
-
-两者职责完全不同，软件栈也完全不同。
-如…</p>
+  <p class="engineering-excerpt">主机是一台 x86 服务器，插槽里有一张 AI 加速卡。卡上的 SoC 作为 Endpoint，既要向主机提供寄存器和队列，也要主动读写主机内存。一次完整启动里，能在 lspci 看到它、能读到设备版本号、能收到第一笔 DMA 完成通知，…</p>
   <div class="entry-meta"><span>2026-03-25</span></div>
 </article>
 </a>

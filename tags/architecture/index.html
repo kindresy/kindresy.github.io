@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -127,17 +127,74 @@
 </article>
 </a>
   
-    <a class="post-card post" href="/2026/03/03/pcie/pcie_introduction/">
+    <a class="post-card post" href="/2026/11/27/pcie-ari-sriov/">
 <article class="md-text engineering-entry">
   <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
-  <h2 class="post-title">pcie_introduction</h2>
-  <p class="engineering-excerpt">本文简介本文主要介绍pci&amp;#x2F;pcie的基本特征，pci发展到pcie的历史背景，pcie的应用场景。简要介绍PCIe与CPU IO体系结构的关系。
-PCI 和 PCIePCI &amp;#x3D; Peripheral Componen…</p>
-  <div class="entry-meta"><span>2026-03-03</span></div>
+  <h2 class="post-title">ARI 与 SR-IOV：从多 Function 到 PF、VF</h2>
+  <p class="engineering-excerpt">理解扩展 Function 编号、VF 资源分配与隔离，区分标准机制和平台启用条件。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-data-link-replay-flow-control/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Data Link：ACK、重放与逐跳流控</h2>
+  <p class="engineering-excerpt">区分链路 ACK 与业务 Completion，解释重放、LCRC 和逐跳 Credit。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-iommu-ats-pasid-pri/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">IOMMU、ATS、PASID 与 PRI：设备怎样访问进程地址空间</h2>
+  <p class="engineering-excerpt">从普通 DMA 的 IOVA 开始，解释翻译缓存、进程身份、缺页请求及失效通知。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-link-lane-ltssm/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Link、Lane 与 LTSSM：PCIe 链路怎样建立</h2>
+  <p class="engineering-excerpt">从时钟与复位走到 L0，串起速率、宽度协商、均衡和控制器观察点。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-memory-tlp-completion/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Memory TLP 与 Completion：PCIe 怎样完成一次读写</h2>
+  <p class="engineering-excerpt">从 Posted Write 和 Non-Posted Read 出发，解释请求头、Byte Enable、Tag 与分段返回。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-message-atomic-prefix/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Message、AtomicOp 与 TLP Prefix：数据读写之外的 PCIe</h2>
+  <p class="engineering-excerpt">理解事件消息、原子事务及附加上下文，并核对路径和具体 IP 的支持条件。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-mps-mrrs-ordering/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">MPS、MRRS 与 Ordering：包长和顺序怎样影响性能</h2>
+  <p class="engineering-excerpt">把单包负载、读请求长度、Completion 边界、流控和事务顺序放在同一次传输中理解。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
 </div>
+
+  <div class='paginator-wrap dis-select'>
+  <span class="extend prev" rel="prev"></span><span class="page-number current">1</span><a class="page-number" href="/tags/architecture/page/2/">2</a><a class="page-number" href="/tags/architecture/page/3/">3</a><a class="extend next" rel="next" href="/tags/architecture/page/2/"></a>
+  </div>
 
 
 

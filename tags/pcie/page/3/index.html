@@ -17,13 +17,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>标签：enumeration - 庐山东林的晚钟</title>
+  <title>标签：pcie - 庐山东林的晚钟</title>
 
   
     <meta name="description" content="协议、驱动与调试现场，也记录工作之外的日常。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="庐山东林的晚钟">
-<meta property="og:url" content="https://www.coffepattern.top/tags/enumeration/">
+<meta property="og:url" content="https://www.coffepattern.top/tags/pcie/page/3/">
 <meta property="og:site_name" content="庐山东林的晚钟">
 <meta property="og:description" content="协议、驱动与调试现场，也记录工作之外的日常。">
 <meta property="og:locale" content="zh_CN">
@@ -66,7 +66,7 @@
 
 <widget class="widget-wrapper engineering-related">
   <div class="widget-header"><span class="name">最近发布</span></div>
-  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li></ul>
+  <ul><li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li><li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li><li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li><li><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></li><li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li><li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li></ul>
 </widget>
 <widget class="widget-wrapper engineering-utilities"><a href="/engineering/">工程记录</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
@@ -96,20 +96,105 @@
 </nav>
 
 
-  <section class="list-intro"><span class="eyebrow">标签</span><h1>enumeration</h1><p>在这里继续寻找相关的文章与实践记录。</p></section>
+  <section class="list-intro"><span class="eyebrow">标签</span><h1>pcie</h1><p>在这里继续寻找相关的文章与实践记录。</p></section>
 
 <div class="post-list post engineering-post-list">
   
-    <a class="post-card post" href="/2026/03/03/pcie/pcie_software/">
+    <a class="post-card post" href="/2026/11/27/pcie-dpc-recovery/">
 <article class="md-text engineering-entry">
-  <div class="entry-kicker"><span class="article-type">源码分析</span><span>PCIe</span></div>
-  <h2 class="post-title">pcie software</h2>
-  <p class="engineering-excerpt">简介本文介绍PCIe软件(Linux内核下)相关的部分。PCIe设备有两种可能的角色：RC和EP。两种角色所对应的软件实现差异很大。RC与EP的职责，以及所需要负责的事务皆有差异。文章会介绍RC的工作流，职责，EP的职责。以一个服务器与A…</p>
-  <div class="entry-meta"><span>2026-03-03</span></div>
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">DPC：先隔离下游故障，再恢复设备</h2>
+  <p class="engineering-excerpt">解释 Downstream Port 的流量阻断、链路状态和软件恢复职责，并与 AER、热插拔区分。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-dynamic-power-allocation/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">DPA：设备保持 D0 时怎样调整功耗预算</h2>
+  <p class="engineering-excerpt">用四档功耗预算解释 D0 内的动态功率分配，区分主机写入的目标和设备兑现的瓦数。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-endpoint-transaction-walkthrough/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">一块 Endpoint 的完整旅程：从上电到 DMA 与 MSI-X</h2>
+  <p class="engineering-excerpt">用固定的 BDF、BAR 和地址走完枚举、doorbell、DMA Read/Write 和中断，逐层追踪真实事务形式。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-error-model-aer/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">PCIe 错误与 AER：从事务失败到系统恢复</h2>
+  <p class="engineering-excerpt">区分链路、事务和设备错误，沿 Completion Status、Header Log 与恢复入口查找原因。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-expansion-option-rom/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Expansion ROM：驱动加载前，设备如何参与启动</h2>
+  <p class="engineering-excerpt">解释 ROM BAR、临时地址窗口、镜像读取与信任校验，区分标准机制和控制器实现。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-hotplug-removal/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">PCIe 热插拔：有序移除与意外掉卡</h2>
+  <p class="engineering-excerpt">沿停止 I/O、断电、链路变化和恢复说明热插拔，区分正常操作与异步移除。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-linux-pci-core/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Linux PCI Core：从枚举到驱动绑定</h2>
+  <p class="engineering-excerpt">沿 pci_host_bridge、pci_bus 和 pci_dev 理解配置访问、资源分配与 driver binding。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-ltr-obff/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">LTR 与 OBFF：设备和平台怎样协商省电时机</h2>
+  <p class="engineering-excerpt">解释可容忍延迟和集中访问提示，理解整条路径上的支持条件与策略边界。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-power-aspm-pme/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">PCIe 电源管理：D-state、ASPM、L1SS 与 PME</h2>
+  <p class="engineering-excerpt">把 Function 与 Link 的两套状态分开，理解进入低功耗、唤醒及操作系统协作。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
+</article>
+</a>
+  
+    <a class="post-card post" href="/2026/11/27/pcie-slot-power-budget/">
+<article class="md-text engineering-entry">
+  <div class="entry-kicker"><span class="article-type">教程</span><span>PCIe</span></div>
+  <h2 class="post-title">Slot Power Limit 与 Power Budgeting：功耗需求和额度怎样对接</h2>
+  <p class="engineering-excerpt">区分设备需求、插槽额度和动态分配，追踪消息、能力字段及固件策略。</p>
+  <div class="entry-meta"><span>2026-11-27</span></div>
 </article>
 </a>
   
 </div>
+
+  <div class='paginator-wrap dis-select'>
+  <a class="extend prev" rel="prev" href="/tags/pcie/page/2/"></a><a class="page-number" href="/tags/pcie/">1</a><a class="page-number" href="/tags/pcie/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/tags/pcie/page/4/">4</a><a class="extend next" rel="next" href="/tags/pcie/page/4/"></a>
+  </div>
 
 
 

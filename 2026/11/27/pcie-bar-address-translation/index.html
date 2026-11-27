@@ -1,0 +1,1070 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>BAR 与地址翻译：一笔访问怎样到达设备内部 - 庐山东林的晚钟</title>
+
+  
+    <meta name="description" content="用一个 64 KiB 寄存器窗口追踪 CPU、PCIe 和设备本地地址，理解 BAR sizing、桥窗口和 DMA 寻址。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BAR 与地址翻译：一笔访问怎样到达设备内部">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/27/pcie-bar-address-translation/">
+<meta property="og:site_name" content="庐山东林的晚钟">
+<meta property="og:description" content="用一个 64 KiB 寄存器窗口追踪 CPU、PCIe 和设备本地地址，理解 BAR sizing、桥窗口和 DMA 寻址。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-26T16:00:00.000Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="architecture">
+<meta property="article:tag" content="pcie">
+<meta property="article:tag" content="tutorial">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  <meta name="keywords" content="tutorial,architecture,pcie">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+    <link rel="shortcut icon" href="/images/evening-bell.svg">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T00:00:00+08:00","dateModified":"2026-11-27T00:00:00+08:00","datePublished":"2026-11-27T00:00:00+08:00","description":"","headline":"BAR 与地址翻译：一笔访问怎样到达设备内部","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/pcie-bar-address-translation/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/pcie-bar-address-translation/","keywords":"tutorial, architecture, pcie","image":[]}</script>
+  
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-2"><!-- hexo injector head_end end --></head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub cap">协议、驱动与调试现场</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<widget class="widget-wrapper engineering-related">
+  <div class="widget-header"><span class="name">PCIe · 阅读顺序</span></div>
+  <ol>
+    
+      <li><a href="/2026/03/03/pcie/pcie_introduction/">PCIe 入门：拓扑、角色与三层协议</a></li>
+    
+      <li><a href="/2026/11/27/pcie-configuration-ecam-routing/">配置空间与 ECAM：主机怎样发现 PCIe 设备</a></li>
+    
+      <li><a href="/2026/11/27/pcie-bdf-requester-id/">BDF、Requester ID 与 PCIe 层次路由</a></li>
+    
+      <li><a href="/2026/11/27/pcie-bar-address-translation/" aria-current="page">BAR 与地址翻译：一笔访问怎样到达设备内部</a></li>
+    
+      <li><a href="/2026/11/27/pcie-endpoint-transaction-walkthrough/">一块 Endpoint 的完整旅程：从上电到 DMA 与 MSI-X</a></li>
+    
+      <li><a href="/2026/11/27/pcie-memory-tlp-completion/">Memory TLP 与 Completion：PCIe 怎样完成一次读写</a></li>
+    
+      <li><a href="/2026/11/27/pcie-data-link-replay-flow-control/">Data Link：ACK、重放与逐跳流控</a></li>
+    
+      <li><a href="/2026/11/27/pcie-link-lane-ltssm/">Link、Lane 与 LTSSM：PCIe 链路怎样建立</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dma-linux-api/">PCIe DMA 与 Linux DMA API：引擎、地址和缓存</a></li>
+    
+      <li><a href="/2026/11/27/pcie-intx-msi-msix/">INTx、MSI 与 MSI-X：中断怎样沿 PCIe 到达 CPU</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-pci-core/">Linux PCI Core：从枚举到驱动绑定</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-function-driver/">Linux PCI 功能驱动：probe、MMIO 与生命周期</a></li>
+    
+      <li><a href="/2026/03/25/pcie/pcie_software1/">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</a></li>
+    
+      <li><a href="/2026/11/27/pcie-linux-host-controller/">Linux Host、EPC 与 EPF：控制器驱动的职责边界</a></li>
+    
+      <li><a href="/2026/11/27/pcie-cadence-core-architecture/">读 Linux Cadence PCIe Host 驱动：一次配置读怎样找到 Endpoint</a></li>
+    
+      <li><a href="/2026/11/27/pcie-cadence-register-programming/">读 Linux Cadence Endpoint 驱动：BAR、出站窗口和一笔 MSI</a></li>
+    
+      <li><a href="/2026/03/23/pcie/pcie_fw/">PCIe Endpoint 固件初始化实例</a></li>
+    
+      <li><a href="/2026/03/06/pcie/pcie_ep_demo/">PCIe 加速卡驱动：结构与工作流程</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ari-sriov/">ARI 与 SR-IOV：从多 Function 到 PF、VF</a></li>
+    
+      <li><a href="/2026/11/27/pcie-iommu-ats-pasid-pri/">IOMMU、ATS、PASID 与 PRI：设备怎样访问进程地址空间</a></li>
+    
+      <li><a href="/2026/11/27/pcie-message-atomic-prefix/">Message、AtomicOp 与 TLP Prefix：数据读写之外的 PCIe</a></li>
+    
+      <li><a href="/2026/11/27/pcie-mps-mrrs-ordering/">MPS、MRRS 与 Ordering：包长和顺序怎样影响性能</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ntb-multi-host/">NTB 与多 Host：两棵 PCIe 树怎样通信</a></li>
+    
+      <li><a href="/2026/11/27/pcie-tc-vc-qos-ptm-acs/">TC、VC、PTM 与 ACS：分类、时钟和隔离各管什么</a></li>
+    
+      <li><a href="/2026/11/27/pcie-reset-recovery/">Link Down、Hot Reset 与 FLR：恢复时该重建什么</a></li>
+    
+      <li><a href="/2026/11/27/pcie-capability-safe-walking/">PCIe Capability：发现能力与安全遍历</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dpc-recovery/">DPC：先隔离下游故障，再恢复设备</a></li>
+    
+      <li><a href="/2026/11/27/pcie-dynamic-power-allocation/">DPA：设备保持 D0 时怎样调整功耗预算</a></li>
+    
+      <li><a href="/2026/11/27/pcie-error-model-aer/">PCIe 错误与 AER：从事务失败到系统恢复</a></li>
+    
+      <li><a href="/2026/11/27/pcie-expansion-option-rom/">Expansion ROM：驱动加载前，设备如何参与启动</a></li>
+    
+      <li><a href="/2026/11/27/pcie-hotplug-removal/">PCIe 热插拔：有序移除与意外掉卡</a></li>
+    
+      <li><a href="/2026/11/27/pcie-ltr-obff/">LTR 与 OBFF：设备和平台怎样协商省电时机</a></li>
+    
+      <li><a href="/2026/11/27/pcie-power-aspm-pme/">PCIe 电源管理：D-state、ASPM、L1SS 与 PME</a></li>
+    
+      <li><a href="/2026/11/27/pcie-slot-power-budget/">Slot Power Limit 与 Power Budgeting：功耗需求和额度怎样对接</a></li>
+    
+  </ol>
+</widget>
+
+<widget class="widget-wrapper engineering-utilities"><a href="/categories/">所有专题</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<nav class="engineering-nav" aria-label="主导航">
+  
+    <a href="/">首页</a>
+  
+    <a href="/categories/">技术专题</a>
+  
+    <a href="/engineering/">工程记录</a>
+  
+    <a href="/categories/life-record/">生活</a>
+  
+    <a href="/about/">关于</a>
+  
+  <button type="button" data-site-search aria-label="打开站内搜索" title="搜索文章">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/">PCIe</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/enumeration-system/">枚举与系统流程</a></div>
+<div class="engineering-dates">
+  <span>发布于 2026-11-27</span>
+  
+</div>
+</div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>BAR 与地址翻译：一笔访问怎样到达设备内部</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div>
+
+  <div class="engineering-reading-tools">
+    <span>教程</span>
+    <button type="button" data-reading-width aria-pressed="false">宽屏阅读</button>
+  </div>
+
+<article class="md-text content"><h2 id="1-BAR-解决的是“设备需要多大窗口、放在哪里”"><a href="#1-BAR-解决的是“设备需要多大窗口、放在哪里”" class="headerlink" title="1. BAR 解决的是“设备需要多大窗口、放在哪里”"></a>1. BAR 解决的是“设备需要多大窗口、放在哪里”</h2><p>Endpoint 内部有寄存器或存储资源，Host 需要通过 PCIe Memory Space 访问它们。但不同机器的地址布局不同，EP 需要通过 BAR 报告窗口需求，由系统分配合适的基址。</p>
+<p>BAR（Base Address Register）提供两部分信息：</p>
+<ul>
+<li><strong>硬件声明</strong>：窗口是 Memory 还是 I&#x2F;O、32&#x2F;64-bit、是否 Prefetchable、需要多大空间；</li>
+<li><strong>系统分配</strong>：firmware&#x2F;OS 规划全局地址图后，把基址写回 BAR。</li>
+</ul>
+<p>所以 BAR 像“房屋规格 + 最终门牌”，不是房屋里的那块 SRAM。</p>
+<h2 id="2-Type-0-BAR-的编码"><a href="#2-Type-0-BAR-的编码" class="headerlink" title="2. Type 0 BAR 的编码"></a>2. Type 0 BAR 的编码</h2><p>Type 0 header 在 offset <code>0x10–0x24</code> 有六个 DWORD 位置。</p>
+<h3 id="Memory-BAR"><a href="#Memory-BAR" class="headerlink" title="Memory BAR"></a>Memory BAR</h3><ul>
+<li>bit 0 &#x3D; 0；</li>
+<li>bits 2:1：<code>00b</code> 为 32-bit，<code>10b</code> 为 64-bit；其余保留；</li>
+<li>bit 3：Prefetchable；</li>
+<li>高位保存 base address；低属性位只读。</li>
+</ul>
+<p>64-bit BAR 使用连续两个 DWORD：低 DWORD 含属性和地址低位，高 DWORD 含地址高 32 bit。因此“六个位置”不等于“必然有六个独立 BAR”。</p>
+<h3 id="I-O-BAR"><a href="#I-O-BAR" class="headerlink" title="I&#x2F;O BAR"></a>I&#x2F;O BAR</h3><ul>
+<li>bit 0 &#x3D; 1；</li>
+<li>固定 32-bit I&#x2F;O address；</li>
+<li>PCIe Endpoint 不应依赖 OS 为 I&#x2F;O BAR 分配资源，现代设备控制空间优先用 Memory BAR。</li>
+</ul>
+<h3 id="Prefetchable-到底在承诺什么"><a href="#Prefetchable-到底在承诺什么" class="headerlink" title="Prefetchable 到底在承诺什么"></a>Prefetchable 到底在承诺什么</h3><p>它不是“CPU 可以随便 cache”。规范核心条件是：读无副作用、读能返回请求的所有 byte、Host Bridge 合并写不会破坏语义。doorbell、clear-on-read status 这类寄存器通常不能轻率标成 prefetchable。</p>
+<p>Base Spec 对标准 PCIe Endpoint 还要求：申请 Memory Space 的 BAR 除非包含 read side effect 或不能容忍 write merging，否则应置 Prefetchable；prefetchable BAR 必须支持 64-bit addressing。来源：§§1.3.2.2、7.5.1.2.1。</p>
+<h2 id="3-BAR-sizing-为什么要写全-1"><a href="#3-BAR-sizing-为什么要写全-1" class="headerlink" title="3. BAR sizing 为什么要写全 1"></a>3. BAR sizing 为什么要写全 1</h2><p>硬件只实现它关心的高地址位，窗口内 offset 对应的低地址位固定返回 0。软件在禁用相应 address decode 后：</p>
+<ol>
+<li>保存 BAR 原值；</li>
+<li>写全 1；</li>
+<li>读回；</li>
+<li>清掉属性位；</li>
+<li>对掩码按位取反再加 1，得到 power-of-two size；</li>
+<li>恢复原值，再按资源规划写入新基址。</li>
+</ol>
+<p>例如 32-bit Memory BAR 读回：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0xFFFF_0000  （低 4 bit 属性先清掉）</span><br><span class="line">~0xFFFF_0000 + 1 = 0x0001_0000 = 64 KiB</span><br></pre></td></tr></table></figure>
+
+<p>窗口必须自然对齐到其大小。未实现 BAR 读回 0。64-bit BAR 要对连续两个 DWORD 一起 sizing。</p>
+<p>Base Spec 的 implementation note 还强调 sizing 前通过 Command Register 禁用对应 decode，避免写全 1 的中间值被当成真实地址。来源：§7.5.1.2.1，printed&#x2F;PDF pp.696–698。</p>
+<h2 id="4-地址分配不只写-EP-BAR"><a href="#4-地址分配不只写-EP-BAR" class="headerlink" title="4. 地址分配不只写 EP BAR"></a>4. 地址分配不只写 EP BAR</h2><p>若 EP 在 Switch&#x2F;Root Port 后面，配置软件还要为路径上的 Type 1 bridge 编程 Memory Base&#x2F;Limit 或 Prefetchable Memory Base&#x2F;Limit。只有目标地址同时命中每一级桥的下游 window，请求才会被逐级转发。</p>
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EP BAR 配对了，但桥窗口没包住它 → Memory TLP 仍可能到不了 EP</span><br></pre></td></tr></table></figure>
+
+<p>如果 Link 已经起来，配置读也正常，仍要看上游桥窗口有没有包含这个 BAR。</p>
+<h2 id="5-三个地址域"><a href="#5-三个地址域" class="headerlink" title="5. 三个地址域"></a>5. 三个地址域</h2><p>先约定名字：</p>
+<ol>
+<li><strong>CPU virtual address</strong>：驱动 <code>pci_iomap()</code> 后拿到、交给 <code>readl/writel</code> 的 <code>__iomem</code> 地址。</li>
+<li><strong>CPU physical &#x2F; AXI address</strong>：CPU&#x2F;SoC interconnect 上用于访问 host bridge aperture 的地址。</li>
+<li><strong>PCIe address</strong>：Memory TLP header 中用于 fabric address routing 的地址。</li>
+</ol>
+<p>在 EP DMA 方向还会出现 <strong>DMA address&#x2F;IOVA</strong>，它是设备应发出的地址，可能经 IOMMU 翻译到 Host physical memory。</p>
+<p>数值可能恰好相等。换到带地址平移的 Host Bridge，或者为 DMA 打开 IOMMU，这个巧合就消失了。</p>
+<h2 id="6-入站访问怎么落到设备寄存器"><a href="#6-入站访问怎么落到设备寄存器" class="headerlink" title="6. 入站访问怎么落到设备寄存器"></a>6. 入站访问怎么落到设备寄存器</h2><p>假设一块卡通过 BAR0 暴露 64 KiB 寄存器。系统把 BAR0 放在 PCI 地址 <code>0x8000_0000</code>，Host Bridge 把 CPU 侧的 <code>0x4_8000_0000</code> 起始窗口映射到这里。驱动想写第 <code>0x100</code> 字节处的 doorbell，各处看到的是同一次访问：</p>
+<table>
+<thead>
+<tr>
+<th>观察位置</th>
+<th>地址或字段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>驱动</td>
+<td><code>writel(value, regs + 0x100)</code>，其中 <code>regs</code> 来自 <code>pci_iomap()</code></td>
+</tr>
+<tr>
+<td>Host Bridge 的 CPU 侧</td>
+<td><code>0x4_8000_0100</code></td>
+</tr>
+<tr>
+<td>链路上的 Memory Write</td>
+<td><code>0x8000_0100</code></td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td>命中 BAR0，窗口内偏移 <code>0x100</code></td>
+</tr>
+</tbody></table>
+<p>一个简单设备可以直接用偏移译码寄存器。带片内互连的设备也可以把 BAR0 对应到另一段本地地址，两种方案向主机呈现相同的 BAR。Linux Endpoint 框架用 EPC 的 <code>set_bar</code> 操作描述这层关系。<a target="_blank" rel="noopener" href="https://docs.kernel.org/PCI/endpoint/pci-endpoint.html">Linux PCI Endpoint 框架</a></p>
+<h2 id="7-反方向的-DMA-地址从哪里来"><a href="#7-反方向的-DMA-地址从哪里来" class="headerlink" title="7. 反方向的 DMA 地址从哪里来"></a>7. 反方向的 DMA 地址从哪里来</h2><p>现在让卡读取主机的一页内存。驱动通过 DMA API 获得 CPU 侧指针和一个给设备使用的 DMA 地址，把后者填进描述符。如果地址为 <code>0x4000_0000</code>，卡发出的 Memory Read 就使用这个地址。Host 是否再将它翻译成另一段物理内存，取决于平台的 DMA 映射。</p>
+<p>从 Endpoint 看，doorbell 是入站，DMA Read 是出站。要查“出站窗口没配好”，先记下自己的观察点。在 Host Bridge 一侧，CPU 写同一个 doorbell 恰恰是出站。</p>
+<h2 id="8-Resizable-BAR：软件在设备支持范围内选择-BAR-大小"><a href="#8-Resizable-BAR：软件在设备支持范围内选择-BAR-大小" class="headerlink" title="8. Resizable BAR：软件在设备支持范围内选择 BAR 大小"></a>8. Resizable BAR：软件在设备支持范围内选择 BAR 大小</h2><p>普通 BAR sizing 只读取当前固定 aperture；Resizable BAR Extended Capability 则列出硬件可接受的多个 size，系统软件选择最合适值写入 Control.BAR Size。</p>
+<p>resize 不是在线拉伸内存窗口：</p>
+<ol>
+<li>quiesce Function，停止相关 MMIO&#x2F;DMA；</li>
+<li>清 Command.Memory Space Enable；</li>
+<li>写 Resizable BAR Control 的 size；</li>
+<li>此时原 BAR 内容未定义，重新分配并写 BAR base&#x2F;bridge window；</li>
+<li>恢复 MSE 和 driver 数据面。</li>
+</ol>
+<p>只有 64-bit BAR 才能宣告 4 GiB 及以上 size。软件通常选择资源布局可容纳的最大受支持 size；更大 aperture 可能改善设备可直接暴露的资源范围，也会挤占其他 MMIO address space。</p>
+<p>可用地址空间、桥窗口和设备支持的大小共同决定能否调整。PCIe Base Specification 5.0 §7.8.6 规定了大小编码和控制字段。</p>
+<h2 id="9-Bus-Master-Enable-是-DMA-前置条件"><a href="#9-Bus-Master-Enable-是-DMA-前置条件" class="headerlink" title="9. Bus Master Enable 是 DMA 前置条件"></a>9. Bus Master Enable 是 DMA 前置条件</h2><p>Command 寄存器中的 Memory Space Enable 控制主机发往 Function 的内存访问，Bus Master Enable 控制 Function 发出的普通内存读写。两者独立，所以“能读设备版本号，DMA 却一直没动”是可能的。</p>
+<p>Linux 驱动调用 <code>pci_set_master(pdev)</code> 设置 BME。它只完成总线主控这一步。驱动还要设置 DMA mask、申请或映射缓冲区、填入 DMA 地址，最后按设备规定启动队列。</p>
+<h2 id="10-Debug-路径"><a href="#10-Debug-路径" class="headerlink" title="10. Debug 路径"></a>10. Debug 路径</h2><h3 id="CPU-访问-EP-BAR-失败"><a href="#CPU-访问-EP-BAR-失败" class="headerlink" title="CPU 访问 EP BAR 失败"></a>CPU 访问 EP BAR 失败</h3><ol>
+<li><code>lspci</code> 检查 BAR 是否有资源、Command.MSE 是否置位。</li>
+<li>检查 Host&#x2F;RC outbound CPU&#x2F;AXI-to-PCIe region 是否覆盖 CPU physical access。</li>
+<li>看协议分析：是否发出正确 PCIe address 的 MWr&#x2F;MRd。</li>
+<li>检查桥 Memory&#x2F;Prefetchable window。</li>
+<li>EP 侧检查 Function&#x2F;BAR hit 和 inbound translation。</li>
+<li>如果链路上已能看到正确地址，查 Endpoint 的 BAR 命中和寄存器偏移。</li>
+</ol>
+<h3 id="EP-的-DMA-没有返回数据"><a href="#EP-的-DMA-没有返回数据" class="headerlink" title="EP 的 DMA 没有返回数据"></a>EP 的 DMA 没有返回数据</h3><p>用三处观察分段：设备有没有发 MRd、Root Port 有没有收到它、Completion 有没有按 Requester ID 和 Tag 返回。没有 MRd 时先确认 BME 和描述符，根端收到 MRd 却报告 IOMMU fault 时查 DMA 地址和映射方向。若收到了 Cpl(UR&#x2F;CA)，读 Completion Status；若一直等不到返回，再对齐超时记录、Link 状态和复位时间。</p>
+<h2 id="11-参考资料"><a href="#11-参考资料" class="headerlink" title="11. 参考资料"></a>11. 参考资料</h2><ul>
+<li>PCIe Base Specification 5.0 r1.0, §7.5.1.2.1, printed&#x2F;PDF pp.696–699。</li>
+<li>PCIe Base Specification 5.0 r1.0, §7.5.1.3.3–.9, pp.705–708。</li>
+<li>PCIe Base Specification 5.0 r1.0, §7.8.6, pp.862–866。</li>
+<li><a target="_blank" rel="noopener" href="https://docs.kernel.org/PCI/pci.html">Linux PCI 驱动接口</a></li>
+</ul>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/pcie-cadence-register-programming/">读 Linux Cadence Endpoint 驱动：BAR、出站窗口和一笔 MSI</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/pcie-bdf-requester-id/">BDF、Requester ID 与 PCIe 层次路由</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="auto"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-BAR-%E8%A7%A3%E5%86%B3%E7%9A%84%E6%98%AF%E2%80%9C%E8%AE%BE%E5%A4%87%E9%9C%80%E8%A6%81%E5%A4%9A%E5%A4%A7%E7%AA%97%E5%8F%A3%E3%80%81%E6%94%BE%E5%9C%A8%E5%93%AA%E9%87%8C%E2%80%9D"><span class="toc-text">1. BAR 解决的是“设备需要多大窗口、放在哪里”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Type-0-BAR-%E7%9A%84%E7%BC%96%E7%A0%81"><span class="toc-text">2. Type 0 BAR 的编码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Memory-BAR"><span class="toc-text">Memory BAR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O-BAR"><span class="toc-text">I&#x2F;O BAR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Prefetchable-%E5%88%B0%E5%BA%95%E5%9C%A8%E6%89%BF%E8%AF%BA%E4%BB%80%E4%B9%88"><span class="toc-text">Prefetchable 到底在承诺什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-BAR-sizing-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%86%99%E5%85%A8-1"><span class="toc-text">3. BAR sizing 为什么要写全 1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%9C%B0%E5%9D%80%E5%88%86%E9%85%8D%E4%B8%8D%E5%8F%AA%E5%86%99-EP-BAR"><span class="toc-text">4. 地址分配不只写 EP BAR</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E4%B8%89%E4%B8%AA%E5%9C%B0%E5%9D%80%E5%9F%9F"><span class="toc-text">5. 三个地址域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%85%A5%E7%AB%99%E8%AE%BF%E9%97%AE%E6%80%8E%E4%B9%88%E8%90%BD%E5%88%B0%E8%AE%BE%E5%A4%87%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">6. 入站访问怎么落到设备寄存器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%8F%8D%E6%96%B9%E5%90%91%E7%9A%84-DMA-%E5%9C%B0%E5%9D%80%E4%BB%8E%E5%93%AA%E9%87%8C%E6%9D%A5"><span class="toc-text">7. 反方向的 DMA 地址从哪里来</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-Resizable-BAR%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%9C%A8%E8%AE%BE%E5%A4%87%E6%94%AF%E6%8C%81%E8%8C%83%E5%9B%B4%E5%86%85%E9%80%89%E6%8B%A9-BAR-%E5%A4%A7%E5%B0%8F"><span class="toc-text">8. Resizable BAR：软件在设备支持范围内选择 BAR 大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-Bus-Master-Enable-%E6%98%AF-DMA-%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6"><span class="toc-text">9. Bus Master Enable 是 DMA 前置条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-Debug-%E8%B7%AF%E5%BE%84"><span class="toc-text">10. Debug 路径</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU-%E8%AE%BF%E9%97%AE-EP-BAR-%E5%A4%B1%E8%B4%A5"><span class="toc-text">CPU 访问 EP BAR 失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EP-%E7%9A%84-DMA-%E6%B2%A1%E6%9C%89%E8%BF%94%E5%9B%9E%E6%95%B0%E6%8D%AE"><span class="toc-text">EP 的 DMA 没有返回数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-text">11. 参考资料</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `/js/vendor/jquery-3.7.1.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div><!-- hexo injector body_end start --><script defer src="/js/engineering.js?v=20261127-1"></script><!-- hexo injector body_end end --></body></html>
