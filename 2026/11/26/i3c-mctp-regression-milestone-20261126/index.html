@@ -17,14 +17,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK - 庐山东林</title>
+  <title>I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK - 庐山东林的晚钟</title>
 
   
     <meta name="description" content="从 open 枚举基线追溯、MCTP 模式切换和 AF_MCTP 类型字节修正，到 7 项只读查询、69 字节边界与连续分包实验，记录 2026-11-26 的调试过程和未解决问题。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK">
 <meta property="og:url" content="https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/">
-<meta property="og:site_name" content="庐山东林">
+<meta property="og:site_name" content="庐山东林的晚钟">
 <meta property="og:description" content="从 open 枚举基线追溯、MCTP 模式切换和 AF_MCTP 类型字节修正，到 7 项只读查询、69 字节边界与连续分包实验，记录 2026-11-26 的调试过程和未解决问题。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-26T11:00:00.000Z">
@@ -51,18 +51,20 @@
 
 
   
+    <link rel="shortcut icon" href="/images/evening-bell.svg">
+  
 
   
 
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-26T19:00:00+08:00","dateModified":"2026-11-27T15:32:52+08:00","datePublished":"2026-11-26T19:00:00+08:00","description":"2026 年 11 月 26 日，MCTP&#x2F;PLDM over I3C 的基础查询终于有了端到端结果：3 项 MCTP Control、4 项 PLDM Base，共 7 项只读查询全部通过。 Host 能读到 Target 的 EID、TID、协议版本和命令位图，响应版本列表的 CRC32 也通过了校验。\n接着往包长边界走，新的问题出现了。Host 连续发送一条拆成两包的消息时，第一包 69 字节发送成功，第二包 6 字节在 0x44/W 地址阶段收到 NACK。两包之间留约 1 秒，Host 驱动又都报告发送成功；重新枚举后去掉间隔，第二包 NACK 再次出现。\n今天可以把“单包管理查询打通”记为一个里程碑。连续分包、Target 重组和满包响应还没有完成验收，接下来要盯的是第一包结束后，Target 怎样准备好接下一包。","headline":"I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/26/i3c-mctp-regression-milestone-20261126/","keywords":"baremetal, linux, i3c, mctp, pldm, debugging, bringup, milestone","image":[]}</script>
   
-</head>
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-1"><!-- hexo injector head_end end --></head>
 <body>
 
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub cap">协议、驱动与调试现场</div></a></div></header>
 
 <div class="nav-area">
 
@@ -72,8 +74,26 @@
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
 
+<widget class="widget-wrapper engineering-related">
+  <div class="widget-header"><span class="name">MCTP 与 PLDM · 阅读顺序</span></div>
+  <ol>
+    
+      <li><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></li>
+    
+      <li><a href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</a></li>
+    
+      <li><a href="/2026/11/27/mctp-pldm-porting-software-architecture/">MCTP/PLDM 移植后的双端软件架构：验收设计基线</a></li>
+    
+      <li><a href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</a></li>
+    
+      <li><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/" aria-current="page">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></li>
+    
+      <li><a href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</a></li>
+    
+  </ol>
+</widget>
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/"><span class="title">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</span></a><a class="item title" href="/2026/03/13/AI/OpenClaw%E4%BB%8B%E7%BB%8D%E4%B8%8E%E4%BD%BF%E7%94%A8/"><span class="title">OpenClaw 介绍与使用</span></a><a class="item title" href="/2026/03/02/mmc/sd_introduction/"><span class="title">sd_introduction</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E8%84%91%E9%9B%BE%E4%BF%AE%E5%A4%8D/"><span class="title">脑雾修复</span></a><a class="item title" href="/2026/03/21/claude_code/what_is/"><span class="title">Claude Code：工具、记忆与运行环境</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a></div></widget>
+<widget class="widget-wrapper engineering-utilities"><a href="/categories/">所有专题</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -82,11 +102,33 @@
 
 
 
+<nav class="engineering-nav" aria-label="主导航">
+  
+    <a href="/">首页</a>
+  
+    <a href="/categories/">技术专题</a>
+  
+    <a href="/engineering/">工程记录</a>
+  
+    <a href="/categories/life-record/">生活</a>
+  
+    <a href="/about/">关于</a>
+  
+  <button type="button" data-site-search aria-label="打开站内搜索" title="搜索文章">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+
 <div class="article banner top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/mctp-pldm/">MCTP 与 PLDM</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/mctp-pldm/porting-regression/">移植与回归</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-26T11:00:00.000Z">2026-11-26</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-27T07:32:52.000Z">2026-11-27</time></span></div></div></div>
+<div class="engineering-dates">
+  <span>发布于 2026-11-26</span>
+  <span>证据截至 2026-11-26</span>
+</div>
+</div></div>
     
     <div class="bottom only-title">
       
@@ -97,7 +139,14 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><p><strong>2026 年 11 月 26 日，MCTP&#x2F;PLDM over I3C 的基础查询终于有了端到端结果：3 项 MCTP Control、4 项 PLDM Base，共 7 项只读查询全部通过。</strong> Host 能读到 Target 的 EID、TID、协议版本和命令位图，响应版本列表的 CRC32 也通过了校验。</p>
+  </div>
+
+  <div class="engineering-reading-tools">
+    <span>工程里程碑<span class="evidence-badge">基础查询通过 · 分包待回归</span></span>
+    <button type="button" data-reading-width aria-pressed="false">宽屏阅读</button>
+  </div>
+
+<article class="md-text content"><p><strong>2026 年 11 月 26 日，MCTP&#x2F;PLDM over I3C 的基础查询终于有了端到端结果：3 项 MCTP Control、4 项 PLDM Base，共 7 项只读查询全部通过。</strong> Host 能读到 Target 的 EID、TID、协议版本和命令位图，响应版本列表的 CRC32 也通过了校验。</p>
 <p>接着往包长边界走，新的问题出现了。Host 连续发送一条拆成两包的消息时，第一包 69 字节发送成功，第二包 6 字节在 <code>0x44/W</code> 地址阶段收到 NACK。两包之间留约 1 秒，Host 驱动又都报告发送成功；重新枚举后去掉间隔，第二包 NACK 再次出现。</p>
 <p>今天可以把“单包管理查询打通”记为一个里程碑。连续分包、Target 重组和满包响应还没有完成验收，接下来要盯的是第一包结束后，Target 怎样准备好接下一包。</p>
 <span id="more"></span>
@@ -640,9 +689,7 @@ sequenceDiagram
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
 
-
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%88%E6%8A%8A%E5%8E%86%E5%8F%B2%E5%9F%BA%E7%BA%BF%E6%89%BE%E5%9B%9E%E6%9D%A5%EF%BC%9Aopen-%E6%88%90%E5%8A%9F%EF%BC%8C%E7%A9%B6%E7%AB%9F%E6%98%AF%E5%93%AA%E4%B8%80%E7%89%88"><span class="toc-text">1. 先把历史基线找回来：open 成功，究竟是哪一版</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%8E%9F%E6%9D%A5%E8%A3%B8%E5%86%99%E9%80%9A%E8%BF%87%EF%BC%8C%E5%B9%B6%E4%B8%8D%E5%8C%85%E5%90%AB%E4%BB%8A%E5%A4%A9%E7%9A%84-PEC-%E9%AA%8C%E8%AF%81"><span class="toc-text">1.1 原来裸写通过，并不包含今天的 PEC 验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BB%8A%E5%A4%A9%E7%9A%84%E6%9E%9A%E4%B8%BE%E5%88%86%E4%BA%86%E5%87%A0%E8%BD%AE%EF%BC%8CDCR-%E7%9A%84%E5%8F%98%E5%8C%96%E8%A6%81%E4%BF%9D%E7%95%99"><span class="toc-text">2. 今天的枚举分了几轮，DCR 的变化要保留</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9E%9A%E4%B8%BE%E6%97%A5%E5%BF%97%E9%87%8C%E7%9A%84-assigned-0-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%AE%97%E5%A4%B1%E8%B4%A5"><span class="toc-text">2.1 枚举日志里的 assigned&#x3D;0 为什么不算失败</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9E%9A%E4%B8%BE%E4%B9%8B%E5%90%8E%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%8A%8A%E4%B8%89%E5%B1%82%E5%9C%B0%E5%9D%80%E6%8E%A5%E8%B5%B7%E6%9D%A5"><span class="toc-text">3. 枚举之后，还需要把三层地址接起来</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%AC%AC%E4%B8%80%E7%AC%94-GetEID-%E8%B6%85%E6%97%B6%EF%BC%9A%E8%BF%99%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E5%B7%B2%E7%BB%8F%E5%88%B0-Target-%E4%BA%86"><span class="toc-text">4. 第一笔 GetEID 超时：这一次请求已经到 Target 了</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%A4%9A%E5%87%BA%E6%9D%A5%E7%9A%84-0x00%EF%BC%8C%E6%98%AF%E8%B0%81%E5%8A%A0%E7%9A%84"><span class="toc-text">4.1 多出来的 0x00，是谁加的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%8F%91%E9%80%81%E5%B0%91%E4%BA%A4%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%8C%E6%8E%A5%E6%94%B6%E4%B9%9F%E8%A6%81%E5%AF%B9%E5%BA%94%E5%A4%84%E7%90%86"><span class="toc-text">4.2 发送少交一个字节，接收也要对应处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E4%BF%AE%E6%AD%A3%E7%89%88%E5%85%88%E7%8B%AC%E7%AB%8B%E9%AA%8C%E8%AF%81%EF%BC%8C%E5%86%8D%E6%9B%BF%E6%8D%A2%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84"><span class="toc-text">4.3 修正版先独立验证，再替换默认路径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-7-%E9%A1%B9%E5%8F%AA%E8%AF%BB%E6%9F%A5%E8%AF%A2%EF%BC%8C%E5%AE%9E%E9%99%85%E8%B7%91%E9%80%9A%E4%BA%86%E5%93%AA%E4%BA%9B%E5%86%85%E5%AE%B9"><span class="toc-text">5. 7 项只读查询，实际跑通了哪些内容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%9B%9E%E5%8C%85%E7%BB%8F%E8%BF%87%E4%BA%86%E6%80%8E%E6%A0%B7%E4%B8%80%E6%9D%A1%E9%93%BE"><span class="toc-text">5.1 回包经过了怎样一条链</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%81%9A%E8%BE%B9%E7%95%8C%E6%B5%8B%E8%AF%95%E4%B9%8B%E5%89%8D%EF%BC%8C%E5%85%88%E6%8A%8A%E9%95%BF%E5%BA%A6%E5%8D%95%E4%BD%8D%E7%AE%97%E6%B8%85%E6%A5%9A"><span class="toc-text">6. 做边界测试之前，先把长度单位算清楚</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-64-%E5%AD%97%E8%8A%82%E6%B6%88%E6%81%AF%E7%9A%84%E5%8D%95%E5%8C%85%E5%B8%83%E5%B1%80"><span class="toc-text">6.1 64 字节消息的单包布局</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-65-%E5%AD%97%E8%8A%82%E6%B6%88%E6%81%AF%E4%B8%BA%E4%BB%80%E4%B9%88%E6%8B%86%E6%88%90-69-6"><span class="toc-text">6.2 65 字节消息为什么拆成 69 + 6</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-Host-%E5%86%85%E6%A0%B8%E5%9B%9E%E7%8E%AF%E9%80%9A%E8%BF%87%E4%BA%86%EF%BC%8C%E4%BD%86%E5%AE%83%E4%B8%8D%E7%BB%8F%E8%BF%87-I3C"><span class="toc-text">7. Host 内核回环通过了，但它不经过 I3C</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E7%9C%9F%E5%AE%9E-I3C-%E8%BE%B9%E7%95%8C%EF%BC%9A68%E3%80%8169-%E5%AD%97%E8%8A%82%E5%8F%91%E5%87%BA%EF%BC%8C%E7%AC%AC%E4%BA%8C%E7%89%87%E5%A4%B1%E8%B4%A5"><span class="toc-text">8. 真实 I3C 边界：68、69 字节发出，第二片失败</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-sendto-%E8%BF%94%E5%9B%9E%EF%BC%8C%E5%B9%B6%E4%B8%8D%E6%98%AF%E6%9C%80%E5%90%8E%E4%B8%80%E6%AC%A1%E6%88%90%E5%8A%9F%E5%88%A4%E5%AE%9A"><span class="toc-text">8.1 sendto 返回，并不是最后一次成功判定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E5%A4%B1%E8%B4%A5%E5%90%8E%EF%BC%8C%E5%B0%8F-GetEID-%E4%BB%8D%E7%84%B6%E9%80%9A%E8%BF%87"><span class="toc-text">8.2 失败后，小 GetEID 仍然通过</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E4%B8%A4%E7%89%87%E9%97%B4%E9%9A%94%E7%BA%A6-1-%E7%A7%92%EF%BC%9A%E4%B8%80%E4%B8%AA%E7%BC%A9%E5%B0%8F%E8%8C%83%E5%9B%B4%E7%9A%84%E5%AE%9E%E9%AA%8C"><span class="toc-text">9. 两片间隔约 1 秒：一个缩小范围的实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-Host-%E5%8F%91%E4%B8%A4%E7%89%87%EF%BC%8C%E4%B8%AD%E9%97%B4%E8%A6%81%E7%AD%89-IBI-%E5%90%97"><span class="toc-text">9.1 Host 发两片，中间要等 IBI 吗</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-%E9%87%8D%E6%96%B0%E6%9E%9A%E4%B8%BE%E5%90%8E%E5%86%8D%E8%AF%95%E4%B8%80%E6%AC%A1%EF%BC%8C%E7%AC%AC%E4%BA%8C%E7%89%87-NACK-%E4%BB%8D%E8%83%BD%E5%A4%8D%E7%8E%B0"><span class="toc-text">10. 重新枚举后再试一次，第二片 NACK 仍能复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E4%BB%8A%E5%A4%A9%E5%88%B0%E5%BA%95%E9%AA%8C%E6%94%B6%E5%88%B0%E4%BA%86%E5%93%AA%E4%B8%80%E5%B1%82"><span class="toc-text">11. 今天到底验收到了哪一层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-%E4%B8%8B%E6%AC%A1%E6%8E%A5%E7%9D%80%E5%81%9A%EF%BC%8C%E8%A6%81%E5%85%88%E7%95%99%E4%BD%8F%E7%AC%AC%E4%B8%80%E5%8C%85%E4%B9%8B%E5%90%8E%E7%9A%84%E7%8E%B0%E5%9C%BA"><span class="toc-text">12. 下次接着做，要先留住第一包之后的现场</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#13-%E7%95%99%E7%BB%99%E5%90%8E%E7%BB%AD%E5%A4%8D%E6%9F%A5%E7%9A%84%E6%9D%90%E6%96%99"><span class="toc-text">13. 留给后续复查的材料</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="auto"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%88%E6%8A%8A%E5%8E%86%E5%8F%B2%E5%9F%BA%E7%BA%BF%E6%89%BE%E5%9B%9E%E6%9D%A5%EF%BC%9Aopen-%E6%88%90%E5%8A%9F%EF%BC%8C%E7%A9%B6%E7%AB%9F%E6%98%AF%E5%93%AA%E4%B8%80%E7%89%88"><span class="toc-text">1. 先把历史基线找回来：open 成功，究竟是哪一版</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%8E%9F%E6%9D%A5%E8%A3%B8%E5%86%99%E9%80%9A%E8%BF%87%EF%BC%8C%E5%B9%B6%E4%B8%8D%E5%8C%85%E5%90%AB%E4%BB%8A%E5%A4%A9%E7%9A%84-PEC-%E9%AA%8C%E8%AF%81"><span class="toc-text">1.1 原来裸写通过，并不包含今天的 PEC 验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BB%8A%E5%A4%A9%E7%9A%84%E6%9E%9A%E4%B8%BE%E5%88%86%E4%BA%86%E5%87%A0%E8%BD%AE%EF%BC%8CDCR-%E7%9A%84%E5%8F%98%E5%8C%96%E8%A6%81%E4%BF%9D%E7%95%99"><span class="toc-text">2. 今天的枚举分了几轮，DCR 的变化要保留</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%9E%9A%E4%B8%BE%E6%97%A5%E5%BF%97%E9%87%8C%E7%9A%84-assigned-0-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%AE%97%E5%A4%B1%E8%B4%A5"><span class="toc-text">2.1 枚举日志里的 assigned&#x3D;0 为什么不算失败</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9E%9A%E4%B8%BE%E4%B9%8B%E5%90%8E%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%8A%8A%E4%B8%89%E5%B1%82%E5%9C%B0%E5%9D%80%E6%8E%A5%E8%B5%B7%E6%9D%A5"><span class="toc-text">3. 枚举之后，还需要把三层地址接起来</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%AC%AC%E4%B8%80%E7%AC%94-GetEID-%E8%B6%85%E6%97%B6%EF%BC%9A%E8%BF%99%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E5%B7%B2%E7%BB%8F%E5%88%B0-Target-%E4%BA%86"><span class="toc-text">4. 第一笔 GetEID 超时：这一次请求已经到 Target 了</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%A4%9A%E5%87%BA%E6%9D%A5%E7%9A%84-0x00%EF%BC%8C%E6%98%AF%E8%B0%81%E5%8A%A0%E7%9A%84"><span class="toc-text">4.1 多出来的 0x00，是谁加的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%8F%91%E9%80%81%E5%B0%91%E4%BA%A4%E4%B8%80%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%8C%E6%8E%A5%E6%94%B6%E4%B9%9F%E8%A6%81%E5%AF%B9%E5%BA%94%E5%A4%84%E7%90%86"><span class="toc-text">4.2 发送少交一个字节，接收也要对应处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E4%BF%AE%E6%AD%A3%E7%89%88%E5%85%88%E7%8B%AC%E7%AB%8B%E9%AA%8C%E8%AF%81%EF%BC%8C%E5%86%8D%E6%9B%BF%E6%8D%A2%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84"><span class="toc-text">4.3 修正版先独立验证，再替换默认路径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-7-%E9%A1%B9%E5%8F%AA%E8%AF%BB%E6%9F%A5%E8%AF%A2%EF%BC%8C%E5%AE%9E%E9%99%85%E8%B7%91%E9%80%9A%E4%BA%86%E5%93%AA%E4%BA%9B%E5%86%85%E5%AE%B9"><span class="toc-text">5. 7 项只读查询，实际跑通了哪些内容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%9B%9E%E5%8C%85%E7%BB%8F%E8%BF%87%E4%BA%86%E6%80%8E%E6%A0%B7%E4%B8%80%E6%9D%A1%E9%93%BE"><span class="toc-text">5.1 回包经过了怎样一条链</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%81%9A%E8%BE%B9%E7%95%8C%E6%B5%8B%E8%AF%95%E4%B9%8B%E5%89%8D%EF%BC%8C%E5%85%88%E6%8A%8A%E9%95%BF%E5%BA%A6%E5%8D%95%E4%BD%8D%E7%AE%97%E6%B8%85%E6%A5%9A"><span class="toc-text">6. 做边界测试之前，先把长度单位算清楚</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-64-%E5%AD%97%E8%8A%82%E6%B6%88%E6%81%AF%E7%9A%84%E5%8D%95%E5%8C%85%E5%B8%83%E5%B1%80"><span class="toc-text">6.1 64 字节消息的单包布局</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-65-%E5%AD%97%E8%8A%82%E6%B6%88%E6%81%AF%E4%B8%BA%E4%BB%80%E4%B9%88%E6%8B%86%E6%88%90-69-6"><span class="toc-text">6.2 65 字节消息为什么拆成 69 + 6</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-Host-%E5%86%85%E6%A0%B8%E5%9B%9E%E7%8E%AF%E9%80%9A%E8%BF%87%E4%BA%86%EF%BC%8C%E4%BD%86%E5%AE%83%E4%B8%8D%E7%BB%8F%E8%BF%87-I3C"><span class="toc-text">7. Host 内核回环通过了，但它不经过 I3C</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E7%9C%9F%E5%AE%9E-I3C-%E8%BE%B9%E7%95%8C%EF%BC%9A68%E3%80%8169-%E5%AD%97%E8%8A%82%E5%8F%91%E5%87%BA%EF%BC%8C%E7%AC%AC%E4%BA%8C%E7%89%87%E5%A4%B1%E8%B4%A5"><span class="toc-text">8. 真实 I3C 边界：68、69 字节发出，第二片失败</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-sendto-%E8%BF%94%E5%9B%9E%EF%BC%8C%E5%B9%B6%E4%B8%8D%E6%98%AF%E6%9C%80%E5%90%8E%E4%B8%80%E6%AC%A1%E6%88%90%E5%8A%9F%E5%88%A4%E5%AE%9A"><span class="toc-text">8.1 sendto 返回，并不是最后一次成功判定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E5%A4%B1%E8%B4%A5%E5%90%8E%EF%BC%8C%E5%B0%8F-GetEID-%E4%BB%8D%E7%84%B6%E9%80%9A%E8%BF%87"><span class="toc-text">8.2 失败后，小 GetEID 仍然通过</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E4%B8%A4%E7%89%87%E9%97%B4%E9%9A%94%E7%BA%A6-1-%E7%A7%92%EF%BC%9A%E4%B8%80%E4%B8%AA%E7%BC%A9%E5%B0%8F%E8%8C%83%E5%9B%B4%E7%9A%84%E5%AE%9E%E9%AA%8C"><span class="toc-text">9. 两片间隔约 1 秒：一个缩小范围的实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-Host-%E5%8F%91%E4%B8%A4%E7%89%87%EF%BC%8C%E4%B8%AD%E9%97%B4%E8%A6%81%E7%AD%89-IBI-%E5%90%97"><span class="toc-text">9.1 Host 发两片，中间要等 IBI 吗</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-%E9%87%8D%E6%96%B0%E6%9E%9A%E4%B8%BE%E5%90%8E%E5%86%8D%E8%AF%95%E4%B8%80%E6%AC%A1%EF%BC%8C%E7%AC%AC%E4%BA%8C%E7%89%87-NACK-%E4%BB%8D%E8%83%BD%E5%A4%8D%E7%8E%B0"><span class="toc-text">10. 重新枚举后再试一次，第二片 NACK 仍能复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E4%BB%8A%E5%A4%A9%E5%88%B0%E5%BA%95%E9%AA%8C%E6%94%B6%E5%88%B0%E4%BA%86%E5%93%AA%E4%B8%80%E5%B1%82"><span class="toc-text">11. 今天到底验收到了哪一层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-%E4%B8%8B%E6%AC%A1%E6%8E%A5%E7%9D%80%E5%81%9A%EF%BC%8C%E8%A6%81%E5%85%88%E7%95%99%E4%BD%8F%E7%AC%AC%E4%B8%80%E5%8C%85%E4%B9%8B%E5%90%8E%E7%9A%84%E7%8E%B0%E5%9C%BA"><span class="toc-text">12. 下次接着做，要先留住第一包之后的现场</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#13-%E7%95%99%E7%BB%99%E5%90%8E%E7%BB%AD%E5%A4%8D%E6%9F%A5%E7%9A%84%E6%9D%90%E6%96%99"><span class="toc-text">13. 留给后续复查的材料</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
@@ -684,7 +731,7 @@ sequenceDiagram
     loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
   };
   const deps = {
-    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    jquery: `/js/vendor/jquery-3.7.1.min.js`,
     marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
     lazyload: `/%5Bobject%20Object%5D`
   }
@@ -1384,4 +1431,4 @@ sequenceDiagram
 <!-- inject -->
 
 
-</div></body></html>
+</div><!-- hexo injector body_end start --><script defer src="/js/engineering.js?v=20261127-1"></script><!-- hexo injector body_end end --></body></html>

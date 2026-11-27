@@ -17,14 +17,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>PCIe 加速卡驱动：结构与工作流程 - 庐山东林</title>
+  <title>PCIe 加速卡驱动：结构与工作流程 - 庐山东林的晚钟</title>
 
   
     <meta name="description" content="这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。 项目概述这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6000-ds-v0.7.1，支持多种 Edge PCIe 设备（如 IPU X2000&#x2F;X5000&#x2F;X5500 等）。 主要功能模块 PCIe">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PCIe 加速卡驱动：结构与工作流程">
 <meta property="og:url" content="https://www.coffepattern.top/2026/03/06/pcie/pcie_ep_demo/">
-<meta property="og:site_name" content="庐山东林">
+<meta property="og:site_name" content="庐山东林的晚钟">
 <meta property="og:description" content="这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。 项目概述这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6000-ds-v0.7.1，支持多种 Edge PCIe 设备（如 IPU X2000&#x2F;X5000&#x2F;X5500 等）。 主要功能模块 PCIe">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-03-06T06:06:30.000Z">
@@ -49,18 +49,20 @@
 
 
   
+    <link rel="shortcut icon" href="/images/evening-bell.svg">
+  
 
   
 
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-03-06T14:06:30+08:00","dateModified":"2026-11-27T15:32:52+08:00","datePublished":"2026-03-06T14:06:30+08:00","description":"","headline":"PCIe 加速卡驱动：结构与工作流程","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/03/06/pcie/pcie_ep_demo/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/03/06/pcie/pcie_ep_demo/","keywords":"dma, code-analysis, linux, driver, pcie, msi","image":[]}</script>
   
-</head>
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-1"><!-- hexo injector head_end end --></head>
 <body>
 
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub cap">协议、驱动与调试现场</div></a></div></header>
 
 <div class="nav-area">
 
@@ -70,8 +72,24 @@
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
 
+<widget class="widget-wrapper engineering-related">
+  <div class="widget-header"><span class="name">PCIe · 阅读顺序</span></div>
+  <ol>
+    
+      <li><a href="/2026/03/03/pcie/pcie_introduction/">pcie_introduction</a></li>
+    
+      <li><a href="/2026/03/03/pcie/pcie_software/">pcie software</a></li>
+    
+      <li><a href="/2026/03/25/pcie/pcie_software1/">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</a></li>
+    
+      <li><a href="/2026/03/06/pcie/pcie_ep_demo/" aria-current="page">PCIe 加速卡驱动：结构与工作流程</a></li>
+    
+      <li><a href="/2026/03/23/pcie/pcie_fw/">PCIe Endpoint 固件初始化实例</a></li>
+    
+  </ol>
+</widget>
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/27/mctp-pldm-porting-acceptance-testcases/"><span class="title">MCTP/PLDM 移植验收：Host 与 Target 的七项功能测试</span></a><a class="item title" href="/2026/03/13/AI/OpenClaw%E4%BB%8B%E7%BB%8D%E4%B8%8E%E4%BD%BF%E7%94%A8/"><span class="title">OpenClaw 介绍与使用</span></a><a class="item title" href="/2026/03/02/mmc/sd_introduction/"><span class="title">sd_introduction</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E6%80%A7%E6%81%A2%E5%A4%8D/"><span class="title">心性恢复</span></a><a class="item title" href="/2026/03/23/life_record/%E4%B8%80%E4%B8%AA%E4%BA%BA%E5%8E%BB%E6%97%85%E8%A1%8C/"><span class="title">一个人去旅行</span></a><a class="item title" href="/2026/03/16/life_record/%E5%BF%83%E8%84%89%E5%8F%97%E6%8D%9F/"><span class="title">心脉受损</span></a><a class="item title" href="/2026/03/16/life_record/%E8%84%91%E9%9B%BE%E4%BF%AE%E5%A4%8D/"><span class="title">脑雾修复</span></a><a class="item title" href="/2026/03/21/claude_code/what_is/"><span class="title">Claude Code：工具、记忆与运行环境</span></a><a class="item title" href="/2026/03/16/AI/plugins/"><span class="title">plugins</span></a><a class="item title" href="/2026/03/16/AI/skills/"><span class="title">skills</span></a></div></widget>
+<widget class="widget-wrapper engineering-utilities"><a href="/categories/">所有专题</a><a href="/archives/">归档</a><a href="/tags/">标签</a></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -80,11 +98,33 @@
 
 
 
+<nav class="engineering-nav" aria-label="主导航">
+  
+    <a href="/">首页</a>
+  
+    <a href="/categories/">技术专题</a>
+  
+    <a href="/engineering/">工程记录</a>
+  
+    <a href="/categories/life-record/">生活</a>
+  
+    <a href="/about/">关于</a>
+  
+  <button type="button" data-site-search aria-label="打开站内搜索" title="搜索文章">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+
 <div class="article banner top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/">PCIe</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/pcie/driver-examples/">驱动实例</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-06T06:06:30.000Z">2026-03-06</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-27T07:32:52.000Z">2026-11-27</time></span></div></div></div>
+<div class="engineering-dates">
+  <span>发布于 2026-03-06</span>
+  
+</div>
+</div></div>
     
     <div class="bottom only-title">
       
@@ -95,7 +135,14 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><p>这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。</p>
+  </div>
+
+  <div class="engineering-reading-tools">
+    <span>源码分析</span>
+    <button type="button" data-reading-width aria-pressed="false">宽屏阅读</button>
+  </div>
+
+<article class="md-text content"><p>这是一个 Linux 内核 PCIe 设备驱动程序，用于与 Edge SoC 硬件（如 AI 加速卡&#x2F;边缘计算设备）进行通信。下面记录工程的组成和接口。</p>
 <h2 id="项目概述"><a href="#项目概述" class="headerlink" title="项目概述"></a>项目概述</h2><p>这是一个 Linux 内核模块 (LKM) 驱动程序，版本为 x6000-ds-v0.7.1，支持多种 Edge PCIe 设备（如 IPU X2000&#x2F;X5000&#x2F;X5500 等）。</p>
 <h2 id="主要功能模块"><a href="#主要功能模块" class="headerlink" title="主要功能模块"></a>主要功能模块</h2><ol>
 <li>PCIe 设备管理<br>支持最多 128 个设备实例<br>字符设备接口 (&#x2F;dev&#x2F;edge0, &#x2F;dev&#x2F;edge1 等)<br>自动识别设备类型、PCIe 链路速度和宽度<br>支持 BAR0-BAR5 内存映射 I&#x2F;O</li>
@@ -203,9 +250,7 @@
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
 
-
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E6%A6%82%E8%BF%B0"><span class="toc-text">项目概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E6%A8%A1%E5%9D%97"><span class="toc-text">主要功能模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">关键数据结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IOCTL-%E6%8E%A5%E5%8F%A3"><span class="toc-text">IOCTL 接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-text">文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E5%AF%84%E5%AD%98%E5%99%A8%E5%9C%B0%E5%9D%80"><span class="toc-text">硬件寄存器地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="toc-text">一、驱动程序结构分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B7%A5%E4%BD%9C%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90"><span class="toc-text">二、工作逻辑分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%BD%9C%E5%9C%A8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-text">三、潜在问题分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-text">四、修复建议优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">五、总结</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="auto"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E6%A6%82%E8%BF%B0"><span class="toc-text">项目概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E6%A8%A1%E5%9D%97"><span class="toc-text">主要功能模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">关键数据结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IOCTL-%E6%8E%A5%E5%8F%A3"><span class="toc-text">IOCTL 接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-text">文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E5%AF%84%E5%AD%98%E5%99%A8%E5%9C%B0%E5%9D%80"><span class="toc-text">硬件寄存器地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="toc-text">一、驱动程序结构分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B7%A5%E4%BD%9C%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90"><span class="toc-text">二、工作逻辑分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%BD%9C%E5%9C%A8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-text">三、潜在问题分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-text">四、修复建议优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">五、总结</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
@@ -247,7 +292,7 @@
     loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
   };
   const deps = {
-    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    jquery: `/js/vendor/jquery-3.7.1.min.js`,
     marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
     lazyload: `/%5Bobject%20Object%5D`
   }
@@ -947,4 +992,4 @@
 <!-- inject -->
 
 
-</div></body></html>
+</div><!-- hexo injector body_end start --><script defer src="/js/engineering.js?v=20261127-1"></script><!-- hexo injector body_end end --></body></html>
