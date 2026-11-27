@@ -1,0 +1,1087 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 8.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑 - 搴愬北涓滄灄</title>
+
+  
+    <meta name="description" content="用六幅拓扑图，从单 Host 单 Target、同总线多设备，逐步扩展到多接口、MCTP bridge、多级跨介质转发和独立 network，解释 EID、下一跳、地址池与 PLDM 终端的关系。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从两端直连到多级桥接：六张图读懂 MCTP &#x2F; PLDM 网络拓扑">
+<meta property="og:url" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/">
+<meta property="og:site_name" content="搴愬北涓滄灄">
+<meta property="og:description" content="用六幅拓扑图，从单 Host 单 Target、同总线多设备，逐步扩展到多接口、MCTP bridge、多级跨介质转发和独立 network，解释 EID、下一跳、地址池与 PLDM 终端的关系。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-02-multi-target.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-03-multi-interface.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-04-bridge.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-05-multi-hop.svg">
+<meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-06-independent-networks.svg">
+<meta property="article:published_time" content="2026-11-27T04:10:00.000Z">
+<meta property="article:modified_time" content="2026-11-27T04:09:41.261Z">
+<meta property="article:author" content="Luyuan">
+<meta property="article:tag" content="architecture">
+<meta property="article:tag" content="i3c">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="mctp">
+<meta property="article:tag" content="pldm">
+<meta property="article:tag" content="protocol">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg">
+  
+  
+  
+  <meta name="keywords" content="linux,protocol,architecture,i3c,mctp,pldm">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T12:10:00+08:00","dateModified":"2026-11-27T12:09:41+08:00","datePublished":"2026-11-27T12:10:00+08:00","description":"两端直连时，EID 和 I3C 地址看起来有些重复：Host 要找 EID 9，最后反正还是访问 0x44。把设备多接几个，再加一条总线，这两层地址的作用就开始分开了。\n这篇从我们已经验证过的 Host—Target 直连关系出发，一次只增加一种复杂度：先加设备，再加接口，然后引入桥接，最后比较一个大网络和两个独立网络。\n六幅图中的第一幅对应当前回归的连接关系；后五幅是为了讲清机制设计的教学拓扑，地址、桥接能力和地址池均为示例，没有声称 Current Proj 已实现这些扩展。每幅图都可以点击放大，也提供 PNG。","headline":"从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/","keywords":"linux, protocol, architecture, i3c, mctp, pldm","image":[]}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/water_lihu.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">庐山东林的晚钟</div><div class="sub normal cap">Seeking your passion</div><div class="sub hover cap" style="opacity:0"> Be persistent</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2026/11/26/i3c-mctp-regression-milestone-20261126/"><span class="title">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</span></a><a class="item title" href="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/"><span class="title">从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</span></a><a class="item title" href="/2026/11/27/mctp-pldm-network-ids-packet-path/"><span class="title">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</span></a><a class="item title" href="/2026/11/25/mctp-pldm-i3c-milestone-20261125/"><span class="title">MCTP/PLDM over I3C 移植里程碑：HOST 已就绪，首包停在地址 NACK</span></a><a class="item title" href="/2026/11/25/i3c-basic-spec/"><span class="title">MIPI I3C Basic v1.1.1 组内分享</span></a><a class="item title" href="/2026/11/25/i3c-target-study/"><span class="title">DWC MIPI I3C Target 开发学习文档</span></a><a class="item title" href="/2026/11/25/i3c-controller-guide/"><span class="title">两根线，一笔事务：I3C 控制器学习手记</span></a><a class="item title" href="/2026/11/25/i3c-linux-driver/"><span class="title">Linux I3C 驱动视角学习笔记</span></a><a class="item title" href="/2026/03/03/pcie/pcie_software/"><span class="title">pcie software</span></a><a class="item title" href="/2026/03/25/pcie/pcie_software1/"><span class="title">从枚举到交互：SoC PCIe RC 与 EP 的完整软件实战流程</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/embedded-tech/">嵌入式开发</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/embedded-tech/i3c/">I3C</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-11-27T04:10:00.000Z">2026-11-27</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-11-27T04:09:41.261Z">2026-11-27</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>从两端直连到多级桥接：六张图读懂 MCTP / PLDM 网络拓扑</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><p>两端直连时，EID 和 I3C 地址看起来有些重复：Host 要找 EID 9，最后反正还是访问 <code>0x44</code>。把设备多接几个，再加一条总线，这两层地址的作用就开始分开了。</p>
+<p>这篇从我们已经验证过的 Host—Target 直连关系出发，一次只增加一种复杂度：先加设备，再加接口，然后引入桥接，最后比较一个大网络和两个独立网络。</p>
+<p>六幅图中的第一幅对应当前回归的连接关系；后五幅是为了讲清机制设计的教学拓扑，地址、桥接能力和地址池均为示例，没有声称 Current Proj 已实现这些扩展。每幅图都可以点击放大，也提供 PNG。</p>
+<span id="more"></span>
+
+<h2 id="看图前，先区分三种边界"><a href="#看图前，先区分三种边界" class="headerlink" title="看图前，先区分三种边界"></a>看图前，先区分三种边界</h2><p><strong>物理链路边界</strong>决定这一跳怎样访问设备。I3C 用 DA，其他 binding 使用各自的寻址方式。</p>
+<p><strong>MCTP network 边界</strong>决定 EID 在哪个地址空间里解释。同一 network 内的端点需要避免 EID 冲突；跨了总线，不意味着自动跨了 network。</p>
+<p><strong>PLDM 处理边界</strong>决定哪里真正接收管理命令、解释数据并生成响应。普通 MCTP bridge 的转发职责，并不要求它替最终 Target 执行 PLDM 命令。MCTP 将统一传输与底层 binding 分开，正是为了让上层不必跟着物理介质改写。<a target="_blank" rel="noopener" href="https://github.com/openbmc/docs/blob/master/designs/mctp/mctp.md">OpenBMC MCTP 设计说明</a></p>
+<p>如果还拿不准 network ID、EID、PID、DA、TID 的区别，可以先看<a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">沿一笔 GetTID 拆解 ID 与收发路径</a>，其中有一张可以切换封装、解析路径的总图。</p>
+<h2 id="1-两端直连：先让一条管理消息走完"><a href="#1-两端直连：先让一条管理消息走完" class="headerlink" title="1. 两端直连：先让一条管理消息走完"></a>1. 两端直连：先让一条管理消息走完</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-01-direct.svg" alt="拓扑一：i.MX93 Host 与 Current Proj Target 经一条 I3C 总线直连，属于同一个 MCTP network"></p>
+<p><a href="topology-01-direct.png">查看 PNG</a></p>
+<p>这是我们当前最熟悉的组合：一个 Linux Host，一个裸机 Target，属于同一 MCTP network。Host 的本地 EID 是 8，Target 的 EID 是 9。Host 的配置工具把这套地址空间标记为 network 1。</p>
+<p>请求走：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PLDM GetTID</span><br><span class="line">  → 目的 EID 9</span><br><span class="line">  → mctpi3c0</span><br><span class="line">  → 邻居 PID beee00000101</span><br><span class="line">  → 当前 I3C DA 0x44</span><br><span class="line">  → Target PLDM handler</span><br></pre></td></tr></table></figure>
+
+<p>Target 响应时用 IBI 通知 Host 读取，成功返回 TID 1。TID 是 PLDM 身份，不是把 I3C DA 再编码一次。</p>
+<p>这个拓扑不用 bridge，Host 不需要替其他设备转发。当前使用固定 EID，Host 手动配置地址、路由和邻居；GetEID&#x2F;GetTID 是确认已有状态。11 月 26 日的 7 项只读查询通过，但连续分包、满包响应和压力测试仍有各自的验收边界，详见<a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">回归记录</a>。</p>
+<p>这里先形成一个判断方法：<strong>PLDM 命令选目标 EID，路由选接口，binding 再找到这一跳的物理设备。</strong></p>
+<h2 id="2-同一总线加多个-Target：EID-开始显出价值"><a href="#2-同一总线加多个-Target：EID-开始显出价值" class="headerlink" title="2. 同一总线加多个 Target：EID 开始显出价值"></a>2. 同一总线加多个 Target：EID 开始显出价值</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-02-multi-target.svg" alt="拓扑二：同一条 I3C 总线上有三个 Target，各自具有不同 EID、PID、DA 和 PLDM TID"></p>
+<p><a href="topology-02-multi-target.png">查看 PNG</a></p>
+<p>现在仍然只有一条 I3C 总线，但增加到三个 Target：</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th align="right">EID</th>
+<th>I3C PID</th>
+<th>当前 DA</th>
+<th align="right">示例 PLDM TID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A</td>
+<td align="right">9</td>
+<td>PID-A</td>
+<td><code>0x44</code></td>
+<td align="right">1</td>
+</tr>
+<tr>
+<td>B</td>
+<td align="right">10</td>
+<td>PID-B</td>
+<td><code>0x45</code></td>
+<td align="right">2</td>
+</tr>
+<tr>
+<td>C</td>
+<td align="right">11</td>
+<td>PID-C</td>
+<td><code>0x46</code></td>
+<td align="right">3</td>
+</tr>
+</tbody></table>
+<p>PID-A&#x2F;B&#x2F;C 是不同设备身份的代号，不是可直接写进配置命令的十六进制值。同一总线上的 DA 也不能冲突。</p>
+<p>Host 的应用只需选择 EID；本地表项把它们映射到同一个接口上的不同邻居：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">EID 9  → mctpi3c0 → PID-A → DA 0x44</span><br><span class="line">EID 10 → mctpi3c0 → PID-B → DA 0x45</span><br><span class="line">EID 11 → mctpi3c0 → PID-C → DA 0x46</span><br></pre></td></tr></table></figure>
+
+<p>访问 EID 10 时，MCTP 头中的目的 EID 为 10，Controller 实际寻址 <code>0x45</code>。不能因为都连在同一个接口，就给三个 Target 配相同 EID。</p>
+<p>设备加入、退出或重新枚举时，还要分别维护物理身份与动态地址、EID 分配、路由邻居，以及 PLDM 终端状态。只看到 I3C 枚举成功，还不知道这个新设备使用什么 EID、支持哪些管理消息。</p>
+<p>这个阶段没有跨总线转发，新增的主要是设备发现、标识分配和表项维护，而不是桥接。</p>
+<h2 id="3-Host-接两条总线：多接口可以属于同一个-network"><a href="#3-Host-接两条总线：多接口可以属于同一个-network" class="headerlink" title="3. Host 接两条总线：多接口可以属于同一个 network"></a>3. Host 接两条总线：多接口可以属于同一个 network</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-03-multi-interface.svg" alt="拓扑三：一个 Host 的两条 MCTP 接口处于同一 network，分别连接不同 I3C 总线和端点"></p>
+<p><a href="topology-03-multi-interface.png">查看 PNG</a></p>
+<p>接着给 Host 增加第二个接口。示例中，两条接口都归入 Linux network 1：</p>
+<table>
+<thead>
+<tr>
+<th>出口</th>
+<th align="right">Host 本地端点 EID</th>
+<th align="right">可达 Target</th>
+<th>Target 当前 DA</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mctpi3c0</code></td>
+<td align="right">8</td>
+<td align="right">EID 9</td>
+<td><code>0x44</code></td>
+</tr>
+<tr>
+<td><code>mctpi3c1</code></td>
+<td align="right">12</td>
+<td align="right">EID 10</td>
+<td><code>0x44</code></td>
+</tr>
+</tbody></table>
+<p>图中为两个 Host 接口明确配置了不同的本地 EID，便于追踪源端点；具体产品如何建模多接口端点，需要按其实现核对，不能只看它们是否装在同一颗 CPU 上。</p>
+<p>两边 Target 都用 DA <code>0x44</code> 没有冲突，因为它们在不同物理总线上。目的 EID 9 和 10 却仍要在同一个 MCTP network 中区分。</p>
+<p>Linux 允许一个 network 关联多个接口，路由负责选择出口。<a target="_blank" rel="noopener" href="https://docs.kernel.org/networking/mctp.html#structure-interfaces-networks">Linux MCTP：Interfaces &amp; networks</a></p>
+<p>对 Host 自己发起的请求而言：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">访问 EID 9  → 选择 mctpi3c0 → 本地源 EID 8</span><br><span class="line">访问 EID 10 → 选择 mctpi3c1 → 本地源 EID 12</span><br></pre></td></tr></table></figure>
+
+<p>但这还没有证明 A 可以经 Host 访问 B。<strong>Host 能通过两个接口访问设备，与 Host 已经启用并完成跨接口 MCTP 转发，是两项能力。</strong> 若希望 Host 充当 bridge，还需要转发实现、双向路由和相应管理策略，不能仅靠把接口放进同一个 network。</p>
+<p>这一图要记住两句话：同一个 network 可以跨多个接口；不同物理总线可以复用 DA。</p>
+<h2 id="4-加入一个-MCTP-bridge：目的地址与下一跳分开"><a href="#4-加入一个-MCTP-bridge：目的地址与下一跳分开" class="headerlink" title="4. 加入一个 MCTP bridge：目的地址与下一跳分开"></a>4. 加入一个 MCTP bridge：目的地址与下一跳分开</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-04-bridge.svg" alt="拓扑四：Host 通过 MCTP bridge 访问下游 I3C Target，端到端 EID 保持不变，每跳使用各自 DA"></p>
+<p><a href="topology-04-bridge.png">查看 PNG</a></p>
+<p>现在 Host 不能直接接触最终 Target，中间加一颗具备两侧收发和 MCTP 转发能力的 bridge B。上游总线 A 连接 Host 与 bridge，下游总线 B 连接 bridge 与最终 Target。</p>
+<p>本例设定 bridge 上行管理端点 EID 9，下行管理端点 EID 16，最终 Target 为 EID 20。两个 bridge 端点的数字只是本图选用的模型，不是说所有 bridge 都必须照抄这两个值。</p>
+<p>Host 要查最终 Target 的 TID，目的 EID 仍写 20；但它在上游总线上只能先访问 bridge：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Host 路由：目的 EID 20 → 上游接口 → bridge 的链路身份</span><br><span class="line">Host 实际访问：bridge 在上游 I3C 总线的 DA 0x44</span><br><span class="line"></span><br><span class="line">bridge 路由：目的 EID 20 → 下游接口 → Target 的链路身份</span><br><span class="line">bridge 实际访问：Target 在下游 I3C 总线的 DA 0x30</span><br></pre></td></tr></table></figure>
+
+<p>因此，Host 上发往 EID 20 的下一跳邻居，是上游 bridge 的 PID。Host 不该把下游 Target 的 PID 当作上游总线里可直接寻址的设备。</p>
+<h3 id="4-1-经过桥接，什么保持，什么改变"><a href="#4-1-经过桥接，什么保持，什么改变" class="headerlink" title="4.1 经过桥接，什么保持，什么改变"></a>4.1 经过桥接，什么保持，什么改变</h3><table>
+<thead>
+<tr>
+<th>内容</th>
+<th>Host → bridge</th>
+<th>bridge → Target</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MCTP 源 EID</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>MCTP 目的 EID</td>
+<td>20</td>
+<td>20</td>
+</tr>
+<tr>
+<td>本跳 I3C 寻址</td>
+<td>bridge DA <code>0x44</code></td>
+<td>Target DA <code>0x30</code></td>
+</tr>
+<tr>
+<td>PLDM 请求</td>
+<td>GetTID</td>
+<td>同一条 GetTID</td>
+</tr>
+<tr>
+<td>I3C PEC</td>
+<td>上游包对应的校验</td>
+<td>下游包重新计算的校验</td>
+</tr>
+</tbody></table>
+<p>普通 MCTP 转发不需要把源 EID 改成 bridge 的 EID，再替 Host 新发一笔 PLDM 请求。bridge 的自身 EID 供访问它自己的管理端点；转发时仍根据原目的 EID 选下一跳。<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0236_1.3.3.pdf">MCTP Base：桥接与路由</a></p>
+<p>响应反向返回时，也需要到 Host EID 8 的路由。只配去程，很可能看到 Target 已生成响应，Host 却收不到。</p>
+<h3 id="4-2-IBI-也不会作为一根中断线穿过-bridge"><a href="#4-2-IBI-也不会作为一根中断线穿过-bridge" class="headerlink" title="4.2 IBI 也不会作为一根中断线穿过 bridge"></a>4.2 IBI 也不会作为一根中断线穿过 bridge</h3><p>在两侧都用当前 I3C 通知模式的前提下，最终 Target 有响应时先通知下游 Controller，也就是 bridge；bridge 读取并转发数据，上游再使用自己的 Target 端通知 Host 来读。</p>
+<p>每跳有各自的 Private Transfer、IBI 和 PEC。不要把下游 Target 的 IBI 想象成直接进入 Host 的同一个硬件事件。<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0233_1.0.1.pdf">DSP0233：I3C 消息传输</a></p>
+<h2 id="5-多级-bridge、跨介质：同一条-PLDM-请求经过不同-binding"><a href="#5-多级-bridge、跨介质：同一条-PLDM-请求经过不同-binding" class="headerlink" title="5. 多级 bridge、跨介质：同一条 PLDM 请求经过不同 binding"></a>5. 多级 bridge、跨介质：同一条 PLDM 请求经过不同 binding</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-05-multi-hop.svg" alt="拓扑五：同一 MCTP network 中，PLDM 请求经 I3C、SMBus 和 PCIe VDM 及两级 bridge 到达最终端点"></p>
+<p><a href="topology-05-multi-hop.png">查看 PNG</a></p>
+<p>再增加一级 bridge，并让几段链路使用不同介质：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Host → I3C → bridge B → SMBus → bridge C → PCIe VDM → Target</span><br></pre></td></tr></table></figure>
+
+<p>这里假定各设备具有对应 binding、桥接与管理能力，硬件和软件都已实现；换几根线不会自动得到这张图的功能。</p>
+<p>最终 Target 的 EID 为 32、TID 为 2。Host 发出的管理请求仍可表达为“把 GetTID 送到 EID 32”。每个 bridge 根据目的 EID 选下一跳：</p>
+<table>
+<thead>
+<tr>
+<th>位置</th>
+<th>当前要做的决定</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Host</td>
+<td>EID 32 从 I3C 接口发给 bridge B</td>
+</tr>
+<tr>
+<td>bridge B</td>
+<td>EID 32 从 SMBus 接口发给 bridge C</td>
+</tr>
+<tr>
+<td>bridge C</td>
+<td>EID 32 从 PCIe VDM binding 送往最终设备</td>
+</tr>
+<tr>
+<td>最终 Target</td>
+<td>接收消息类型为 PLDM 的完整消息，执行 GetTID</td>
+</tr>
+</tbody></table>
+<p>I3C 的 PID&#x2F;DA 只适用于相应 I3C 链路。到了 SMBus 和 PCIe VDM，使用各自 binding 规定的物理寻址与封装，不能继续套用“PID → DA”。MCTP 的统一传输与多种 binding 正是为了隔开这些差异。<a target="_blank" rel="noopener" href="https://github.com/openbmc/docs/blob/master/designs/mctp/mctp.md">OpenBMC MCTP 架构说明</a></p>
+<h3 id="5-1-多级结构里，谁保证-EID-不冲突"><a href="#5-1-多级结构里，谁保证-EID-不冲突" class="headerlink" title="5.1 多级结构里，谁保证 EID 不冲突"></a>5.1 多级结构里，谁保证 EID 不冲突</h3><p>如果每个下游 Controller 都从 EID 9 开始随便编号，同一 network 很快就会冲突。动态管理通常使用层级地址池：顶层 Bus Owner 给下级分配一段 EID，下级再从自己的池中分配或继续划分。bridge 与 Bus Owner 是不同职责，本例让同一设备同时承担两者。<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0236_1.3.3.pdf">MCTP Base §8.18</a></p>
+<p>用本图数字作一个地址规划示例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">顶层管理者：为 bridge B 分配池 16～39</span><br><span class="line">    B 使用 16 作为图中的下行端点 EID</span><br><span class="line">    B 为 C 的上行端点分配 17</span><br><span class="line">    B 再把 24～39 划给 C</span><br><span class="line">        C 使用 24 作为图中的下行端点 EID</span><br><span class="line">        C 为最终 Target 分配 32</span><br></pre></td></tr></table></figure>
+
+<p>bridge B 的上行端点 9 由上层另行分配。这份数字规划没有把同一 EID 同时分给两个端点；实际实现还要同步路由、分配结果与设备生命周期。</p>
+<p>地址池管理解决“谁可以用这些 EID”，转发表解决“到这些 EID 从哪里走”。分到地址池，不等于每条转发路径已经配置并验证完成。</p>
+<h3 id="5-2-PLDM-终端不会因为经过两座桥就多出两个"><a href="#5-2-PLDM-终端不会因为经过两座桥就多出两个" class="headerlink" title="5.2 PLDM 终端不会因为经过两座桥就多出两个"></a>5.2 PLDM 终端不会因为经过两座桥就多出两个</h3><p>这笔 GetTID 的 PLDM 处理点仍在最终 Target，返回的 TID 为 2。bridge 可以有自己的 PLDM 管理功能，但那是另一个可单独访问的终端，不是转发每条消息都必须进入的 handler。</p>
+<p>如果中间设备先终止原请求、解析业务，再以自己的身份向下游新发一条 PLDM 请求，它承担的是代理或网关行为。此时已经是两笔事务，不能继续套用“普通转发中源、目的 EID 保持不变”的描述。</p>
+<h2 id="6-两个独立-network：相同-EID-可以分别存在"><a href="#6-两个独立-network：相同-EID-可以分别存在" class="headerlink" title="6. 两个独立 network：相同 EID 可以分别存在"></a>6. 两个独立 network：相同 EID 可以分别存在</h2><p><img src="/2026/11/27/mctp-pldm-topologies-from-simple-to-complex/topology-06-independent-networks.svg" alt="拓扑六：一个 Linux Host 连接两个独立 MCTP network，两个网络各有 EID 9，通过 network ID 区分"></p>
+<p><a href="topology-06-independent-networks.png">查看 PNG</a></p>
+<p>最后换一种扩展方式：两套管理系统不互通，各自保留自己的 EID 地址空间。Host 在 Linux 中把它们标为 network 1 和 network 2。</p>
+<table>
+<thead>
+<tr>
+<th>Host 看到的目的地址</th>
+<th>出口</th>
+<th>目的设备</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>(network 1, EID 9)</code></td>
+<td><code>mctpi3c0</code></td>
+<td>系统 A 的设备</td>
+</tr>
+<tr>
+<td><code>(network 2, EID 9)</code></td>
+<td><code>mctpi3c1</code></td>
+<td>系统 B 的设备</td>
+</tr>
+</tbody></table>
+<p>两个 EID 9 在各自 network 中解释，不构成冲突。Linux 的 network 编号属于本地选择信息，不会作为 MCTP 包头字段传给对端，两套系统也不会仅因接到同一个 Host 就自动互通。<a target="_blank" rel="noopener" href="https://docs.kernel.org/networking/mctp.html#structure-interfaces-networks">Linux MCTP 地址空间</a></p>
+<p>这和第三幅图的区别就在于：第三幅图把两条接口放进同一个地址空间，用不同目的 EID 选路；本图把接口放进两个独立地址空间，允许目的 EID 数值相同。</p>
+<p>图中给两个 PLDM Target 选了 TID 1 和 2。不要从 EID 可跨 network 重复，推导出 TID 也自动按 Linux network ID 隔离；PLDM 终端标识与系统管理范围还需要另行规划。<a target="_blank" rel="noopener" href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0240_1.1.0.pdf">PLDM Base：Terminus</a></p>
+<h2 id="7-拓扑变复杂后，怎么确认自己没有画错"><a href="#7-拓扑变复杂后，怎么确认自己没有画错" class="headerlink" title="7. 拓扑变复杂后，怎么确认自己没有画错"></a>7. 拓扑变复杂后，怎么确认自己没有画错</h2><p>拿到一张板级连接图，我会按下面的顺序把信息补全：</p>
+<ol>
+<li>先圈物理总线，标出每段的 Controller、Target 或其他 binding 角色。</li>
+<li>再圈 MCTP network，确认哪些接口共用 EID 地址空间。</li>
+<li>给端点标 EID，给每跳标物理身份和当前地址，检查是否在各自作用域内冲突。</li>
+<li>选一笔请求，从源端点一路写出出口和下一跳，再写反向响应路径。</li>
+<li>单独标 Bus Owner、地址池来源和配置责任，别把“能转发”与“会分配地址”混成一项。</li>
+<li>最后标出真正执行 PLDM 命令的终端及其 TID；若有代理，明确拆成两笔事务。</li>
+</ol>
+<p>这些步骤也是调试顺序。例如 Host 访问远端 EID 32 失败，第一跳根本没有 ACK，就先查上游 bridge 的物理地址和接收状态；第一跳成功，也只能说明到达了 bridge，后面几跳仍需逐段核对。</p>
+<p>六幅图变化的是设备数量、接口和转发层次。沿请求检查时，始终保留三个问题就不容易绕晕：<strong>最终目的 EID 是谁，这一跳实际访问谁，PLDM 命令最后在哪里执行。</strong></p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">Luyuan</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1">Stellar 1.33.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9C%8B%E5%9B%BE%E5%89%8D%EF%BC%8C%E5%85%88%E5%8C%BA%E5%88%86%E4%B8%89%E7%A7%8D%E8%BE%B9%E7%95%8C"><span class="toc-text">看图前，先区分三种边界</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%B8%A4%E7%AB%AF%E7%9B%B4%E8%BF%9E%EF%BC%9A%E5%85%88%E8%AE%A9%E4%B8%80%E6%9D%A1%E7%AE%A1%E7%90%86%E6%B6%88%E6%81%AF%E8%B5%B0%E5%AE%8C"><span class="toc-text">1. 两端直连：先让一条管理消息走完</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%90%8C%E4%B8%80%E6%80%BB%E7%BA%BF%E5%8A%A0%E5%A4%9A%E4%B8%AA-Target%EF%BC%9AEID-%E5%BC%80%E5%A7%8B%E6%98%BE%E5%87%BA%E4%BB%B7%E5%80%BC"><span class="toc-text">2. 同一总线加多个 Target：EID 开始显出价值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Host-%E6%8E%A5%E4%B8%A4%E6%9D%A1%E6%80%BB%E7%BA%BF%EF%BC%9A%E5%A4%9A%E6%8E%A5%E5%8F%A3%E5%8F%AF%E4%BB%A5%E5%B1%9E%E4%BA%8E%E5%90%8C%E4%B8%80%E4%B8%AA-network"><span class="toc-text">3. Host 接两条总线：多接口可以属于同一个 network</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%8A%A0%E5%85%A5%E4%B8%80%E4%B8%AA-MCTP-bridge%EF%BC%9A%E7%9B%AE%E7%9A%84%E5%9C%B0%E5%9D%80%E4%B8%8E%E4%B8%8B%E4%B8%80%E8%B7%B3%E5%88%86%E5%BC%80"><span class="toc-text">4. 加入一个 MCTP bridge：目的地址与下一跳分开</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E7%BB%8F%E8%BF%87%E6%A1%A5%E6%8E%A5%EF%BC%8C%E4%BB%80%E4%B9%88%E4%BF%9D%E6%8C%81%EF%BC%8C%E4%BB%80%E4%B9%88%E6%94%B9%E5%8F%98"><span class="toc-text">4.1 经过桥接，什么保持，什么改变</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-IBI-%E4%B9%9F%E4%B8%8D%E4%BC%9A%E4%BD%9C%E4%B8%BA%E4%B8%80%E6%A0%B9%E4%B8%AD%E6%96%AD%E7%BA%BF%E7%A9%BF%E8%BF%87-bridge"><span class="toc-text">4.2 IBI 也不会作为一根中断线穿过 bridge</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A4%9A%E7%BA%A7-bridge%E3%80%81%E8%B7%A8%E4%BB%8B%E8%B4%A8%EF%BC%9A%E5%90%8C%E4%B8%80%E6%9D%A1-PLDM-%E8%AF%B7%E6%B1%82%E7%BB%8F%E8%BF%87%E4%B8%8D%E5%90%8C-binding"><span class="toc-text">5. 多级 bridge、跨介质：同一条 PLDM 请求经过不同 binding</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%A4%9A%E7%BA%A7%E7%BB%93%E6%9E%84%E9%87%8C%EF%BC%8C%E8%B0%81%E4%BF%9D%E8%AF%81-EID-%E4%B8%8D%E5%86%B2%E7%AA%81"><span class="toc-text">5.1 多级结构里，谁保证 EID 不冲突</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-PLDM-%E7%BB%88%E7%AB%AF%E4%B8%8D%E4%BC%9A%E5%9B%A0%E4%B8%BA%E7%BB%8F%E8%BF%87%E4%B8%A4%E5%BA%A7%E6%A1%A5%E5%B0%B1%E5%A4%9A%E5%87%BA%E4%B8%A4%E4%B8%AA"><span class="toc-text">5.2 PLDM 终端不会因为经过两座桥就多出两个</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E4%B8%A4%E4%B8%AA%E7%8B%AC%E7%AB%8B-network%EF%BC%9A%E7%9B%B8%E5%90%8C-EID-%E5%8F%AF%E4%BB%A5%E5%88%86%E5%88%AB%E5%AD%98%E5%9C%A8"><span class="toc-text">6. 两个独立 network：相同 EID 可以分别存在</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E6%8B%93%E6%89%91%E5%8F%98%E5%A4%8D%E6%9D%82%E5%90%8E%EF%BC%8C%E6%80%8E%E4%B9%88%E7%A1%AE%E8%AE%A4%E8%87%AA%E5%B7%B1%E6%B2%A1%E6%9C%89%E7%94%BB%E9%94%99"><span class="toc-text">7. 拓扑变复杂后，怎么确认自己没有画错</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    // applyThemeToGiscus(theme)
+  }
+
+  // FIXME: 这会导致无法使用 preferred_color_scheme 以外的主题
+  const applyThemeToGiscus = (theme) => {
+    // theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    utils.dark.mode = newTheme === 'auto' ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : newTheme;
+    utils.dark.method.toggle.start();
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      utils.dark.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    utils.dark.method.toggle.start();
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://gcore.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer type="text/javascript" src="https://unpkg.com/mermaid@11.12.3/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var mermaid_config = {
+      startOnLoad: true,
+      theme:
+        "auto" == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "default",
+      logLevel: 3,
+      themeVariables: {
+        darkMode: true
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: "linear"
+      },
+      gantt: {
+        axisFormat: "%Y/%m/%d"
+      },
+      sequence: {
+        actorMargin: 50
+      }
+    }
+    mermaid.initialize(mermaid_config);
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+</div></body></html>
