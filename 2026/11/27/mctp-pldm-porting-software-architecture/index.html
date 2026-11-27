@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-software-architecture/target-lifecycle.svg">
 <meta property="og:image" content="https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-software-architecture/command-paths.svg">
 <meta property="article:published_time" content="2026-11-26T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-11-27T08:50:01.808Z">
+<meta property="article:modified_time" content="2026-11-27T07:32:52.000Z">
 <meta property="article:author" content="Luyuan">
 <meta property="article:tag" content="architecture">
 <meta property="article:tag" content="baremetal">
@@ -59,9 +59,9 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T00:00:00+08:00","dateModified":"2026-11-27T16:50:01+08:00","datePublished":"2026-11-27T00:00:00+08:00","description":"我们接下来要验收的，是一条完整的软件服务链：Host 发出管理请求，Target 接收并处理，准备好响应，再让 Host 取回结果。底层 I3C 原来已经能收发字节，这次移植是在它上面增加管理消息的寻址、分包、解析和响应生命周期。\n先记住两侧最大的不同：Host 把 MCTP 放在 Linux 内核，PLDM 编解码放在用户态；Target 在裸机环境运行 libmctp 和 PLDM Base handler，由平台主循环衔接 I3C 驱动。 两边使用相同的线上协议，但内部软件实现并不对称。\n这份文档先确定软件移植范围、模块边界和运行路径，为下一步编写验收 testcase 提供依据。它不代替正式测试计划，也没有在整理期间重新发包、复位或刷机。","headline":"MCTP/PLDM 移植后的双端软件架构：验收设计基线","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-software-architecture/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-software-architecture/","keywords":"baremetal, code-analysis, linux, i3c, mctp, pldm, architecture","image":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luyuan","sameAs":[]},"dateCreated":"2026-11-27T00:00:00+08:00","dateModified":"2026-11-27T15:32:52+08:00","datePublished":"2026-11-27T00:00:00+08:00","description":"我们接下来要验收的，是一条完整的软件服务链：Host 发出管理请求，Target 接收并处理，准备好响应，再让 Host 取回结果。底层 I3C 原来已经能收发字节，这次移植是在它上面增加管理消息的寻址、分包、解析和响应生命周期。\n先记住两侧最大的不同：Host 把 MCTP 放在 Linux 内核，PLDM 编解码放在用户态；Target 在裸机环境运行 libmctp 和 PLDM Base handler，由平台主循环衔接 I3C 驱动。 两边使用相同的线上协议，但内部软件实现并不对称。\n这份文档先确定软件移植范围、模块边界和运行路径，为下一步编写验收 testcase 提供依据。它不代替正式测试计划，也没有在整理期间重新发包、复位或刷机。","headline":"MCTP/PLDM 移植后的双端软件架构：验收设计基线","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-software-architecture/"},"publisher":{"@type":"Organization","name":"Luyuan","sameAs":[]},"url":"https://www.coffepattern.top/2026/11/27/mctp-pldm-porting-software-architecture/","keywords":"baremetal, code-analysis, linux, i3c, mctp, pldm, architecture","image":[]}</script>
   
-<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-1"><!-- hexo injector head_end end --></head>
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/engineering.css?v=20261127-2"><!-- hexo injector head_end end --></head>
 <body>
 
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
@@ -798,7 +798,7 @@
 
 </div>
 
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/26/i3c-mctp-regression-milestone-20261126/">I3C 回归里程碑：7 项管理查询通过，连续分包仍停在第二包 NACK</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2026/11/27/mctp-pldm-network-ids-packet-path/">I3C 上为什么会有网口：沿一笔 GetTID 理解 MCTP、PLDM 和五种 ID</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/11/27/i3c-host-target-architecture-regression/">从手工收发到双端回归：I3C Host 与 Target 的设计和实现</a></div></section></div>
 
 
 
